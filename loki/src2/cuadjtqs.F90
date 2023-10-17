@@ -108,7 +108,7 @@ SUBROUTINE CUADJTQS_OPENACC (YDTHF, YDCST, KIDIA, KFDIA, KLON, KLEV, KK, PSP, PT
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   !----------------------------------------------------------------------
   
   !     1.           DEFINE CONSTANTS

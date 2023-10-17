@@ -520,9 +520,9 @@ SUBROUTINE ACTURB_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAT, KTD
   ZEPS2 = 1.E+04_JPRB
   ZEPS3 = 1.E-12_JPRB
   
-  PKTROV(JLON:, :) = 0.0_JPRB
-  PKUROV(JLON:, :) = 0.0_JPRB
-  PPRODTH(JLON:, :) = 0.0_JPRB
+  PKTROV(JLON, :) = 0.0_JPRB
+  PKUROV(JLON, :) = 0.0_JPRB
+  PPRODTH(JLON, :) = 0.0_JPRB
   
   ! ZSTAB      : INDICE DE STABILITE A LA SURFACE (1 SI STABLE, 0 SINON).
   ! ZRS        : CONSTANTE DES GAZ PARFAITS EN SURFACE.
@@ -690,7 +690,7 @@ SUBROUTINE ACTURB_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAT, KTD
     ! the first one close to the ground.
     !- - - - - - - - - - - - - - - - - - - - - - - - - -
     ILEVBI = 0
-    ICM(JLON:, :) = 0
+    ICM(JLON, :) = 0
     ZECTBLH = 0.01_JPRB
     DO JLEV=KTDIAN,KLEV
       ICM(JLON, JLEV) = INT(MAX(0.0_JPRB, SIGN(1.0_JPRB, PECT(JLON, JLEV) - ZECTBLH)))
@@ -786,8 +786,8 @@ SUBROUTINE ACTURB_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAT, KTD
   !     ------------------------------------------------------------------
   !     V - CALCUL DES COEFFICIENTS DE MELANGE "PKUROV" ET "PKTROV".
   !     ------------------------------------------------------------------
-  ZGKUH(JLON:, :) = 1.E-14_JPRB
-  ZGKTH(JLON:, :) = 1.E-14_JPRB
+  ZGKUH(JLON, :) = 1.E-14_JPRB
+  ZGKTH(JLON, :) = 1.E-14_JPRB
   DO JLEV=KTDIAN,KLEV - 1
     !DEC$ IVDEP
     
@@ -1510,8 +1510,8 @@ SUBROUTINE ACTURB_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAT, KTD
     PNEBS(JLON, KLEV) = MAX(ZEPNEBS, MIN(PNEBS(JLON, KLEV), 1.0_JPRB - ZEPNEBS))
     
   ELSE
-    PNEBS(JLON:, :) = ZEPNEBS
-    PQCS(JLON:, :) = 0.0_JPRB
+    PNEBS(JLON, :) = ZEPNEBS
+    PQCS(JLON, :) = 0.0_JPRB
   END IF
   ! KEY LNEBECT
   

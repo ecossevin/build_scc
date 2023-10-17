@@ -278,7 +278,7 @@ SUBROUTINE CUBASEN_OPENACC (PPLDARE, PPLRG, YDTHF, YDCST, YDEPHLI, YDECLDP, YDEC
   alloc (ZQU)
   alloc (ZTU)
   alloc (ZCAPE)
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   !     0.           INITIALIZE CONSTANTS AND FIELDS

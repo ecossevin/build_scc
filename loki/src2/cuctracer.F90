@@ -179,7 +179,7 @@ SUBROUTINE CUCTRACER_OPENACC (YDCST, YDCUMFS, YDECUMF2, YDECUMF, KIDIA, KFDIA, K
   alloc (ZR1)
   alloc (LLCUMASK)
   alloc (LLCUMBAS)
-  JLON = KIDIA
+  JL = KIDIA
   !----------------------------------------------------------------------
   
   IF (YDCUMFS%LECUMFS) THEN
@@ -341,8 +341,8 @@ SUBROUTINE CUCTRACER_OPENACC (YDCST, YDCUMFS, YDECUMF2, YDECUMF, KIDIA, KFDIA, K
     ! ZTENC corresponds to the RHS ("constants") of the equation
     ! The solution is in ZR1
     
-    LLCUMBAS(JL:, :) = .false.
-    ZB(JL:, :) = 1._JPRB
+    LLCUMBAS(JL, :) = .false.
+    ZB(JL, :) = 1._JPRB
     
     DO JN=1,KTRAC
       

@@ -24,8 +24,9 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
   begin_index = None
   end_index = None
 
-  verbose=True
+  verbose=False
 
+  define=False
   splitted = horizontal_lst_bounds[0][1].split('%')
   for var in FindVariables().visit(routine.variables):
     if (var.name == splitted[0]):
@@ -45,7 +46,6 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
       if verbose : print(colored("derived type " + splitted[0] + " found", "green"))
 
   for var in FindVariables().visit(routine.variables):
-    print(var.name)
     if (var.name == horizontal_lst_bounds[1][0]):
       end_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
@@ -59,8 +59,8 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
         if (len(var.dimensions) > 0):
           if (var.dimensions[0] == ':'):              
 
-#            if not (begin_index or end_index):
-#             raise RuntimeError(f'index variables not found in routine {routine.name}')
+            if not (begin_index or end_index):
+                raise RuntimeError(f'index variables not found in routine {routine.name}')
            # Check if variable seems to be of the correct size
             found_in_routine_vars = False
             if (var.name in routine.variable_map) :
@@ -70,12 +70,7 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
               if (dim_name in horizontal_lst_size):
                 if verbose : print(colored("First dimension of array is "+dim_name, "green"))
                 newrange = RangeIndex( (begin_index, end_index, None) )
-#                newrange = RangeIndex( (horizontal_index, end_index, None) )
-#                if verbose: 
-#                  print(colored("begin_index=",begin_index))
-#                  print(colored("end_index=",end_index))
-#                  print(colored("newrange=", newrange))
-#
+                define=True
                 newdimensions = (newrange,) + var.dimensions[1:]
                 new_var = var.clone(dimensions=newdimensions)
                 expression_map[var] = new_var
@@ -94,5 +89,6 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
           
   routine.body=Transformer(assign_map).visit(routine.body)
   if (total > 0) : info(f'[Loki] {routine.name}:: {total} implicit array syntax expressions replaced with explicit boundaries')
-
+  if define==False :
+    newrange=None
   return(end_index, begin_index, newrange)

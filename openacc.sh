@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
-~/loki/bin/activate
+###~/loki/bin/activate
+source ~/loki_env_new/bin/activate
 which python3
 
 for f in \

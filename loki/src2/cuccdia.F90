@@ -86,7 +86,7 @@ SUBROUTINE CUCCDIA_OPENACC (YDERAD, YDEPHLI, YDEPHY, KIDIA, KFDIA, KLON, KLEV, K
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !---------------------------------------------------------------------
   

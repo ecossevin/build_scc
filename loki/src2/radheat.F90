@@ -148,7 +148,7 @@ SUBROUTINE RADHEAT_OPENACC (YDCST, YDTHF, YDERAD, YDERDI, YDML_PHY_MF, KIDIA, KF
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !     ------------------------------------------------------------------
   

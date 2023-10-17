@@ -1,0 +1,247 @@
+[Loki::Sourcefile] Constructed from src2/actke.F90 in 1.41s
+[Loki] ACTKE:: 23 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACTKE_OPENACC: ZECTCLS, PQS, PTS, TOTO, ZKCLS, PCD, PCH, PGZ0
+[Loki::Sourcefile] Writing to loki/src2/actke.F90
+Skipping bad character in input file "src2/acbl89.F90": 'utf-8' codec can't decode byte 0xe7 in position 20352: invalid continuation byte
+[Loki::Sourcefile] Constructed from src2/acbl89.F90 in 1.56s
+[Loki] ACBL89:: 4 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACBL89_OPENACC: ZGZBOT, ZGZTOPCVP, ZGZBOTCVP, PTS, PGZ0, ZEN, ZLWK1, ZGZTOP, ZLUP, ZTESTSAVE
+[Loki::Sourcefile] Writing to loki/src2/acbl89.F90
+[Loki::Sourcefile] Constructed from src2/acturb.F90 in 4.53s
+[Loki] ACTURB:: 9 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACTURB_OPENACC: ZQCINT, PCD, PCH, ZECTINT, PGZ0, PGKCLS, ZUSTAR, ILEVBI, PQS, ZWSTAR, ZBLH, ZRS, PTS, ZSTAB, PECTCLS
+[Loki::Sourcefile] Writing to loki/src2/acturb.F90
+[Loki::Sourcefile] Constructed from src2/acevolet.F90 in 1.02s
+[Loki] ACEVOLET:: 3 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACEVOLET_OPENACC: ZCOR, ZANKP1, PECTCLS, PKCLS
+[Loki::Sourcefile] Writing to loki/src2/acevolet.F90
+[Loki::Sourcefile] Constructed from src2/aclender.F90 in 3.14s
+[Loki] ACLENDER:: 24 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACLENDER_OPENACC: ZGZTOP, ZGZBOTCVP, PGZ0, ZGZBOT, ZGZTOPCVP
+[Loki::Sourcefile] Writing to loki/src2/aclender.F90
+[Loki::Sourcefile] Constructed from src2/hl2fl.F90 in 0.20s
+[Loki::Sourcefile] Writing to loki/src2/hl2fl.F90
+[Loki::Sourcefile] Constructed from src2/fl2hl.F90 in 0.18s
+[Loki::Sourcefile] Writing to loki/src2/fl2hl.F90
+[Loki::Sourcefile] Constructed from src2/dprecips.F90 in 0.76s
+[Loki] DPRECIPS:: 7 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in DPRECIPS_OPENACC: ZANEG, I2, ITOP, ZICE, ZTOT, POROG, PFPLSL, PDPRECIPS, I1, ZDCLWC, PCLSTPW, JJLEVM1, PDIAGH, ZAPOS, PFPLSG, ZLIQ, JLEVM1, ZHEIGHT, ZPROFNEG, PFPLSN, ZRATIO
+[Loki::Sourcefile] Writing to loki/src2/dprecips.F90
+[Loki::Sourcefile] Constructed from src2/ppwetpoint.F90 in 0.84s
+[Loki::Transform] Demoted variables in PPWETPOINT_OPENACC: ZRT, ZCONS, ZRRT, ZPITER, PQI, PWETPOINT, PQV, ZCPT, ZS1, ZTITER, ZS2, PAPRS, ZDEL, ZFUNCT, PT, PQL
+[Loki::Sourcefile] Writing to loki/src2/ppwetpoint.F90
+[Loki::Sourcefile] Constructed from src2/acdrag.F90 in 2.05s
+[Loki] ACDRAG:: 1 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACDRAG_OPENACC: PGWDCS, ZZCV, ZZCU, ZSUMU, ZSUMV, ZTST2, ZSTS, PGETRL, ZSUMF, ZPR1, PRCORI, ZSUMD, ZDS1, ZSUM, ZSTM, ZSTVS, ZTST1, ZCOS, ZREF, ZOBST, ZZBB, ZZCR, ZPR2, PVRLAN, ZSUSR, ZDS2, ZUSR, ZZAA, ZFACS, PVRLDI, ZSTUS, ZTEMPF, ZUSUR, ZVSUR, ZWGHTK
+[Loki::Sourcefile] Writing to loki/src2/acdrag.F90
+Skipping bad character in input file "src2/acpluis.F90": 'utf-8' codec can't decode byte 0xe9 in position 3206: invalid continuation byte
+[Loki::Sourcefile] Constructed from src2/acpluis.F90 in 0.95s
+[Loki::Transform] Demoted variables in ACPLUIS_OPENACC: ZRME, ZNEIGE, ZPLH
+[Loki::Sourcefile] Writing to loki/src2/acpluis.F90
+[Loki::Sourcefile] Constructed from src2/acdnshf.F90 in 0.39s
+[Loki::Transform] Demoted variables in ACDNSHF_OPENACC: ZZDLS, ZZDLLW, PDQSTS, PQS, PTS, PNEIJ, ZZDLLS, ZZDRCN, PEMIS, PDERNSHF, ZZPN, PCHROV, PLSM
+[Loki::Sourcefile] Writing to loki/src2/acdnshf.F90
+[Loki::Sourcefile] Constructed from src2/radozcmf.F90 in 0.40s
+[Loki::Transform] Demoted variables in RADOZCMF_OPENACC: INLA, PGEMU, ZSILAT
+[Loki::Sourcefile] Writing to loki/src2/radozcmf.F90
+[Loki::Sourcefile] Constructed from src2/suozon.F90 in 0.25s
+[Loki::Transform] Demoted variables in SUOZON_OPENACC: PVO3A, PVO3B, PVO3C
+[Loki::Sourcefile] Writing to loki/src2/suozon.F90
+[Loki::Sourcefile] Constructed from src2/cpphinp.F90 in 1.01s
+[Loki::Sourcefile] Writing to loki/src2/cpphinp.F90
+[Loki::Sourcefile] Constructed from src2/aplpar_init.F90 in 0.30s
+[Loki] APLPAR_INIT:: 27 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in APLPAR_INIT_OPENACC: PCD, PVEG, PCDN, PQSATS, PC2, PCPS, KCLPH, PCH, PC1, PVEG0, PRS, PNEIJ, PLHS, PEMIS
+[Loki::Sourcefile] Writing to loki/src2/aplpar_init.F90
+[Loki::Sourcefile] Constructed from src2/actqsat.F90 in 0.47s
+[Loki::Transform] Demoted variables in ACTQSAT_OPENACC: ZLH, ZQWI, ZCP
+[Loki::Sourcefile] Writing to loki/src2/actqsat.F90
+[Loki::Sourcefile] Constructed from src2/acsol.F90 in 1.09s
+[Loki::Transform] Demoted variables in ACSOL_OPENACC: PRHONS, PWS, PWSI, PWPMX, PLAI, PNEIJV, PC3, PWPI, PVEG0, PCG, PSNS, PGZ0HF, PCN, ZWSAT, PWWILT, PARG, PC2, PIVEG, PTS, PWFC, PWSEQ, PGZ0RLF, PSAB, PWSMX, PLSM, PWP, PC1, PALBNS, PD2, PNEIJG, PCT, PGZ0F
+[Loki::Sourcefile] Writing to loki/src2/acsol.F90
+[Loki::Sourcefile] Constructed from src2/acsolw.F90 in 0.29s
+[Loki::Transform] Demoted variables in ACSOLW_OPENACC: PLSM, PWPMX, PARG, PIVEG, PWWILT, PWSMX, PD2, PWFC, PSAB, PWSAT
+[Loki::Sourcefile] Writing to loki/src2/acsolw.F90
+[Loki::Sourcefile] Constructed from src2/achmt.F90 in 2.43s
+[Loki::Transform] Demoted variables in ACHMT_OPENACC: PQSATS, PGZ0HF, ZCDMR, PXHROV, PCHROV, PGZ0F, PRHCLS, PVEG0, PWS, PRS, PTS, PVRAF, PZPCLS, PDPHIV, ZCDNH, PSNS, PCD, ZSTABV, PGZ0H, PNEIJV, PHQ, ZU, PVEG, ZCDNMR, PUCLS, ZDPHI, ZDELT, PTCLS, PHU, PCH, PNEIJG, PHV, PQS, PURAF, PCDN, PUCLN, PNEIJ, PGZ0, PQCLS, PWFC, PCDROV, PGWDCS, ZESP, PCPS, PVCLS, PWSI, PVCLN, PDPHIT, PDQSTS, PLSM, PSTAB, PRTI, PGZ0RLF, PXDROV
+[Loki::Sourcefile] Writing to loki/src2/achmt.F90
+[Loki::Sourcefile] Constructed from src2/acntcls.F90 in 0.51s
+[Loki::Transform] Demoted variables in ACNTCLS_OPENACC: PDPHI, PCH, PVCLN, PQCLS, PCDNH, PZPCLS, PRHCLS, PUCLN, PDPHIV, PTS, PDPHIT, PQS, PCDN, PTCLS, PUCLS, PCDMR, PCPS, PCD, PVCLS, PSTAB, PCDNMR
+[Loki::Sourcefile] Writing to loki/src2/acntcls.F90
+[Loki::Sourcefile] Constructed from src2/achmtls.F90 in 0.57s
+[Loki::Transform] Demoted variables in ACHMTLS_OPENACC: PGZ0, ZSTABV, PQS, ZRS, PZPCLS, PLHS, PDPHIT, ZDPHI, PCD, PCDN, PCPS, PGWDCS, ZRTI, PTS, PGZ0H
+[Loki::Sourcefile] Writing to loki/src2/achmtls.F90
+[Loki::Sourcefile] Constructed from src2/acclph.F90 in 0.66s
+[Loki::Transform] Demoted variables in ACCLPH_OPENACC: KCLPH, ZX_PREV, ZVITM, PTHETAVS, ZLCH_PREV, ZCLPV, PCLPH, PVGST, PUGST, PVEIN, ZCLPU, ZINT, IC
+[Loki::Sourcefile] Writing to loki/src2/acclph.F90
+[Loki::Sourcefile] Constructed from src2/qngcor.F90 in 0.53s
+[Loki::Transform] Demoted variables in QNGCOR_OPENACC: ZQLCORP, ZQICORP
+[Loki::Sourcefile] Writing to loki/src2/qngcor.F90
+[Loki::Sourcefile] Constructed from src2/acdrme.F90 in 0.41s
+[Loki::Sourcefile] Writing to loki/src2/acdrme.F90
+[Loki::Sourcefile] Constructed from src2/acevadcape.F90 in 0.24s
+[Loki::Transform] Demoted variables in ACEVADCAPE_OPENACC: PDCAPE
+[Loki::Sourcefile] Writing to loki/src2/acevadcape.F90
+[Loki::Sourcefile] Constructed from src2/accldia.F90 in 0.56s
+[Loki] ACCLDIA:: 2 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACCLDIA_OPENACC: PBLH, JLEVM1, JJLEVM1, POROG, PUCLS, KCLPH, PVCLS, PCAPE, PUGST, ILEVBI, PVGST, PDCAPE
+[Loki::Sourcefile] Writing to loki/src2/accldia.F90
+[Loki::Sourcefile] Constructed from src2/acvisih.F90 in 0.53s
+[Loki::Transform] Demoted variables in ACVISIH_OPENACC: PMXCLWC, ILEV, ZRCONTENT, PVISIHYD, ZC1, ZC2, ZLCONTENT, ZSCONTENT, PVISICLD, ZICONTENT, ZGCONTENT
+[Loki::Sourcefile] Writing to loki/src2/acvisih.F90
+[Loki::Sourcefile] Constructed from src2/mf_phys_precips.F90 in 0.15s
+[Loki::Sourcefile] Writing to loki/src2/mf_phys_precips.F90
+[Loki::Sourcefile] Constructed from src2/mf_phys_bayrad.F90 in 0.13s
+[Loki] MF_PHYS_BAYRAD:: 4 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Sourcefile] Writing to loki/src2/mf_phys_bayrad.F90
+[Loki::Sourcefile] Constructed from src2/acfluso.F90 in 1.47s
+[Loki::Transform] Demoted variables in ACFLUSO_OPENACC: ZQSRODQ, ZDU, ZT, ZCIS, ZUSRODU, ZTS, PLSM, ZDELTAQ10NODQ, ZDELTAU10NODU, PCD, PDPHIT, PCHROV, PUCLS, ZQSR, ZDPHI, ZCHN, ZDELTAT10NODT, ZUSR, ZDELTAQ10N, ZHT, PRHCLS, PURAF, ZTSR, PCEROV, ZDELTAU10N, PRTI, PCDROV, ZTSRODT, ZCEN, PVRAF, PCE, PGZ0, ZQ, PQSATS, PTCLS, PTS, PCH, ZDTH, ZLSM, PCDN, PVCLS, PDPHIU, ZDQ, PQCLS, ZDELTAT10N
+[Loki::Sourcefile] Writing to loki/src2/acfluso.F90
+[Loki::Sourcefile] Constructed from src2/radaer.F90 in 0.75s
+[Loki::Transform] Demoted variables in RADAER_OPENACC: ZDPN, ZAEQUN, ZAEQFO, ZAEQFN, ZAETRN, PAESUL, PAEVOL, ZTOT, ZAETRO, PAELAN, PTS, ZAEQDO, PAESEA, ZAEQSN, ZAEQDN, ZAEQLN, ZAEQLO, ZDPO, PAESOO, PAEDES, ZAEQSO, ZAEQUO
+[Loki::Sourcefile] Writing to loki/src2/radaer.F90
+[Loki::Sourcefile] Constructed from src2/acnebcond.F90 in 2.66s
+[Loki::Transform] Demoted variables in ACNEBCOND_OPENACC: ZDC, ZMESHEXP, PBLH, ZS2, PGM, ILIQ, ZAW, ZSITER, ZS1, ZRMF, ZB, ZA, ZNEB1, ZX0, ZC, PTS
+[Loki::Sourcefile] Writing to loki/src2/acnebcond.F90
+[Loki::Sourcefile] Constructed from src2/acnebsm.F90 in 0.53s
+[Loki::Transform] Demoted variables in ACNEBSM_OPENACC: ZC, ZA, ZB, ZRHCRI1, PGM
+[Loki::Sourcefile] Writing to loki/src2/acnebsm.F90
+[Loki::Sourcefile] Constructed from src2/acnebn.F90 in 1.82s
+[Loki] ACNEBN:: 4 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACNEBN_OPENACC: PAIPCMT, ZSUM, ILEVREF, ZPHIREL1, ILEVTES
+[Loki::Sourcefile] Writing to loki/src2/acnebn.F90
+[Loki::Sourcefile] Constructed from src2/acnebxrs.F90 in 0.27s
+[Loki::Sourcefile] Writing to loki/src2/acnebxrs.F90
+[Loki::Sourcefile] Constructed from src2/acnpart.F90 in 0.34s
+[Loki] ACNPART:: 2 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACNPART_OPENACC: PCLCM, PCLCL, PCLCT, PCLCC, PTOPC, PCLCH, PCLCT_RAD, PDECRD
+[Loki::Sourcefile] Writing to loki/src2/acnpart.F90
+[Loki::Sourcefile] Constructed from src2/acnpart_cloud_cover_wmo.F90 in 0.51s
+[Loki::Transform] Demoted variables in ACNPART_CLOUD_COVER_WMO_OPENACC: PCLCM, PCLCH, ZOVLP, PCLCL, PDECRD
+[Loki::Sourcefile] Writing to loki/src2/acnpart_cloud_cover_wmo.F90
+[Loki::Sourcefile] Constructed from src2/acnpart_cloud_cover.F90 in 0.33s
+[Loki::Transform] Demoted variables in ACNPART_CLOUD_COVER_OPENACC: PCLC, PDECRD, ZOVLP
+[Loki::Sourcefile] Writing to loki/src2/acnpart_cloud_cover.F90
+[Loki::Sourcefile] Constructed from src2/acnpart_conv_base_top.F90 in 0.27s
+[Loki::Transform] Demoted variables in ACNPART_CONV_BASE_TOP_OPENACC: ZALPHA, JCBASE, PTOPC, ZABINV, ZBETA, JCTOP
+[Loki::Sourcefile] Writing to loki/src2/acnpart_conv_base_top.F90
+[Loki::Sourcefile] Constructed from src2/radheat.F90 in 0.58s
+[Loki::Transform] Demoted variables in RADHEAT_OPENACC: ZTH4, PSUDU, PTRSOD, PEMIS, PMU0, ZDTDIV, ZFTE, PFRTHDS, PTSM1M, ZFLB, ZFSO, PFRSODS, ZI0, PDSRP, PFRSOPS, ZDTDT, ZFLT, PFRSOPT, PFRSOFS, PSDUR
+[Loki::Sourcefile] Writing to loki/src2/radheat.F90
+[Loki::Sourcefile] Constructed from src2/acdayd.F90 in 0.27s
+[Loki] ACDAYD:: 1 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACDAYD_OPENACC: PMU0, PGEMU
+[Loki::Sourcefile] Writing to loki/src2/acdayd.F90
+[Loki::Sourcefile] Constructed from src2/acrso.F90 in 0.21s
+[Loki::Transform] Demoted variables in ACRSO_OPENACC: PGEMU, PMU0
+[Loki::Sourcefile] Writing to loki/src2/acrso.F90
+[Loki::Sourcefile] Constructed from src2/acveg.F90 in 0.46s
+[Loki::Transform] Demoted variables in ACVEG_OPENACC: PNEIJ, ZRSTO, PGWDCS, PWFC, PHV, PVEG, PHQ, ZDELTA, PLAI, PWP, PHU, PCHROV, PRSMIN, PIVEG, PWWILT, PQSATS, PHTR, PWL, PD2, PWLMX, PLSM
+[Loki::Sourcefile] Writing to loki/src2/acveg.F90
+[Loki::Sourcefile] Constructed from src2/acdifv1.F90 in 1.32s
+[Loki] ACDIFV1:: 11 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in ACDIFV1_OPENACC: PXDROV, PXHROV
+[Loki::Sourcefile] Writing to loki/src2/acdifv1.F90
+[Loki::Sourcefile] Constructed from src2/arp_ground_param.F90 in 2.39s
+[Loki::Transform] Demoted variables in ARP_GROUND_PARAM_OPENACC: ZLHS, PHTR, PVEG, ZCHRS, PCDN, PCHROV, PFCLL, ZCQVT, PSC_FEVI, PQS, PSC_FEVN, PHV, PFCLN, ZRCOR, PFCS, ZDRCN, ZDLLW, PLHS, PHU, PWSI, ZCHRL, PQSATS, PDQSTS, ZLHW, ZPN, ZXSRO, PCEROV, ZXLRO, PIVEG, ZCSDT, ZWSI, PFEVN, PFEVV, PSC_FCLL, PNEIJ, PFEVI, ZNTS, ZCTVS, ZSUBS, ZCQVQ, PSFU, PTS, PGZ0HF, PCDROV, PFHPS, PEMIS, PQSH, ZCSVT, PXHROV, PDIFWS, ZRHSS, PXDROV, PSC_FCLN, PCPS, PDIFWQ, PSFV, PLSM, PFTR, ZDLS, ZRHST, ZCTVT, PFEVL, PCT, ZXDRO, PCD, ZRHSQ, ZCTVQ, PHQ, PGZ0F, PWS, ZDLLS
+[Loki::Sourcefile] Writing to loki/src2/arp_ground_param.F90
+[Loki::Sourcefile] Constructed from src2/acdifv2.F90 in 1.83s
+[Loki::Transform] Demoted variables in ACDIFV2_OPENACC: PTSN, PFCS, PFMDU, PFMDV, PXHROV, PFEV
+[Loki::Sourcefile] Writing to loki/src2/acdifv2.F90
+[Loki::Sourcefile] Constructed from src2/tridifv1.F90 in 0.64s
+[Loki::Transform] Demoted variables in TRIDIFV1_OPENACC: ZMUL
+[Loki::Sourcefile] Writing to loki/src2/tridifv1.F90
+[Loki::Sourcefile] Constructed from src2/acuptq.F90 in 0.41s
+[Loki::Transform] Demoted variables in ACUPTQ_OPENACC: PTS
+[Loki::Sourcefile] Writing to loki/src2/acuptq.F90
+[Loki::Sourcefile] Constructed from src2/acpluiz.F90 in 0.62s
+[Loki::Transform] Demoted variables in ACPLUIZ_OPENACC: PNEIJ, PGM, PTS, PLSM
+[Loki::Sourcefile] Writing to loki/src2/acpluiz.F90
+[Loki::Sourcefile] Constructed from src2/acmicro.F90 in 0.42s
+[Loki::Transform] Demoted variables in ACMICRO_OPENACC: PLSM, PNEIJ, PTS
+[Loki::Sourcefile] Writing to loki/src2/acmicro.F90
+[Loki::Sourcefile] Constructed from src2/advprcs.F90 in 1.67s
+[Loki::Transform] Demoted variables in ADVPRCS_OPENACC: ZPOW2, ZDZ, ZWORK1, ZPOW1, ZWORK3, ZWORK2, ZQPSTOT
+[Loki::Sourcefile] Writing to loki/src2/advprcs.F90
+[Loki::Sourcefile] Constructed from src2/acdrov.F90 in 0.98s
+[Loki::Transform] Demoted variables in ACDROV_OPENACC: PRUISS, PD2, PCT, PC2, PWSI, PFCHSP, PWFC, ZITS, PFTR, PWS, PFCLN, PWP, PCN, PWPMX, PFEVN, PWPI, PFGELS, PWSMX, PC3, PFEVV, PFCS, PWLMX, PFONTE, PFEVL, PLSM, PFGEL, PWSEQ, PSNS, PC1, PRUISL, PRUISP, PWL, PFEVI, PVEG, PFLWSP, PLAI, PTS, PNEIJ, PFCLL
+[Loki::Sourcefile] Writing to loki/src2/acdrov.F90
+[Loki::Sourcefile] Constructed from src2/acdrov.F90 in 0.98s
+[Loki::Transform] Demoted variables in ACDROV_OPENACC: PSNS, PWLMX, PC1, PFEVV, PFCS, PRUISP, PFGELS, PWL, PWPI, PCN, PD2, PWP, PWPMX, PC3, PWS, PFEVN, PVEG, PFCLN, PTS, PRUISS, PWSI, PFLWSP, PLAI, PFTR, PNEIJ, PFEVL, PWFC, PWSMX, PFONTE, PFCLL, PC2, PRUISL, PFGEL, ZITS, PWSEQ, PFCHSP, PFEVI, PCT, PLSM
+[Loki::Sourcefile] Writing to loki/src2/acdrov.F90
+[Loki::Sourcefile] Constructed from src2/cpwts.F90 in 0.59s
+[Loki::Transform] Demoted variables in CPWTS_OPENACC: PSNS1, PTDWS, PWS1, PWL1, PTDWL, PTDSNS, PWPCLI, PWP1, PWPI1, PTPCLI, PTDTS, PTDWSI, PTDRHONS, PTS1, PLSM, PTDALBNS, PRHONS1, PALBNS1, PTDWP, PIVEG, PTDWPI, PWSI1
+[Loki::Sourcefile] Writing to loki/src2/cpwts.F90
+[Loki::Sourcefile] Constructed from src2/cptends.F90 in 0.75s
+[Loki::Transform] Demoted variables in CPTENDS_OPENACC: PCT, PC2, PLSM, PALBNS1, PFEVI, PTDWP, PFLWSP, PC1, PFONTE, PTDWSI, PTDWL, PFEVV, PFCLN, PVEG, PTDSNS, PTDALBNS, PFEVL, PFEVN, PRUISP, PFCLL, PRUISS, PTDRHONS, PFGEL, PTDTS, PRHONS1, PFGELS, PTDWPI, PRUISL, PFCS, PTDWS, PFTR, PSNS1
+[Loki::Sourcefile] Writing to loki/src2/cptends.F90
+[Loki::Sourcefile] Constructed from src2/cptend_new.F90 in 7.58s
+[Loki] CPTEND_NEW:: 1 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CPTEND_NEW_OPENACC: PGNORDM, PTS, PGNORDL, PCPS
+[Loki::Sourcefile] Writing to loki/src2/cptend_new.F90
+[Loki::Sourcefile] Constructed from src2/cpmvvps.F90 in 0.23s
+[Loki::Transform] Demoted variables in CPMVVPS_OPENACC: PFEVN, PFEVL, PSPT1, ZEVELS, PRES
+[Loki::Sourcefile] Writing to loki/src2/cpmvvps.F90
+[Loki::Sourcefile] Constructed from src2/cucalln_mf.F90 in 0.98s
+[Loki::Transform] Demoted variables in CUCALLN_MF_OPENACC: ZCONDFLL, KCBOT_LIG, KTOPC, LDSHCV, PCUCONVCA, ZRAIN, KCTOP_LIG, ZCONDFLN, KBOTSC, KBASEC, LDLAND, PWMEAN, KCTOP, PCAPE, PGAW, LDCUM_LIG, KTYPE, LDSC, PDX, KCBOT, PARPRC, PVDISCU, LDCUM
+[Loki::Sourcefile] Writing to loki/src2/cucalln_mf.F90
+[Loki::Sourcefile] Constructed from src2/cuadjtq.F90 in 2.55s
+[Loki::Transform] Demoted variables in CUADJTQ_OPENACC: LLFLAG, PSP, LDOFLAG, LDFLAG
+[Loki::Sourcefile] Writing to loki/src2/cuadjtq.F90
+[Loki::Sourcefile] Constructed from src2/cuascn.F90 in 3.14s
+[Loki::Transform] Demoted variables in CUASCN_OPENACC: LDLAND, LDCUM, ZPH, KCBOT, ZDMFEN, ZDPMEAN, KDPL, LLKLAB, KCTOP, KTYPE, ZDMFDE, ZPRECIP, KCTOP0, ZLUOLD, PWMEAN, LLO1, PMFUB, JLX, ZQOLD, LLFLAGUV, ZOENTR, PWUBASE, LLFLAG, LSCVFLAG
+[Loki::Sourcefile] Writing to loki/src2/cuascn.F90
+[Loki::Sourcefile] Constructed from src2/cubasen.F90 in 2.71s
+[Loki::Transform] Demoted variables in CUBASEN_OPENACC: PWUBASE, ICTOP, ZMIX, LDSC, IDPL, KDPL, ZDZ, LLRESETJL, ZQOLD, ZPH, ICBOT, LL_LDBASE, LLDCUM, IBOTSC, KCTOP, KCBOT, ZCBASE, LLDEEP, ZQEX, LDCUM, PCAPE, LLGO_ON, PKMFL, LLDSC, ZTEX, KBOTSC, LLFIRST
+[Loki::Sourcefile] Writing to loki/src2/cubasen.F90
+[Loki::Sourcefile] Constructed from src2/cuddrafn.F90 in 0.81s
+[Loki::Transform] Demoted variables in CUDDRAFN_OPENACC: ZBUOY, ZPH, ZCOND, ZDMFEN, ZOENTR, LDDRAF, PRFL, LLO2, ZDMFDE
+[Loki::Sourcefile] Writing to loki/src2/cuddrafn.F90
+[Loki::Sourcefile] Constructed from src2/cudlfsn.F90 in 0.57s
+[Loki::Transform] Demoted variables in CUDLFSN_OPENACC: LDDRAF, PRFL, ZCOND, IKHSMIN, KCBOT, KCTOP, KDTOP, LLO2, LDCUM, ZPH, PMFUB, ZHSMIN
+[Loki::Sourcefile] Writing to loki/src2/cudlfsn.F90
+[Loki::Sourcefile] Constructed from src2/cududv.F90 in 1.20s
+[Loki] CUDUDV:: 3 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CUDUDV_OPENACC: ZRDV, ZADVW, LDCUM, KTYPE, KCBOT, KCTOP, ZRDU
+[Loki::Sourcefile] Writing to loki/src2/cududv.F90
+[Loki::Sourcefile] Constructed from src2/cuinin.F90 in 0.44s
+[Loki::Transform] Demoted variables in CUININ_OPENACC: LLFLAG, ZPH
+[Loki::Sourcefile] Writing to loki/src2/cuinin.F90
+[Loki::Sourcefile] Constructed from src2/cuadjtqs.F90 in 0.77s
+[Loki::Transform] Demoted variables in CUADJTQS_OPENACC: Z4ES, ZALDCP, Z3ES, LDFLAG, Z5ALCP, PSP
+[Loki::Sourcefile] Writing to loki/src2/cuadjtqs.F90
+[Loki::Sourcefile] Constructed from src2/cubasmcn.F90 in 0.32s
+[Loki::Transform] Demoted variables in CUBASMCN_OPENACC: PMFUB, KTYPE, KCBOT, LDCUM
+[Loki::Sourcefile] Writing to loki/src2/cubasmcn.F90
+[Loki::Sourcefile] Constructed from src2/cubidiag.F90 in 0.18s
+[Loki] CUBIDIAG:: 1 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CUBIDIAG_OPENACC: KCTOP
+[Loki::Sourcefile] Writing to loki/src2/cubidiag.F90
+[Loki::Sourcefile] Constructed from src2/cuccdia.F90 in 0.30s
+[Loki::Transform] Demoted variables in CUCCDIA_OPENACC: LDCUM, KCTOP, PARPRC, PRAIN, KCBOT, KTOPC, KBASEC
+[Loki::Sourcefile] Writing to loki/src2/cuccdia.F90
+[Loki::Sourcefile] Constructed from src2/cuctracer.F90 in 1.10s
+[Loki] CUCTRACER:: 2 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CUCTRACER_OPENACC: KDTOP, KTYPE, LDCUM, LDDRAF, KCTOP, ZADVW
+[Loki::Sourcefile] Writing to loki/src2/cuctracer.F90
+[Loki::Sourcefile] Constructed from src2/cudtdqn.F90 in 1.55s
+[Loki] CUDTDQN:: 3 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CUDTDQN_OPENACC: LSCVFLAG, LDCUM, ZINT2, KCTOP, LDDRAF, KDTOP, ZINT, KCBOT, ZADVW, KTYPE
+[Loki::Sourcefile] Writing to loki/src2/cudtdqn.F90
+[Loki::Sourcefile] Constructed from src2/cuentr.F90 in 0.30s
+[Loki::Transform] Demoted variables in CUENTR_OPENACC: PDMFDE, ZENTR, LDCUM, KTYPE, KCBOT, PDMFEN
+[Loki::Sourcefile] Writing to loki/src2/cuentr.F90
+[Loki::Sourcefile] Constructed from src2/cuflxn.F90 in 1.84s
+[Loki] CUFLXN:: 7 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CUFLXN_OPENACC: PRAIN, ZRCUCOV, ZRHEBC, ZMFS, IDBAS, LDLAND, KCTOP, LDCUM, KDTOP, KCBOT, KTYPE, LDDRAF
+[Loki::Sourcefile] Writing to loki/src2/cuflxn.F90
+[Loki::Sourcefile] Constructed from src2/cumastrn.F90 in 6.20s
+[Loki] CUMASTRN:: 6 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CUMASTRN_OPENACC: LDCUM, ZDX, LDSHCV, LLDDRAF3, KCBOT_LIG, LLDCUM, ICTOP0, KTYPE, ZMFCFL, PVDISCU, ZMF_SHAL, PWMEAN, PCUCONVCA, ZFACCA, ZMFUB, ZTAUPBL, KCTOP_LIG, LLDDRAF, PCAPE, LDSC, KBOTSC, ZHEAT, ZTAU, ZSUM12, ZWUBASE, ZKHVFL, ZMFUB1, ZCAPE2, IDPL, ZCAPDCYCL, KCBOT, LLO2, ZSATFR, ZCAPE, KCTOP, IDTOP, ZDHPBL, ZKHFL, ZCAPPBL, LDLAND, LLSCVFLAG, PRAIN, PDX, ZDQCV, PGAW, LDCUM_LIG, ZXTAU, ZMFS, ZSUM22, ZMFUVB, ZMFUUB, ZKMFL, ZRFL
+[Loki::Sourcefile] Writing to loki/src2/cumastrn.F90
+[Loki::Sourcefile] Constructed from src2/culight.F90 in 1.62s
+[Loki] CULIGHT:: 12 implicit array syntax expressions replaced with explicit boundaries
+[Loki::Transform] Demoted variables in CULIGHT_OPENACC: PLIGH_TOT, PCTOPH, PGAW, LDCUM, PCHARGE, KCTOP, PPRECMX, PICE, PGELAT, LDLINOX, PLIGH_CTG, ZPREC_CV, ZCDEPTH, LDLAND, PWMFU, PCDEPTH, ZCBASEH, PCAPE, KCBOT, ZAREA
+[Loki::Sourcefile] Writing to loki/src2/culight.F90
+[Loki::Sourcefile] Constructed from src2/satur.F90 in 0.25s
+[Loki::Sourcefile] Writing to loki/src2/satur.F90

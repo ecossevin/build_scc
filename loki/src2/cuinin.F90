@@ -132,7 +132,7 @@ SUBROUTINE CUININ_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, K
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   

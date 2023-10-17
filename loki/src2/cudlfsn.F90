@@ -163,7 +163,7 @@ SUBROUTINE CUDLFSN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, 
   YLSTACK = YDSTACK
   alloc (ZTENWB)
   alloc (ZQENWB)
-  JLON = KIDIA
+  JL = KIDIA
   !----------------------------------------------------------------------
   
   !     1.           SET DEFAULT VALUES FOR DOWNDRAFTS

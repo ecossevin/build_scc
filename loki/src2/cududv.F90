@@ -184,7 +184,7 @@ SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
   alloc (ZR1)
   alloc (ZR2)
   alloc (LLCUMBAS)
-  JLON = KIDIA
+  JL = KIDIA
   !----------------------------------------------------------------------
   
   ZIMP = 1.0_JPRB - YDECUMF%RMFSOLUV
@@ -283,9 +283,9 @@ SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
     ! ZDUDT and ZDVDT correspond to the RHS ("constants") of the equation
     ! The solution is in ZR1 and ZR2
     
-    LLCUMBAS(JL:, :) = .false.
-    ZB(JL:, :) = 1.0_JPRB
-    ZMFUU(JL:, :) = 0.0_JPRB
+    LLCUMBAS(JL, :) = .false.
+    ZB(JL, :) = 1.0_JPRB
+    ZMFUU(JL, :) = 0.0_JPRB
     
     ! Fill vectors A, B and RHS
     

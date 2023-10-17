@@ -193,7 +193,7 @@ SUBROUTINE CULIGHT_OPENACC (PPLDARE, PPLRG, YDTHF, YDCST, YDEPHY, YGFL, YDECUMF,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   

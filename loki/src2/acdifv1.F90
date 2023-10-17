@@ -271,8 +271,8 @@ SUBROUTINE ACDIFV1_OPENACC (YDCST, YGFL, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA,
   
   !  Some initialisation
   
-  ZMF_UP(JLON:, :) = 0.0_JPRB
-  ZF_UP(JLON:, :) = 0.0_JPRB
+  ZMF_UP(JLON, :) = 0.0_JPRB
+  ZF_UP(JLON, :) = 0.0_JPRB
   
   !     ------------------------------------------------------------------
   !     I - VERT DIFF DES VARIABLES CONSERV.
@@ -393,16 +393,16 @@ SUBROUTINE ACDIFV1_OPENACC (YDCST, YGFL, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA,
     ZBE(JLON, KLEV) = PMF_UP(JLON, KLEV - 1)*0.5_JPRB*YDML_PHY_MF%YRPHY0%GCVIMPT*ZIPOI(JLON, KLEV)
     ZCE(JLON, KLEV) = 0.0_JPRB
   ELSE
-    ZAE(JLON:, :) = 0._JPRB
-    ZBE(JLON:, :) = 0._JPRB
-    ZCE(JLON:, :) = 0._JPRB
+    ZAE(JLON, :) = 0._JPRB
+    ZBE(JLON, :) = 0._JPRB
+    ZCE(JLON, :) = 0._JPRB
   END IF
   
   !  Construction of the triband matrix  (2) Eddy difusivity part T and Q
   
-  ZAT(JLON:, :) = 0._JPRB
-  ZBT(JLON:, :) = 1._JPRB
-  ZCT(JLON:, :) = 0._JPRB
+  ZAT(JLON, :) = 0._JPRB
+  ZBT(JLON, :) = 1._JPRB
+  ZCT(JLON, :) = 0._JPRB
   
   ZAT(JLON, KTDIA) = -PXTRO(JLON, KTDIA)*ZIPOI(JLON, KTDIA)    ! useless but this initialyse the array !
   ZBT(JLON, KTDIA) = 1._JPRB + ZBE(JLON, KTDIA) + PXTRO(JLON, KTDIA)*ZIPOI(JLON, KTDIA)    ! Diagonal (ligne 1)
@@ -420,9 +420,9 @@ SUBROUTINE ACDIFV1_OPENACC (YDCST, YGFL, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA,
   
   !  Construction of the triband matrix  (3) Eddy difusivity part U and V
   
-  ZAU(JLON:, :) = 0._JPRB
-  ZBU(JLON:, :) = 1._JPRB
-  ZCU(JLON:, :) = 0._JPRB
+  ZAU(JLON, :) = 0._JPRB
+  ZBU(JLON, :) = 1._JPRB
+  ZCU(JLON, :) = 0._JPRB
   
   ZAU(JLON, KTDIA) = -PXURO(JLON, KTDIA)*ZIPOI(JLON, KTDIA)    ! useless but this initialyse the arrey !
   ZBU(JLON, KTDIA) = 1._JPRB + ZBE(JLON, KTDIA) + PXURO(JLON, KTDIA)*ZIPOI(JLON, KTDIA)    ! Diagonal (ligne 1)

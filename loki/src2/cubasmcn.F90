@@ -121,7 +121,7 @@ SUBROUTINE CUBASMCN_OPENACC (YDCST, YDECUMF, KIDIA, KFDIA, KLON, KLEV, KK, PTEN,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   

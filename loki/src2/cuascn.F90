@@ -313,7 +313,7 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
   alloc (ZBUO)
-  JLON = KIDIA
+  JL = KIDIA
   !----------------------------------------------------------------------
   
   !*    1.           SPECIFY PARAMETERS

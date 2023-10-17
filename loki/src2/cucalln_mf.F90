@@ -312,7 +312,7 @@ SUBROUTINE CUCALLN_MF_OPENACC (PPLDARE, PPLRG, KSTEP, YDTHF, YDCST, YDERAD, YDML
   alloc (ZUEA)
   alloc (ZENTHD)
   alloc (ZENTHS)
-  JLON = KIDIA
+  JL = KIDIA
   
   !-----------------------------------------------------------------------
   

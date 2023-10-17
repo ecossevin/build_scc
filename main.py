@@ -4,7 +4,8 @@ from loki import (
     Scalar, Assignment, fgen,
     FindVariables, symbols, demote_variables,
     Intrinsic, Variable, SymbolAttributes,
-    DerivedType, VariableDeclaration, flatten
+    DerivedType, VariableDeclaration, flatten,
+    BasicType
 )
 
 from loki.transform import resolve_associates
@@ -76,7 +77,6 @@ def remove_loop(routine):
     for loop in FindNodes(ir.Loop).visit(routine.body):
         if loop.variable in horizontal_lst:
             loop_map[loop]=loop.body
-    #routine_new.body=Transformer(loop_map).visit(routine.body)
     routine.body=Transformer(loop_map).visit(routine.body)
 
 def rename(routine):
@@ -86,10 +86,10 @@ def acc_seq(routine):
     routine.spec.insert(0,ir.Pragma(keyword='acc', content='routine ('+routine.name+') seq'))
     routine.spec.insert(1,ir.Comment(text=''))
 
-def jlon_kidia(routine, end_index, begin_index, newrange):
-    jlon=Scalar("JLON")
+def jlon_kidia(routine, end_index, begin_index, new_range, loop_variable):
+    
+    routine.spec.append(Assignment(loop_variable, begin_index))
 #    kidia=Scalar(begin_index)
-    routine.spec.append(Intrinsic("JLON="+begin_index.name))
 #    routine.spec.append(Assignment(jlon, kidia))
 
 def stack_mod(routine):
@@ -119,7 +119,8 @@ def rm_KLON(routine, horizontal):
 
     var_names=tuple(var.name for var in to_demote)
     if var_names:
-        demote_variables(routine, variable_names=('TOTO',), dimensions='KLON')
+       # demote_variables(routine, variable_names=var_names, dimensions='KLON')
+        demote_variables(routine, var_names, dimensions=horizontal.size)
 ###    if var_names:
 ###    #transform_array_indexing.demote_variables(routine, var_names, dimensions=horizontal.size)
 ###        print(routine.to_fortran())
@@ -201,6 +202,23 @@ def ystack(routine):
     routine.spec.append(Assignment(stack_local, stack_argument))
 
 
+def get_loop_variable(routine, horizontal_lst):
+    var_lst=FindVariables(unique=True).visit(routine.spec)
+    var_lst=[var for var in var_lst if var.name in horizontal_lst]
+    print("var_lst=",var_lst)
+    if var_lst : 
+        loop_variable=var_lst[0]
+        print("toto")
+    else:
+        loop_variable=Scalar("JLON") #Scalar(horizontal_lst[0])
+        jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='jpim')))
+        routine.variables+=(jlon,)
+
+#        routine.spec.
+        print("titi")
+    print("name=",loop_variable.name)
+    return(loop_variable)
+
 
 #pathR='src/phys_dmn/'
 #pathW='src/phys_dmn_loki/'
@@ -226,31 +244,35 @@ source=Sourcefile.from_file(file)
 routine=source.subroutines[0]
 
 
-horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFIDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
+horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
 horizontal_lst=['JLON', 'JL']
 vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
 true_symbols=[]
 false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
 
 logical.transform_subroutine(routine, true_symbols, false_symbols)
-end_index, begin_index, newrange=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, horizontal, horizontal_lst)
-loop_variable=Scalar("JLON")
+end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, horizontal, horizontal_lst)
+loop_variable=get_loop_variable(routine, horizontal_lst)
+#Scalar("JLON")
+#loop_variable=horizontal.index
 bounds=[begin_index, end_index]
-print(bounds)
 ##add_openacc1(routine)
 add_openacc2(routine)
-remove_loop(routine)
+
+#ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
 rename(routine)
 acc_seq(routine)
 stack_mod(routine)
-jlon_kidia(routine, end_index, begin_index, newrange) #at the end
-rm_KLON(routine, horizontal)
-ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
 resolve_associates(routine)
+rm_KLON(routine, horizontal)
+#ResolveVector.resolve_vector_dimension(routine, loop_variable, horizontal.bounds)
+ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
+
+remove_loop(routine)
 ###
 ystack(routine)
 alloc_temp(routine)
-jlon_kidia(routine, end_index, begin_index, newrange) #at the end
+jlon_kidia(routine, end_index, begin_index, new_range, loop_variable) #at the end
 ##save_subroutine(pathW, file)
 from pathlib import Path
 Sourcefile.to_file(fgen(routine), Path('loki/'+file))

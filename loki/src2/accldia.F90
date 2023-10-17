@@ -189,7 +189,7 @@ SUBROUTINE ACCLDIA_OPENACC (YDCST, LDXCLP, LDXTGST, LDXXGST, YDPHY, YDPHY2, YDTO
     ! the first one close to the ground.
     !- - - - - - - - - - - - - - - - - - - - - - - - - -
     ILEVBI = 0
-    ICM(JLON:, :) = 0
+    ICM(JLON, :) = 0
     ZECTBLH = 0.01_JPRB
     !NTCOET = 1 by default in the setup
     DO JLEV=YDTOPH%NTCOET,KLEV

@@ -241,7 +241,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   !-----------------------------------------------------------------------
   
   
-  PRAPTRAJ(JLON:, :) = 0.0
+  PRAPTRAJ(JLON, :) = 0.0
   !*
   !     ------------------------------------------------------------------
   !     I - CALCUL DES PARAMETRES DERIVES, CONSTANTES DE SECURITE (POUR LE

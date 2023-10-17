@@ -202,7 +202,7 @@ SUBROUTINE CUDTDQN_OPENACC (YDTHF, YDCST, YDEPHLI, YDPHNC, YDECUMF, YDEPHY, KIDI
   alloc (ZR1)
   alloc (ZR2)
   alloc (LLCUMBAS)
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   
@@ -377,9 +377,9 @@ SUBROUTINE CUDTDQN_OPENACC (YDTHF, YDCST, YDEPHLI, YDPHNC, YDECUMF, YDEPHY, KIDI
     ! ZDTDT and ZDQDT correspond to the RHS ("constants") of the equation
     ! The solution is in ZR1 and ZR2
     
-    LLCUMBAS(JL:, :) = .false.
-    ZB(JL:, :) = 1.0_JPRB
-    ZMFUS(JL:, :) = 0.0_JPRB
+    LLCUMBAS(JL, :) = .false.
+    ZB(JL, :) = 1.0_JPRB
+    ZMFUS(JL, :) = 0.0_JPRB
     
     ! Fill vectors A, B and RHS
     

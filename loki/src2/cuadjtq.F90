@@ -122,7 +122,7 @@ SUBROUTINE CUADJTQ_OPENACC (YDTHF, YDCST, YDEPHLI, KIDIA, KFDIA, KLON, KLEV, KK,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   

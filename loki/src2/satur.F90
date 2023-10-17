@@ -94,7 +94,7 @@ SUBROUTINE SATUR_OPENACC (YDTHF, YDCST, KIDIA, KFDIA, KLON, KTDIA, KLEV, LDPHYLI
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   

@@ -229,9 +229,9 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   !     I.2  MISE A ZERO DES FLUX
   !          - - - - - - - - - - -
   
-  PPRDY(JLON:, :) = 0.0_JPRB
-  PDIFF(JLON:, :) = 0.0_JPRB
-  PDISS(JLON:, :) = 0.0_JPRB
+  PPRDY(JLON, :) = 0.0_JPRB
+  PDIFF(JLON, :) = 0.0_JPRB
+  PDISS(JLON, :) = 0.0_JPRB
   
   !-----------------------------------------------------------------------
   !     II - CALCUL DES COEFFICIENTS ET INVERSION DE LA MATRICE

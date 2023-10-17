@@ -83,12 +83,12 @@ SUBROUTINE CUBIDIAG_OPENACC (KIDIA, KFDIA, KLON, KLEV, KCTOP, LD_LCUMASK, PA, PB
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  JLON = KIDIA
+  JL = KIDIA
   
   !----------------------------------------------------------------------
   
   
-  PU(JL:, :) = 0.0_JPRB
+  PU(JL, :) = 0.0_JPRB
   
   ! Forward Substitution
   
