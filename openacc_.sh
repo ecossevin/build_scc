@@ -1,7 +1,8 @@
 #!/usr/bin/bash
 
 ###~/loki/bin/activate
-source ~/loki_env_new/bin/activate
+#source ~/loki_env_new/bin/activate
+source ~/venv/bin/python
 which python3
 
 for f in \

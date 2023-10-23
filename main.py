@@ -29,31 +29,37 @@ def save_subroutine(path, file):
 
 
 
-def add_openacc1(routine):
-    call_lst=[]
-    call_map={}
-    suffix='_OPENACC'
-    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
-    stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
-
-    for call in FindNodes(CallStatement).visit(routine.body):
-        if call.name != "DR_HOOK":
-            call_lst.append(call.name.name)
-            new_call=call.clone(name=call.name, arguments=call.arguments)
-            new_call._update(name=call.name.clone(name=f'{call.name}{suffix}'))
-            new_call._update(kwarguments=new_call.kwarguments + ((stack_argument.name, stack_local),))
-            call_map.update({call : new_call})
-
-    routine_importSPEC=FindNodes(ir.Import).visit(routine.spec)
-    imp_map={}
-    for imp in routine_importSPEC:
-        name=imp.module.replace(".intfb.h","").upper()
-        if imp.c_import==True and any(call==name for call in call_lst):
-            new_name=imp.module.replace("intfb.f","")+"_openacc"+".intfb.h"
-            new_imp=imp.clone(module=new_name)
-            imp_map.update({imp : new_imp})
-    routine.body=Transformer(call_map).visit(routine.body)
-    routine.spec=Transformer(imp_map).visit(routine.spec)
+#def add_openacc1(routine):
+#    call_lst=[]
+#    call_map={}
+#    suffix='_OPENACC'
+#    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
+#    stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
+#
+#    for call in FindNodes(CallStatement).visit(routine.body):
+#        print("call.name=",call.name)
+#        if call.name == "ABOR1":
+#    #        call_lst.append(call.name.name) don't add in call_lst, no #include abor1_acc
+#            new_call=call.clone(name=call.name, arguments=call.arguments)
+#            new_call._update(name=call.name.clone(name=call.name+"_ACC"))
+#            call_map.update({call : new_call})
+#        elif call.name != "DR_HOOK":
+#            call_lst.append(call.name.name)
+#            new_call=call.clone(name=call.name, arguments=call.arguments)
+#            new_call._update(name=call.name.clone(name=f'{call.name}{suffix}'))
+#            new_call._update(kwarguments=new_call.kwarguments + ((stack_argument.name, stack_local),))
+#            call_map.update({call : new_call})
+#
+#    routine_importSPEC=FindNodes(ir.Import).visit(routine.spec)
+#    imp_map={}
+#    for imp in routine_importSPEC:
+#        name=imp.module.replace(".intfb.h","").upper()
+#        if imp.c_import==True and any(call==name for call in call_lst):
+#            new_name=imp.module.replace("intfb.f","")+"_openacc"+".intfb.h"
+#            new_imp=imp.clone(module=new_name)
+#            imp_map.update({imp : new_imp})
+#    routine.body=Transformer(call_map).visit(routine.body)
+#    routine.spec=Transformer(imp_map).visit(routine.spec)
 
 
 def add_openacc2(routine):
@@ -62,15 +68,32 @@ def add_openacc2(routine):
     stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
     stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
     for call in FindNodes(CallStatement).visit(routine.body):
-        call_lst.append(call.name.name)
-        call.name.name=call.name.name+suffix
-        call._update(kwarguments=call.kwarguments + ((stack_argument.name, stack_local),))
+        if call.name == "ABOR1":
+            
+        #call_lst.append(call.name.name)
+            call.name.name=call.name.name+"_ACC"
+#            call._update(kwarguments=call.kwarguments + ((stack_argument.name, stack_local),))
+
+        elif call.name != "DR_HOOK":
+            call_lst.append(call.name.name)
+            call.name.name=call.name.name+suffix
+            call._update(kwarguments=call.kwarguments + ((stack_argument.name, stack_local),))
 
     routine_importSPEC=FindNodes(ir.Import).visit(routine.spec)
     for imp in routine_importSPEC:
-        name=imp.module.replace("intffb.h","").upper()
+        name=imp.module.replace(".intfb.h","").upper()
+#        print("name=",name)
+#        print("call_lst=",call_lst)
         if imp.c_import==True and any(call==name for call in call_lst):
-            imp.module=imp.module.replace(".intfb.h","")+"_openacc"+".intfb.h"
+ #       # if any(call==name for call in call_lst):
+ #            print("imp.module=",imp.module)
+ #            print("imp.module.type=",type(imp.module))
+
+            new_name=imp.module.replace(".intfb.h","")+"_openacc"+".intfb.h"
+            imp._update(module=f'{new_name}')
+#            #print("imp.module_new=",imp.module)
+#            print("new_name=", new_name)
+#            print("imp.module_new",imp.module)
 
 def remove_loop(routine):
     loop_map={}
@@ -93,14 +116,16 @@ def jlon_kidia(routine, end_index, begin_index, new_range, loop_variable):
 #    routine.spec.append(Assignment(jlon, kidia))
 
 def stack_mod(routine):
-    idx=0
+    idx=-1
     for spec in routine.spec.body:
-        if type(spec)==ir.Intrinsic and spec.text=='IMPLICIT NONE':
+#        if type(spec)==ir.Intrinsic and spec.text=='IMPLICIT NONE':
+#            break
+        if type(spec)==ir.VariableDeclaration:
             break
         idx=idx+1
-    routine.spec.insert(idx, ir.Import(module='STACK_MOD'))
-    routine.spec.insert(idx+1, ir.Import(module='stack.h', c_import=True))
-    routine.spec.insert(idx+2, ir.Comment(text=''))
+    routine.spec.insert(idx-1, ir.Import(module='STACK_MOD'))
+    routine.spec.insert(idx, ir.Import(module='stack.h', c_import=True))
+    routine.spec.insert(idx+1, ir.Comment(text=''))
 
 def rm_KLON(routine, horizontal):
     routine_arg=[var.name for var in routine.arguments]
@@ -109,8 +134,8 @@ def rm_KLON(routine, horizontal):
     to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size]
     #to_demote=[var for var in to_demote if var.shape[0] == horizontal.size]
             #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size and var.shape[0] == horizontal.size]
-#    if True :
-#        to_demote = [var for var in to_demote if var.name not in routine_arg]
+    if True :
+        to_demote = [var for var in to_demote if var.name not in routine_arg]
 
 #    calls = FindNodes(ir.CallStatement).visit(routine.body)
 #    call_args = flatten(call.arguments for call in calls)
@@ -193,11 +218,18 @@ def alloc_temp(routine):
 
 
 
-def ystack(routine):
+def ystack1(routine):
+#    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK")),scope=routine)
     stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
     stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
 
     routine.arguments+=(stack_argument,)
+
+def ystack2(routine):
+#    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK")),scope=routine)
+    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
+    stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
+
     routine.variables+=(stack_argument, stack_local,)
     routine.spec.append(Assignment(stack_local, stack_argument))
 
@@ -205,20 +237,25 @@ def ystack(routine):
 def get_loop_variable(routine, horizontal_lst):
     var_lst=FindVariables(unique=True).visit(routine.spec)
     var_lst=[var for var in var_lst if var.name in horizontal_lst]
-    print("var_lst=",var_lst)
     if var_lst : 
         loop_variable=var_lst[0]
-        print("toto")
     else:
         loop_variable=Scalar("JLON") #Scalar(horizontal_lst[0])
         jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='jpim')))
         routine.variables+=(jlon,)
 
-#        routine.spec.
-        print("titi")
-    print("name=",loop_variable.name)
     return(loop_variable)
 
+
+def generate_interface(routine):
+    removal_map={}
+    imports = FindNodes(ir.Import).visit(routine.spec)
+    routine_new=routine.clone()
+    for im in imports:
+        if im.c_import==True:
+            removal_map[im]=None
+    routine_new.spec = Transformer(removal_map).visit(routine_new.spec)
+    Sourcefile.to_file(fgen(routine_new.interface), Path(pathW+".intfb.h"))
 
 #pathR='src/phys_dmn/'
 #pathW='src/phys_dmn_loki/'
@@ -238,9 +275,15 @@ def get_loop_variable(routine, horizontal_lst):
 ##fileW=filetest+'_loki.F90'
 ##name=nametest
 
-file=sys.argv[1]
+#file=sys.argv[1]
+pathR=sys.argv[1]
+pathW=sys.argv[2]
+
+from pathlib import Path
+pathW=pathW.replace(".F90", "")+"_openacc"
+
 #routine=load_subroutine(pathR, fileR, name)
-source=Sourcefile.from_file(file)
+source=Sourcefile.from_file(pathR)
 routine=source.subroutines[0]
 
 
@@ -264,15 +307,18 @@ rename(routine)
 acc_seq(routine)
 stack_mod(routine)
 resolve_associates(routine)
-rm_KLON(routine, horizontal)
+#rm_KLON(routine, horizontal)
 #ResolveVector.resolve_vector_dimension(routine, loop_variable, horizontal.bounds)
 ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
 
 remove_loop(routine)
 ###
-ystack(routine)
+ystack1(routine)
+generate_interface(routine) #must be before temp allocation and y stack, or temp will be in interface
+ystack2(routine)
 alloc_temp(routine)
 jlon_kidia(routine, end_index, begin_index, new_range, loop_variable) #at the end
 ##save_subroutine(pathW, file)
-from pathlib import Path
-Sourcefile.to_file(fgen(routine), Path('loki/'+file))
+#directoryW=os.path.dirname(pathW)
+#fileW=os.path.basename(pathW)
+Sourcefile.to_file(fgen(routine), Path(pathW+".F90"))
