@@ -128,19 +128,21 @@ def stack_mod(routine):
     routine.spec.insert(idx+1, ir.Comment(text=''))
 
 def rm_KLON(routine, horizontal):
+    demote_arg=False #rm KLON in function arg if True
     routine_arg=[var.name for var in routine.arguments]
     to_demote=FindVariables(unique=True).visit(routine.spec)
     to_demote=[var for var in to_demote if isinstance(var, symbols.Array)]
     to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size]
     #to_demote=[var for var in to_demote if var.shape[0] == horizontal.size]
             #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size and var.shape[0] == horizontal.size]
-    if True :
+    if not demote_arg :
         to_demote = [var for var in to_demote if var.name not in routine_arg]
 
-#    calls = FindNodes(ir.CallStatement).visit(routine.body)
-#    call_args = flatten(call.arguments for call in calls)
-#    call_args += flatten(list(dict(call.kwarguments).values()) for call in calls)
-#    to_demote = [v for v in to_demote if v.name not in call_args]
+
+        calls = FindNodes(ir.CallStatement).visit(routine.body)
+        call_args = flatten(call.arguments for call in calls)
+        call_args += flatten(list(dict(call.kwarguments).values()) for call in calls)
+        to_demote = [v for v in to_demote if v.name not in call_args]
 
     var_names=tuple(var.name for var in to_demote)
     if var_names:
@@ -307,7 +309,7 @@ rename(routine)
 acc_seq(routine)
 stack_mod(routine)
 resolve_associates(routine)
-#rm_KLON(routine, horizontal)
+rm_KLON(routine, horizontal)
 #ResolveVector.resolve_vector_dimension(routine, loop_variable, horizontal.bounds)
 ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
 
