@@ -5,7 +5,7 @@ from loki import (
     FindVariables, symbols, demote_variables,
     Intrinsic, Variable, SymbolAttributes,
     DerivedType, VariableDeclaration, flatten,
-    BasicType
+    BasicType, FindInlineCalls, SubstituteExpressions
 )
 
 from loki.transform import resolve_associates
@@ -248,6 +248,14 @@ def get_loop_variable(routine, horizontal_lst):
 
     return(loop_variable)
 
+def rm_sum(routine):
+    call_map={}
+    for assign in FindNodes(Assignment).visit(routine.body):
+        for call in FindInlineCalls().visit(assign):
+            if (call.name=="SUM"):
+                call_map[call]=call.parameters[0]
+    if call_map:
+        routine.body=SubstituteExpressions(call_map).visit(routine.body)
 
 def generate_interface(routine):
     removal_map={}
@@ -316,6 +324,7 @@ ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
 remove_loop(routine)
 ###
 ystack1(routine)
+rm_sum(routine)
 generate_interface(routine) #must be before temp allocation and y stack, or temp will be in interface
 ystack2(routine)
 alloc_temp(routine)
