@@ -297,13 +297,20 @@ source=Sourcefile.from_file(pathR)
 routine=source.subroutines[0]
 
 
+import logical_lst
+
+
 horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
 horizontal_lst=['JLON', 'JL']
 vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
-true_symbols=[]
-false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
+#true_symbols=[]
+#false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
 
+resolve_associates(routine)
+true_symbols, false_symbols=logical_lst.symbols()
+false_symbols.append('LHOOK')
 logical.transform_subroutine(routine, true_symbols, false_symbols)
+
 end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, horizontal, horizontal_lst)
 loop_variable=get_loop_variable(routine, horizontal_lst)
 #Scalar("JLON")
@@ -316,7 +323,6 @@ add_openacc2(routine)
 rename(routine)
 acc_seq(routine)
 stack_mod(routine)
-resolve_associates(routine)
 rm_KLON(routine, horizontal)
 #ResolveVector.resolve_vector_dimension(routine, loop_variable, horizontal.bounds)
 ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
