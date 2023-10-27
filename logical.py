@@ -5,7 +5,8 @@ from loki import (
     FindVariables, symbols, demote_variables,
     Intrinsic, Variable, SymbolAttributes,
     DerivedType, Conditional, FindTypedSymbols,
-    DeferredTypeSymbol, LogicalNot, LogicalOr
+    DeferredTypeSymbol, LogicalNot, LogicalOr,
+    LogicalAnd,
 )
 
 from loki.transform import resolve_associates
