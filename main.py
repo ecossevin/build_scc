@@ -301,7 +301,7 @@ import logical_lst
 
 
 horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
-horizontal_lst=['JLON', 'JL']
+horizontal_lst=['JLON', 'JL','JPROF']
 vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
 #true_symbols=[]
 #false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']

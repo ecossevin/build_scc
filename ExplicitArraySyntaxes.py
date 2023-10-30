@@ -16,8 +16,8 @@ import sys
 
 def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
     
-  horizontal_lst_size=["KLON","YDCPG_OPTS%KLON"]
-  horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA"],["KFDIA", "YDCPG_BNDS%KFIDIA"]]
+  horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
+  horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFIDIA","KEND"]]
   total = 0
   assign_map={}
   
@@ -27,30 +27,42 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
   verbose=False
 
   define=False
-  splitted = horizontal_lst_bounds[0][1].split('%')
+  splitted1 = horizontal_lst_bounds[0][1].split('%')
+  splitted2 = horizontal_lst_bounds[1][1].split('%')
   for var in FindVariables().visit(routine.variables):
-    if (var.name == splitted[0]):
-      begin_index=Variable(name=f'{var.name}%{splitted[1]}', parent=var, scope=routine)
-      if verbose : print(colored("derived type " + splitted[0] + " found", "green"))
+    print("var=",var)
+    print("var_name=",var.name)
+
+    if (var.name == splitted1[0]):
+      begin_index=Variable(name=f'{var.name}%{splitted1[1]}', parent=var, scope=routine)
+      if verbose : print(colored("derived type " + splitted1[0] + " found", "green"))
 
 
-  for var in FindVariables().visit(routine.variables):
     if (var.name == horizontal_lst_bounds[0][0]):
       begin_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
-  splitted = horizontal_lst_bounds[1][1].split('%')
-  for var in FindVariables().visit(routine.variables):
-    if (var.name == splitted[0]):
-      end_index=Variable(name=f'{var.name}%{splitted[1]}', parent=var, scope=routine)
-      if verbose : print(colored("derived type " + splitted[0] + " found", "green"))
+    print("horizontal_lst_bounds=",horizontal_lst_bounds[0][2])
+    print("test=",horizontal_lst_bounds[0][2]==var.name)
+    if (var.name == horizontal_lst_bounds[0][2]):
+      print("found")
+      begin_index = var
+      if verbose : print(colored("variable " + var.name + " found", "green"))
 
-  for var in FindVariables().visit(routine.variables):
+    if (var.name == splitted2[0]):
+      end_index=Variable(name=f'{var.name}%{splitted2[1]}', parent=var, scope=routine)
+      if verbose : print(colored("derived type " + splitted2[0] + " found", "green"))
+
     if (var.name == horizontal_lst_bounds[1][0]):
       end_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
+    if (var.name == horizontal_lst_bounds[1][2]):
+      end_index = var
+      if verbose : print(colored("variable " + var.name + " found", "green"))
 
+  print("begin_index=",begin_index)
+  print("end_index=",end_index)
 
   for assign in FindNodes(Assignment).visit(routine.body):
     expression_map={}             
@@ -78,6 +90,7 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
                 print(colored("Unexpected first dimension of array : " + dim_name, "red"))
 
             else :
+              print("VAR=",var)
               print (colored("Variable not found in routine variables !", "red"))
 
     if expression_map:
