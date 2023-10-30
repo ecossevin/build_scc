@@ -13,6 +13,7 @@ from loki.transform import resolve_associates
 import os
 import sys
 
+from termcolor import colored
 import logical
 import ResolveVector
 import ExplicitArraySyntaxes
@@ -127,12 +128,12 @@ def stack_mod(routine):
     routine.spec.insert(idx, ir.Import(module='stack.h', c_import=True))
     routine.spec.insert(idx+1, ir.Comment(text=''))
 
-def rm_KLON(routine, horizontal):
+def rm_KLON(routine, horizontal, horizontal_size):
     demote_arg=False #rm KLON in function arg if True
     routine_arg=[var.name for var in routine.arguments]
     to_demote=FindVariables(unique=True).visit(routine.spec)
     to_demote=[var for var in to_demote if isinstance(var, symbols.Array)]
-    to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size]
+    to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
     #to_demote=[var for var in to_demote if var.shape[0] == horizontal.size]
             #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size and var.shape[0] == horizontal.size]
     if not demote_arg :
@@ -147,7 +148,7 @@ def rm_KLON(routine, horizontal):
     var_names=tuple(var.name for var in to_demote)
     if var_names:
        # demote_variables(routine, variable_names=var_names, dimensions='KLON')
-        demote_variables(routine, var_names, dimensions=horizontal.size)
+        demote_variables(routine, var_names, dimensions=horizontal_size)
 ###    if var_names:
 ###    #transform_array_indexing.demote_variables(routine, var_names, dimensions=horizontal.size)
 ###        print(routine.to_fortran())
@@ -175,6 +176,13 @@ def rm_KLON(routine, horizontal):
 ###        print(routine.to_fortran())
 ###        print("**************************")
 
+def assoc(routine):
+    for assign in FindNodes(Assignment).visit(routine.body):
+        for var in FindVariables().visit(assign):
+            if (var.type.target):
+                print("ASSIGN=",assign)
+                print("NAME=",var.name)
+    
 def alloc_temp(routine):
     routine_arg=[var.name for var in routine.arguments]
 #    variables=FindVariables(unique=False).visit(routine.spec)
@@ -223,7 +231,13 @@ def alloc_temp(routine):
     routine.spec=Transformer(temp_map).visit(routine.spec)
     
 
+def get_horizontal(routine, horizontal_size_lst):
+    for name in horizontal_size_lst:
+        if name in routine.variable_map:
+            return(name)
+    print(colored("Horizontal size not found in routine args!", "red"))
 
+horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
 
 def ystack1(routine):
 #    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK")),scope=routine)
@@ -248,7 +262,7 @@ def get_loop_variable(routine, horizontal_lst):
         loop_variable=var_lst[0]
     else:
         loop_variable=Scalar("JLON") #Scalar(horizontal_lst[0])
-        jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='jpim')))
+        jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='JPIM')))
         routine.variables+=(jlon,)
 
     return(loop_variable)
@@ -311,12 +325,16 @@ vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
 #true_symbols=[]
 #false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
 
+horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
+horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFIDIA","KEND"]]
+ 
 resolve_associates(routine)
 true_symbols, false_symbols=logical_lst.symbols()
 false_symbols.append('LHOOK')
 logical.transform_subroutine(routine, true_symbols, false_symbols)
 
-end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, horizontal, horizontal_lst)
+horizontal_size=get_horizontal(routine, horizontal_lst_size)
+end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds)
 loop_variable=get_loop_variable(routine, horizontal_lst)
 #Scalar("JLON")
 #loop_variable=horizontal.index
@@ -328,7 +346,7 @@ add_openacc2(routine)
 rename(routine)
 acc_seq(routine)
 stack_mod(routine)
-rm_KLON(routine, horizontal)
+rm_KLON(routine, horizontal, horizontal_size)
 #ResolveVector.resolve_vector_dimension(routine, loop_variable, horizontal.bounds)
 ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
 
@@ -339,6 +357,7 @@ rm_sum(routine)
 generate_interface(routine) #must be before temp allocation and y stack, or temp will be in interface
 ystack2(routine)
 alloc_temp(routine)
+assoc(routine)
 jlon_kidia(routine, end_index, begin_index, new_range, loop_variable) #at the end
 ##save_subroutine(pathW, file)
 #directoryW=os.path.dirname(pathW)

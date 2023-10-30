@@ -14,18 +14,16 @@ from termcolor import colored
 from loki.logging import info
 import sys
 
-def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
+def ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds):
     
-  horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
-  horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFIDIA","KEND"]]
   total = 0
   assign_map={}
   
   begin_index = None
   end_index = None
 
-#  verbose=False
-  verbose=True
+  verbose=False
+#  verbose=True
 
   define=False
   splitted1 = horizontal_lst_bounds[0][1].split('%')

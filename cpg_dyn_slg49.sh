@@ -27,6 +27,7 @@ function resolve ()
 }
 
 for f in \
+  arpifs/adiab/gphpre_expl_vertfe0.F90 \
   arpifs/adiab/lasure.F90   \
   arpifs/adiab/lattex_dnt.F90 \
   arpifs/adiab/lattex_tnt.F90 \
@@ -58,7 +59,7 @@ do
  mkdir -p src/local/ifsaux/openacc/$dir
  g=$(resolve $f)
  python3 ~/build_scc/main.py $p/$g $p/src/local/ifsaux/openacc/$f
- #exit 1
+ exit 1
 
  #openacc.pl --cycle 49 --pointers --nocompute ABOR1 --version --cpg_dyn --dir src/local/ifsaux/openacc/$dir $(resolve $f)
   
