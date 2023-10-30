@@ -24,14 +24,15 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
   begin_index = None
   end_index = None
 
-  verbose=False
+#  verbose=False
+  verbose=True
 
   define=False
   splitted1 = horizontal_lst_bounds[0][1].split('%')
   splitted2 = horizontal_lst_bounds[1][1].split('%')
   for var in FindVariables().visit(routine.variables):
-    print("var=",var)
-    print("var_name=",var.name)
+    #print("var=",var)
+    #print("var_name=",var.name)
 
     if (var.name == splitted1[0]):
       begin_index=Variable(name=f'{var.name}%{splitted1[1]}', parent=var, scope=routine)
@@ -42,10 +43,9 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
       begin_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
-    print("horizontal_lst_bounds=",horizontal_lst_bounds[0][2])
-    print("test=",horizontal_lst_bounds[0][2]==var.name)
+    #print("horizontal_lst_bounds=",horizontal_lst_bounds[0][2])
+    #print("test=",horizontal_lst_bounds[0][2]==var.name)
     if (var.name == horizontal_lst_bounds[0][2]):
-      print("found")
       begin_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
@@ -65,8 +65,13 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
   print("end_index=",end_index)
 
   for assign in FindNodes(Assignment).visit(routine.body):
+    is_pointer=False
+    not_found=[]  
     expression_map={}             
     for var in FindVariables().visit(assign):
+      if (var.type.pointer):
+        is_pointer=True
+        if verbose : print("Variable", var.name, " is a pointer")
       if isinstance(var, Array):
         if (len(var.dimensions) > 0):
           if (var.dimensions[0] == ':'):              
@@ -89,9 +94,17 @@ def ExplicitArraySyntaxes(routine, horizontal, horizontal_lst):
               else:
                 print(colored("Unexpected first dimension of array : " + dim_name, "red"))
 
+#            elif (var.type.pointer) :
+#              is_pointer=True
+#              if verbose : print("Variable", var.name, " is a pointer")
+              
             else :
-              print("VAR=",var)
-              print (colored("Variable not found in routine variables !", "red"))
+              not_found.append(var.name)
+
+    if not is_pointer : 
+      for var in not_found :
+        print (colored("Variable not found in routine variables !", "red"))
+        if verbose : print ("Variable", var, " not found in routine variables !")
 
     if expression_map:
       total += len(expression_map)

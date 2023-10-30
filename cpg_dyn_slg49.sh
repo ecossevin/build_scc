@@ -58,6 +58,7 @@ do
  mkdir -p src/local/ifsaux/openacc/$dir
  g=$(resolve $f)
  python3 ~/build_scc/main.py $p/$g $p/src/local/ifsaux/openacc/$f
+ #exit 1
 
  #openacc.pl --cycle 49 --pointers --nocompute ABOR1 --version --cpg_dyn --dir src/local/ifsaux/openacc/$dir $(resolve $f)
   

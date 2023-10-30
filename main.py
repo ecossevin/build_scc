@@ -188,20 +188,25 @@ def alloc_temp(routine):
         var_lst=[] #var to keep in the decl.
         for s in decls.symbols:
             if isinstance(s, symbols.Array):
-                if s.name not in routine_arg:
-                    if s.type.kind:
-                        new_s='temp ('+s.type.dtype.name+' (KIND='+s.type.kind.name+'), '+s.name+', ('
-                    else:
-                        new_s='temp ('+s.type.dtype.name+', '+s.name+', ('
-                    for shape in s.shape:
-                        new_s=new_s+str(shape)+', '
-                    new_s=new_s[:-2]
-                    new_s=new_s+'))'
-                    alloc='alloc ('+s.name+')'
-                    routine.spec.append(Intrinsic(alloc))
-                    intrinsic_lst.append(Intrinsic(new_s))
-                else: #if array in routine args
-#                    var_lst.append(decls.clone(symbols=s))
+                if not s.type.pointer:
+                    if s.name not in routine_arg:
+                        if s.type.kind:
+                            new_s='temp ('+s.type.dtype.name+' (KIND='+s.type.kind.name+'), '+s.name+', ('
+                        else:
+                            new_s='temp ('+s.type.dtype.name+', '+s.name+', ('
+                        for shape in s.shape:
+                            new_s=new_s+str(shape)+', '
+                        new_s=new_s[:-2]
+                        new_s=new_s+'))'
+                        alloc='alloc ('+s.name+')'
+                        routine.spec.append(Intrinsic(alloc))
+                        intrinsic_lst.append(Intrinsic(new_s))
+                    else: #if array in routine args
+#                        var_lst.append(decls.clone(symbols=s))
+                        var_lst=[s]
+                        VAR=decls.clone(symbols=var_lst)
+                        intrinsic_lst.append(VAR)
+                else: #if s is a pointer
                     var_lst=[s]
                     VAR=decls.clone(symbols=var_lst)
                     intrinsic_lst.append(VAR)
