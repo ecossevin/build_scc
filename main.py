@@ -149,45 +149,9 @@ def rm_KLON(routine, horizontal, horizontal_size):
     if var_names:
        # demote_variables(routine, variable_names=var_names, dimensions='KLON')
         demote_variables(routine, var_names, dimensions=horizontal_size)
-###    if var_names:
-###    #transform_array_indexing.demote_variables(routine, var_names, dimensions=horizontal.size)
-###        print(routine.to_fortran())
-###        print("names=",var_names)
-###        print("typenamess=",type(var_names))
-###        print("typenamess0=",type(var_names[0]))
-###
-###
-###
-###        print("**************************")
-###        print("second routine")
-###
-###        file='src2/toto2.F90'
-###        source=Sourcefile.from_file(file)
-###        routine2=source.subroutines[0]
-###        print(routine2.to_fortran())
-###        demote_variables(routine2, variable_names=('TOTO',), dimensions='KLON')
-###        print(routine2.to_fortran())
-###        print("**************************")
-###
-###        print("**************************")
-###        print("first routine")
-###        print(routine.to_fortran())
-###        demote_variables(routine, variable_names=('TOTO',), dimensions='KLON')
-###        print(routine.to_fortran())
-###        print("**************************")
 
-def assoc(routine):
-    for assign in FindNodes(Assignment).visit(routine.body):
-        for var in FindVariables().visit(assign):
-            if (var.type.target):
-                print("ASSIGN=",assign)
-                print("NAME=",var.name)
-    
 def alloc_temp(routine):
     routine_arg=[var.name for var in routine.arguments]
-#    variables=FindVariables(unique=False).visit(routine.spec)
-#    variables=[var for variables is instance(var, symbols.Array)]
-#    variabes=[var for var in variables if var.name not in routine_arg]
     
 
     temp_map={}
@@ -232,12 +196,19 @@ def alloc_temp(routine):
     
 
 def get_horizontal(routine, horizontal_size_lst):
+    verbose=True
     for name in horizontal_size_lst:
         if name in routine.variable_map:
+            if verbose: print("horizontal size = ",name)
             return(name)
+    for var in FindVariables().visit(routine.body):
+#        print(var)
+        for vvar in var.name.split("%"):
+            if vvar in horizontal_size_lst:
+                if verbose: print("horizontal size = ",name)
+                return(var.name)
     print(colored("Horizontal size not found in routine args!", "red"))
 
-horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
 
 def ystack1(routine):
 #    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK")),scope=routine)
@@ -286,25 +257,90 @@ def generate_interface(routine):
     routine_new.spec = Transformer(removal_map).visit(routine_new.spec)
     Sourcefile.to_file(fgen(routine_new.interface), Path(pathW+".intfb.h"))
 
-#pathR='src/phys_dmn/'
-#pathW='src/phys_dmn_loki/'
-###file='cucalln_mf.F90'
-###name='CUCALLN_MF'
-#file='actke.F90'
-#fileR=file
-#fileW=file
-#name='ACTKE'
-#
-##pathtest='test/'
-##filetest='logic.F90'
-##nametest='LOGIC'
-##pathR=pathtest
-##pathW=pathtest
-##fileR=filetest
-##fileW=filetest+'_loki.F90'
-##name=nametest
+#---------------------------------------------------------
+#---------------------------------------------------------
+#Pointers
+#---------------------------------------------------------
+#---------------------------------------------------------
 
-#file=sys.argv[1]
+def find_pt(routine):
+    tmp_pt=[]
+    tmp_target=[]
+    #for var in FindVariables().visit(routine.variables):
+    routine_args=[var.name for var in routine.arguments]
+    for decls in FindNodes(VariableDeclaration).visit(routine.spec):
+        for s in decls.symbols:
+            if s.name not in routine_args:
+                if s.type.pointer:
+                    tmp_pt.append(s)
+            if s.type.target:
+                tmp_target.append(s)
+    return(tmp_pt, tmp_target)
+             
+             
+def get_dim_pt(routine, tmp_pt, horizontal_size):
+    assign_map={}
+    tmp_pt_klon={}
+    for assign in FindNodes(Assignment).visit(routine.body):
+        assigned=False
+        is_target=False
+        is_pt=False
+        rhs=FindVariables().visit(assign.rhs)
+        rhs=list(rhs)
+        lhs=FindVariables().visit(assign.lhs)
+        lhs=list(lhs)
+        if (len(rhs)==1 and len(lhs)==1):
+            for pt in tmp_pt:
+                if pt.name==lhs[0].name:
+                   is_pt=True
+                   break
+            for target in tmp_target:
+                if target.name==rhs[0].name:
+                   is_target=True
+                   break
+            if is_pt and is_target:
+                if target.dimensions[0]=='KPROMA': #replace KPROMA by hor_dim... here we assume that if they are no dim, then the dim isn't NPROMA.... 
+                    print("kproma")
+                    tmp_pt_klon[lhs[0].name]=rhs[0]
+                    new_assign='assoc ('+lhs[0].name+','+rhs[0].name+')'
+                    assign_map[assign]=Intrinsic(new_assign)
+                    assigned=True
+        if not assigned:
+            assign_map[assign]=assign
+    routine.body=Transformer(assign_map).visit(routine.body) 
+    #TODO ::: MAPING MODIFIER LES A => B en assoc(A,B)
+    return(tmp_pt_klon)
+
+#define target lst to avoid A.type => bug
+
+
+
+def assoc_alloc_pt(routine):
+    temp_map={}
+    for decls in FindNodes(VariableDeclaration).visit(routine.spec):
+        intrinsic_lst=[]
+        var_lst=[]
+        for s in decls.symbols:
+            if s.name in tmp_pt_klon:
+                var=tmp_pt_klon[s.name]
+                if var.type.kind:
+                    new_s='temp ('+var.type.dtype.name+' (KIND='+var.type.kind.name+'), '+s.name+', ('
+                else:
+                    new_s='temp ('+var.type.dtype.name+', '+s.name+', ('
+                for shape in var.shape:
+                    new_s=new_s+str(shape)+', '
+                new_s=new_s[:-2]
+                new_s=new_s+'))'
+                #alloc='alloc ('+s.name+')'
+                #routine.spec.append(Intrinsic(alloc))
+                intrinsic_lst.append(Intrinsic(new_s))
+            else:
+                var_lst=[s]
+                VAR=decls.clone(symbols=var_lst)
+                intrinsic_lst.append(VAR)
+        temp_map[decls]=tuple(intrinsic_lst)
+    routine.spec=Transformer(temp_map).visit(routine.spec)
+
 pathR=sys.argv[1]
 pathW=sys.argv[2]
 
@@ -325,15 +361,16 @@ vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
 #true_symbols=[]
 #false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
 
-horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
+horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA", "YDDIM%NPROMA", "NPROMA"]
+#horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
 horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFIDIA","KEND"]]
  
+horizontal_size=get_horizontal(routine, horizontal_lst_size)
 resolve_associates(routine)
 true_symbols, false_symbols=logical_lst.symbols()
 false_symbols.append('LHOOK')
 logical.transform_subroutine(routine, true_symbols, false_symbols)
 
-horizontal_size=get_horizontal(routine, horizontal_lst_size)
 end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds)
 loop_variable=get_loop_variable(routine, horizontal_lst)
 #Scalar("JLON")
@@ -355,11 +392,19 @@ remove_loop(routine)
 ystack1(routine)
 rm_sum(routine)
 generate_interface(routine) #must be before temp allocation and y stack, or temp will be in interface
+
+#----------------------------------------
+#Pointers
+#----------------------------------------
+tmp_pt, tmp_target=find_pt(routine)
+tmp_pt_klon=get_dim_pt(routine, tmp_pt, horizontal_size)
+assoc_alloc_pt(routine)
+#----------------------------------------
+#
+
 ystack2(routine)
 alloc_temp(routine)
-assoc(routine)
 jlon_kidia(routine, end_index, begin_index, new_range, loop_variable) #at the end
-##save_subroutine(pathW, file)
-#directoryW=os.path.dirname(pathW)
-#fileW=os.path.basename(pathW)
+
+
 Sourcefile.to_file(fgen(routine), Path(pathW+".F90"))
