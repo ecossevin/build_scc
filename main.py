@@ -5,7 +5,8 @@ from loki import (
     FindVariables, symbols, demote_variables,
     Intrinsic, Variable, SymbolAttributes,
     DerivedType, VariableDeclaration, flatten,
-    BasicType, FindInlineCalls, SubstituteExpressions
+    BasicType, FindInlineCalls, SubstituteExpressions,
+    Nullify
 )
 
 from loki.transform import resolve_associates
@@ -17,6 +18,8 @@ from termcolor import colored
 import logical
 import ResolveVector
 import ExplicitArraySyntaxes
+
+import re
 
 
 def load_subroutine(path, file, name):
@@ -257,6 +260,17 @@ def generate_interface(routine):
     routine_new.spec = Transformer(removal_map).visit(routine_new.spec)
     Sourcefile.to_file(fgen(routine_new.interface), Path(pathW+".intfb.h"))
 
+def write_print(routine):
+    intr_map={}
+    for intr in FindNodes(Intrinsic).visit(routine.body):
+        if "WRITE" in intr.text:
+            pattern='WRITE\(NULERR, \*\)(.*)'
+            match=re.search(pattern,intr.text)
+            string=match.group(1)
+            new_intr='PRINT *, '+string
+            intr_map[intr]=Intrinsic(new_intr)
+    routine.body=Transformer(intr_map).visit(routine.body)
+            
 #---------------------------------------------------------
 #---------------------------------------------------------
 #Pointers
@@ -300,7 +314,6 @@ def get_dim_pt(routine, tmp_pt, horizontal_size):
                    break
             if is_pt and is_target:
                 if target.dimensions[0]=='KPROMA': #replace KPROMA by hor_dim... here we assume that if they are no dim, then the dim isn't NPROMA.... 
-                    print("kproma")
                     tmp_pt_klon[lhs[0].name]=rhs[0]
                     new_assign='assoc ('+lhs[0].name+','+rhs[0].name+')'
                     assign_map[assign]=Intrinsic(new_assign)
@@ -311,6 +324,17 @@ def get_dim_pt(routine, tmp_pt, horizontal_size):
     #TODO ::: MAPING MODIFIER LES A => B en assoc(A,B)
     return(tmp_pt_klon)
 
+def nullify(routine, tmp_pt_klon):
+#    null=FindNodes(Nullify).visit(routine.body)
+    null_map={}
+    for null in FindNodes(Nullify).visit(routine.body):
+        new_null=()
+        for pt in null.variables:
+            if null.variables[0].name in tmp_pt_klon:
+                new_intr=Intrinsic("nullptr("+null.variables[0].name+")")
+                new_null=new_null+(new_intr,)
+        null_map[null]=new_null
+    routine.body=Transformer(null_map).visit(routine.body)
 #define target lst to avoid A.type => bug
 
 
@@ -401,6 +425,8 @@ tmp_pt_klon=get_dim_pt(routine, tmp_pt, horizontal_size)
 assoc_alloc_pt(routine)
 #----------------------------------------
 #
+write_print(routine)
+nullify(routine, tmp_pt_klon)
 
 ystack2(routine)
 alloc_temp(routine)
