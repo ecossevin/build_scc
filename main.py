@@ -144,7 +144,7 @@ def rm_KLON(routine, horizontal, horizontal_size):
     to_demote=FindVariables(unique=True).visit(routine.spec)
     to_demote=[var for var in to_demote if isinstance(var, symbols.Array)]
     #to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
-    to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size]
+    to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
             #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size and var.shape[0] == horizontal.size]
     if not demote_arg :
         to_demote = [var for var in to_demote if var.name not in routine_arg]
@@ -206,7 +206,7 @@ def alloc_temp(routine):
     routine.spec=Transformer(temp_map).visit(routine.spec)
     
 
-def get_horizontal(routine, horizontal_size_lst):
+def get_horizontal(routine, horizontal, horizontal_size_lst):
     verbose=True
     for name in horizontal_size_lst:
         if name in routine.variable_map:
@@ -218,6 +218,8 @@ def get_horizontal(routine, horizontal_size_lst):
                 if verbose: print("horizontal size = ",name)
                 return(var.name)
     print(colored("Horizontal size not found in routine args!", "red"))
+    if verbose: print("horizontal size = ", horizontal.size)
+    return(horizontal.size)
 
 
 def ystack1(routine):
@@ -432,7 +434,6 @@ routine=source.subroutines[0]
 
 import logical_lst
 
-
 horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
 horizontal_lst=['JLON', 'JL','JROF']
 vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
@@ -443,7 +444,7 @@ horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"
 #horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
 horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFDIA","KEND"]]
  
-horizontal_size=get_horizontal(routine, horizontal_lst_size)
+horizontal_size=get_horizontal(routine, horizontal, horizontal_lst_size)
 resolve_associates(routine)
 true_symbols, false_symbols=logical_lst.symbols()
 false_symbols.append('LHOOK')
@@ -474,10 +475,10 @@ generate_interface(routine) #must be before temp allocation and y stack, or temp
 ##----------------------------------------
 ##Pointers
 ##----------------------------------------
-#tmp_pt, tmp_target=find_pt(routine)
-#tmp_pt_klon=get_dim_pt(routine, tmp_pt, horizontal_size)
-#assoc_alloc_pt(routine)
-#nullify(routine, tmp_pt_klon)
+tmp_pt, tmp_target=find_pt(routine)
+tmp_pt_klon=get_dim_pt(routine, tmp_pt, horizontal_size)
+assoc_alloc_pt(routine)
+nullify(routine, tmp_pt_klon)
 ##----------------------------------------
 ##
 write_print(routine)
