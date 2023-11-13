@@ -99,7 +99,7 @@ def add_openacc2(routine):
 #            print("new_name=", new_name)
 #            print("imp.module_new",imp.module)
 
-def remove_loop(routine):
+def remove_loop(routine, horizontal_lst):
     loop_map={}
     for loop in FindNodes(ir.Loop).visit(routine.body):
         if loop.variable in horizontal_lst:
@@ -132,12 +132,19 @@ def stack_mod(routine):
     routine.spec.insert(idx+1, ir.Comment(text=''))
 
 def rm_KLON(routine, horizontal, horizontal_size):
+#    print("horizontal=",horizontal.size)
+#    print("horizontal_size=",horizontal_size)
+    if horizontal_size!=horizontal.size:
+        print(colored("PB with HOR_DIM","red"))
+        print("horizontal=",horizontal.size)
+        print("horizontal_size=",horizontal_size)
+
     demote_arg=False #rm KLON in function arg if True
     routine_arg=[var.name for var in routine.arguments]
     to_demote=FindVariables(unique=True).visit(routine.spec)
     to_demote=[var for var in to_demote if isinstance(var, symbols.Array)]
-    to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
-    #to_demote=[var for var in to_demote if var.shape[0] == horizontal.size]
+    #to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
+    to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size]
             #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size and var.shape[0] == horizontal.size]
     if not demote_arg :
         to_demote = [var for var in to_demote if var.name not in routine_arg]
@@ -151,7 +158,7 @@ def rm_KLON(routine, horizontal, horizontal_size):
     var_names=tuple(var.name for var in to_demote)
     if var_names:
        # demote_variables(routine, variable_names=var_names, dimensions='KLON')
-        demote_variables(routine, var_names, dimensions=horizontal_size)
+        demote_variables(routine, var_names, dimensions=horizontal.size)
 
 def alloc_temp(routine):
     routine_arg=[var.name for var in routine.arguments]
@@ -182,6 +189,7 @@ def alloc_temp(routine):
                         VAR=decls.clone(symbols=var_lst)
                         intrinsic_lst.append(VAR)
                 else: #if s is a pointer
+                    print(colored("POINTER","red"))
                     var_lst=[s]
                     VAR=decls.clone(symbols=var_lst)
                     intrinsic_lst.append(VAR)
@@ -205,7 +213,6 @@ def get_horizontal(routine, horizontal_size_lst):
             if verbose: print("horizontal size = ",name)
             return(name)
     for var in FindVariables().visit(routine.body):
-#        print(var)
         for vvar in var.name.split("%"):
             if vvar in horizontal_size_lst:
                 if verbose: print("horizontal size = ",name)
@@ -230,16 +237,61 @@ def ystack2(routine):
 
 
 def get_loop_variable(routine, horizontal_lst):
+    is_present=False
+    verbose=False
     var_lst=FindVariables(unique=True).visit(routine.spec)
-    var_lst=[var for var in var_lst if var.name in horizontal_lst]
-    if var_lst : 
-        loop_variable=var_lst[0]
-    else:
-        loop_variable=Scalar("JLON") #Scalar(horizontal_lst[0])
-        jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='JPIM')))
+    for var in var_lst:
+        if var.name=="JLON":
+            is_present=True
+            loop_index=var
+    
+    if not is_present:
+        jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='    JPIM')))
+        loop_index=jlon
         routine.variables+=(jlon,)
 
-    return(loop_variable)
+    loop_map={}
+    for loop in FindNodes(ir.Loop).visit(routine.body):
+        if loop.variable in horizontal_lst:
+            #new_loop=loop.clone(variable=routine.variable_map["JLON"])
+            if verbose: print("loop_idx=",loop_index)
+            new_loop=loop.clone(variable=routine.variable_map[loop_index.name])
+            var_map={}
+            for var in FindVariables().visit(loop.body):
+                if (var==loop.variable):
+                    var_map[var]=routine.variable_map[loop_index.name]
+            loop_map[loop]=SubstituteExpressions(var_map).visit(loop.body)
+            #loop.body=SubstituteExpressions(var_map).visit(loop.body)
+    #        loop.variable=routine.variable_map[loop_index.name]
+
+    routine.body=Transformer(loop_map).visit(routine.body)
+
+    return(loop_index)
+
+#def get_loop_variable(routine, horizontal_lst):
+#    verbose=True
+#    var_lst=FindVariables(unique=True).visit(routine.spec)
+#    var_lst=[var for var in var_lst if var.name in horizontal_lst]
+#    if var_lst : 
+#        if verbose: print(var_lst)
+#        loop_variable=var_lst[0]
+#    else:
+#        loop_variable=Scalar("JLON") #Scalar(horizontal_lst[0])
+#        jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='JPIM')))
+#        routine.variables+=(jlon,)
+#
+#    loop_variables=[]
+#    for loop in FindNodes(ir.Loop):
+#        if loop.variable in horizontal_lst:
+#            loop_variables.append(loop.variable)
+#            loop.variables=
+#    loop_map={}
+#    for loop in FindNodes(ir.Loop).visit(routine.body):
+#        if loop.variable in horizontal_lst:
+#            loop_map[loop]=loop.body
+#    routine.body=Transformer(loop_map).visit(routine.body)
+#
+#    return(loop_variable)
 
 def rm_sum(routine):
     call_map={}
@@ -261,9 +313,11 @@ def generate_interface(routine):
     Sourcefile.to_file(fgen(routine_new.interface), Path(pathW+".intfb.h"))
 
 def write_print(routine):
+    verbose=False
     intr_map={}
     for intr in FindNodes(Intrinsic).visit(routine.body):
         if "WRITE" in intr.text:
+            if verbose : print(colored("WRITE found in routine","red"))
             pattern='WRITE\(NULERR, \*\)(.*)'
             match=re.search(pattern,intr.text)
             string=match.group(1)
@@ -380,14 +434,14 @@ import logical_lst
 
 
 horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
-horizontal_lst=['JLON', 'JL','JPROF']
+horizontal_lst=['JLON', 'JL','JROF']
 vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
 #true_symbols=[]
 #false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
 
 horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA", "YDDIM%NPROMA", "NPROMA"]
 #horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
-horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFIDIA","KEND"]]
+horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFDIA","KEND"]]
  
 horizontal_size=get_horizontal(routine, horizontal_lst_size)
 resolve_associates(routine)
@@ -411,22 +465,22 @@ rm_KLON(routine, horizontal, horizontal_size)
 #ResolveVector.resolve_vector_dimension(routine, loop_variable, horizontal.bounds)
 ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
 
-remove_loop(routine)
+remove_loop(routine, horizontal_lst)
 ###
 ystack1(routine)
 rm_sum(routine)
 generate_interface(routine) #must be before temp allocation and y stack, or temp will be in interface
 
-#----------------------------------------
-#Pointers
-#----------------------------------------
-tmp_pt, tmp_target=find_pt(routine)
-tmp_pt_klon=get_dim_pt(routine, tmp_pt, horizontal_size)
-assoc_alloc_pt(routine)
-#----------------------------------------
-#
+##----------------------------------------
+##Pointers
+##----------------------------------------
+#tmp_pt, tmp_target=find_pt(routine)
+#tmp_pt_klon=get_dim_pt(routine, tmp_pt, horizontal_size)
+#assoc_alloc_pt(routine)
+#nullify(routine, tmp_pt_klon)
+##----------------------------------------
+##
 write_print(routine)
-nullify(routine, tmp_pt_klon)
 
 ystack2(routine)
 alloc_temp(routine)

@@ -1,12 +1,7 @@
 #!/bin/bash
 
-source ~/venv/bin/activate
-which python3
+export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
 
-#export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
-export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH
-p=$(pwd)
-echo $p
 function resolve ()
 {
   f=$1
@@ -20,7 +15,6 @@ function resolve ()
     fi
   done
 }
-
 
 for f in \
    arpifs/phys_dmn/actke.F90                       \
@@ -82,21 +76,18 @@ for f in \
    arpifs/adiab/cptend_new.F90                     \
    arpifs/adiab/cpmvvps.F90                        
 do 
+
   echo "==> $f <=="
   dir=$(dirname $f)
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer 
-  g=$(resolve $f)
-  python3 ~/build_scc/main.py $p/$g $p/src/local/ifsaux/openacc/$f
-  #exit 1
-#  openacc.pl $* \
-#   --dir src/local/ifsaux/openacc/$dir \
-#   --nocompute ABOR1 --version \
-#   $(resolve $f)
+  openacc.pl $* \
+   --dir src/local/ifsaux/openacc/$dir \
+   --nocompute ABOR1 --version \
+   $(resolve $f)
 done
 
 
-#exit 1
 for f in \
    arpifs/phys_dmn/cucalln_mf.F90                  \
    arpifs/phys_ec/cuadjtq.F90                      \
@@ -122,14 +113,11 @@ do
   dir=$(dirname $f)
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer \
-  g=$(resolve $f)
-  python3 ~/build_scc/main.py $p/$g $p/src/local/ifsaux/openacc/$f
-  #exit 1
-#  openacc.pl $* \
-#   --inlined cuadjtq.F90,cubasmcn.F90,cuentr.F90,cuadjtqs.F90 \
-#   --dir src/local/ifsaux/openacc/$dir \
-#   --nocompute ABOR1 --version \
-#   --jljk2jlonjlev --cycle 49 \
-#   $(resolve $f)
+  openacc.pl $* \
+   --inlined cuadjtq.F90,cubasmcn.F90,cuentr.F90,cuadjtqs.F90 \
+   --dir src/local/ifsaux/openacc/$dir \
+   --nocompute ABOR1 --version \
+   --jljk2jlonjlev --cycle 49 \
+   $(resolve $f)
 done
 
