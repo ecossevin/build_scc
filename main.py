@@ -131,7 +131,7 @@ def stack_mod(routine):
     routine.spec.insert(idx, ir.Import(module='stack.h', c_import=True))
     routine.spec.insert(idx+1, ir.Comment(text=''))
 
-def rm_KLON(routine, horizontal, horizontal_size):
+def rm_KLON(routine, horizontal, horizontal_lst_size):
 #    print("horizontal=",horizontal.size)
 #    print("horizontal_size=",horizontal_size)
     if horizontal_size!=horizontal.size:
@@ -143,8 +143,10 @@ def rm_KLON(routine, horizontal, horizontal_size):
     routine_arg=[var.name for var in routine.arguments]
     to_demote=FindVariables(unique=True).visit(routine.spec)
     to_demote=[var for var in to_demote if isinstance(var, symbols.Array)]
-    #to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
     to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
+    #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size]
+    #to_demote=[var for var in to_demote if var.shape[-1] in horizontal_lst_size]
+    #to_demote=[var for var in to_demote if var.shape[-1] in horizontal_lst_size]
             #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size and var.shape[0] == horizontal.size]
     if not demote_arg :
         to_demote = [var for var in to_demote if var.name not in routine_arg]
@@ -156,9 +158,11 @@ def rm_KLON(routine, horizontal, horizontal_size):
         to_demote = [v for v in to_demote if v.name not in call_args]
 
     var_names=tuple(var.name for var in to_demote)
+    #TODO demote over all horizontal dimensions if more than one
     if var_names:
        # demote_variables(routine, variable_names=var_names, dimensions='KLON')
-        demote_variables(routine, var_names, dimensions=horizontal.size)
+        demote_variables(routine, var_names, dimensions=horizontal_size)
+        #demote_variables(routine, var_names, dimensions=horizontal.size)
 
 def alloc_temp(routine):
     routine_arg=[var.name for var in routine.arguments]
@@ -217,9 +221,24 @@ def get_horizontal(routine, horizontal, horizontal_size_lst):
             if vvar in horizontal_size_lst:
                 if verbose: print("horizontal size = ",name)
                 return(var.name)
-    print(colored("Horizontal size not found in routine args!", "red"))
-    if verbose: print("horizontal size = ", horizontal.size)
-    return(horizontal.size)
+    if verbose: print(colored("Horizontal size not found in routine args!", "red"))
+#    if verbose: print("horizontal size = ", horizontal.size)
+    
+    
+    #TODO : ajouter identification lorsque la dimension horizontale est dans un type dérivé. 
+    hor_lst=[]
+    var_lst=FindVariables(unique=True).visit(routine.spec)
+    var_lst=[var for var in var_lst if isinstance(var, symbols.Array)]
+    for var in var_lst:
+        for shape in var.shape: 
+            if shape in horizontal_lst_size: 
+                if shape not in hor_lst:
+                    hor_lst.append(shape)
+    if len(hor_lst)>1:
+        print(colored("diff horizontal size are used", "red"))
+        return(horizontal.size)
+    else:
+        return(hor_lst[0])
 
 
 def ystack1(routine):
