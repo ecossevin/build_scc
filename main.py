@@ -454,7 +454,7 @@ routine=source.subroutines[0]
 import logical_lst
 
 horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
-horizontal_lst=['JLON', 'JL','JROF']
+horizontal_lst=['JLON','JROF']
 vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
 #true_symbols=[]
 #false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
