@@ -87,7 +87,7 @@ do
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer 
   g=$(resolve $f)
-  python3 ~/build_scc/main.py $p/$g $p/src/local/ifsaux/openacc/$f
+  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
 #  exit 1
 #  openacc.pl $* \
 #   --dir src/local/ifsaux/openacc/$dir \
@@ -123,7 +123,7 @@ do
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer \
   g=$(resolve $f)
-  python3 ~/build_scc/main.py $p/$g $p/src/local/ifsaux/openacc/$f
+  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
   #exit 1
 #  openacc.pl $* \
 #   --inlined cuadjtq.F90,cubasmcn.F90,cuentr.F90,cuadjtqs.F90 \

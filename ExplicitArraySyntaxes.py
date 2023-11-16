@@ -14,7 +14,7 @@ from termcolor import colored
 from loki.logging import info
 import sys
 
-def ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds):
+def ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds):
     
   total = 0
   assign_map={}
@@ -26,24 +26,20 @@ def ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds):
 #  verbose=True
 
   define=False
-  splitted1 = horizontal_lst_bounds[0][1].split('%')
-  splitted2 = horizontal_lst_bounds[1][1].split('%')
+  splitted1 = lst_horizontal_bounds[0][1].split('%')
+  splitted2 = lst_horizontal_bounds[1][1].split('%')
   for var in FindVariables().visit(routine.variables):
-    #print("var=",var)
-    #print("var_name=",var.name)
 
     if (var.name == splitted1[0]):
       begin_index=Variable(name=f'{var.name}%{splitted1[1]}', parent=var, scope=routine)
       if verbose : print(colored("derived type " + splitted1[0] + " found", "green"))
 
 
-    if (var.name == horizontal_lst_bounds[0][0]):
+    if (var.name == lst_horizontal_bounds[0][0]):
       begin_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
-    #print("horizontal_lst_bounds=",horizontal_lst_bounds[0][2])
-    #print("test=",horizontal_lst_bounds[0][2]==var.name)
-    if (var.name == horizontal_lst_bounds[0][2]):
+    if (var.name == lst_horizontal_bounds[0][2]):
       begin_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
@@ -51,16 +47,16 @@ def ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds):
       end_index=Variable(name=f'{var.name}%{splitted2[1]}', parent=var, scope=routine)
       if verbose : print(colored("derived type " + splitted2[0] + " found", "green"))
 
-    if (var.name == horizontal_lst_bounds[1][0]):
+    if (var.name == lst_horizontal_bounds[1][0]):
       end_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
-    if (var.name == horizontal_lst_bounds[1][2]):
+    if (var.name == lst_horizontal_bounds[1][2]):
       end_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
-  print("begin_index=",begin_index)
-  print("end_index=",end_index)
+  if verbose: print("begin_index=",begin_index)
+  if verbose: print("end_index=",end_index)
 
   for assign in FindNodes(Assignment).visit(routine.body):
     is_pointer=False
@@ -82,7 +78,7 @@ def ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds):
               if verbose : print ("Variable", var.name, " found in routine variables")
               routine_var =routine.variable_map[var.name]
               dim_name = routine_var.dimensions[0].name
-              if (dim_name in horizontal_lst_size):
+              if (dim_name in lst_horizontal_size):
                 if verbose : print(colored("First dimension of array is "+dim_name, "green"))
                 newrange = RangeIndex( (begin_index, end_index, None) )
                 define=True
@@ -112,7 +108,8 @@ def ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds):
       if verbose : print("        into ", explicited_assign,  "\n")
           
   routine.body=Transformer(assign_map).visit(routine.body)
-  if (total > 0) : info(f'[Loki] {routine.name}:: {total} implicit array syntax expressions replaced with explicit boundaries')
+  if verbose:
+      if (total > 0) : info(f'[Loki] {routine.name}:: {total} implicit array syntax expressions replaced with explicit boundaries')
   if define==False :
     newrange=None
   return(end_index, begin_index, newrange)

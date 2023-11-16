@@ -21,6 +21,7 @@ import ExplicitArraySyntaxes
 
 import re
 
+from pathlib import Path
 
 def load_subroutine(path, file, name):
     source=Sourcefile.from_file(path+file)
@@ -31,6 +32,13 @@ def save_subroutine(path, file):
     Sourcefile.to_file(fgen(routine), Path(path+name+'.F90'))
 
 
+#*********************************************************
+#*********************************************************
+#*********************************************************
+#       Some  routines  of  the  transformation
+#*********************************************************
+#*********************************************************
+#*********************************************************
 
 
 #def add_openacc1(routine):
@@ -41,7 +49,6 @@ def save_subroutine(path, file):
 #    stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
 #
 #    for call in FindNodes(CallStatement).visit(routine.body):
-#        print("call.name=",call.name)
 #        if call.name == "ABOR1":
 #    #        call_lst.append(call.name.name) don't add in call_lst, no #include abor1_acc
 #            new_call=call.clone(name=call.name, arguments=call.arguments)
@@ -86,8 +93,6 @@ def add_openacc2(routine):
     routine_importSPEC=FindNodes(ir.Import).visit(routine.spec)
     for imp in routine_importSPEC:
         name=imp.module.replace(".intfb.h","").upper()
-#        print("name=",name)
-#        print("call_lst=",call_lst)
         if imp.c_import==True and any(call==name for call in call_lst):
  #       # if any(call==name for call in call_lst):
  #            print("imp.module=",imp.module)
@@ -95,14 +100,11 @@ def add_openacc2(routine):
 
             new_name=imp.module.replace(".intfb.h","")+"_openacc"+".intfb.h"
             imp._update(module=f'{new_name}')
-#            #print("imp.module_new=",imp.module)
-#            print("new_name=", new_name)
-#            print("imp.module_new",imp.module)
 
-def remove_loop(routine, horizontal_lst):
+def remove_loop(routine, lst_horizontal_idx):
     loop_map={}
     for loop in FindNodes(ir.Loop).visit(routine.body):
-        if loop.variable in horizontal_lst:
+        if loop.variable in lst_horizontal_idx:
             loop_map[loop]=loop.body
     routine.body=Transformer(loop_map).visit(routine.body)
 
@@ -113,9 +115,9 @@ def acc_seq(routine):
     routine.spec.insert(0,ir.Pragma(keyword='acc', content='routine ('+routine.name+') seq'))
     routine.spec.insert(1,ir.Comment(text=''))
 
-def jlon_kidia(routine, end_index, begin_index, new_range, loop_variable):
+def jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx):
     
-    routine.spec.append(Assignment(loop_variable, begin_index))
+    routine.spec.append(Assignment(horizontal_idx, begin_index))
 #    kidia=Scalar(begin_index)
 #    routine.spec.append(Assignment(jlon, kidia))
 
@@ -131,23 +133,17 @@ def stack_mod(routine):
     routine.spec.insert(idx, ir.Import(module='stack.h', c_import=True))
     routine.spec.insert(idx+1, ir.Comment(text=''))
 
-def rm_KLON(routine, horizontal, horizontal_lst_size):
-#    print("horizontal=",horizontal.size)
-#    print("horizontal_size=",horizontal_size)
-    if horizontal_size!=horizontal.size:
-        print(colored("PB with HOR_DIM","red"))
-        print("horizontal=",horizontal.size)
-        print("horizontal_size=",horizontal_size)
-
+def rm_KLON(routine, horizontal, horizontal_size):
+#    if horizontal_size!=horizontal.size:
+#        print(colored("PB with HOR_DIM","red"))
+#        print("horizontal=",horizontal.size)
+#        print("horizontal_size=",horizontal_size)
+#
     demote_arg=False #rm KLON in function arg if True
     routine_arg=[var.name for var in routine.arguments]
     to_demote=FindVariables(unique=True).visit(routine.spec)
     to_demote=[var for var in to_demote if isinstance(var, symbols.Array)]
     to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
-    #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size]
-    #to_demote=[var for var in to_demote if var.shape[-1] in horizontal_lst_size]
-    #to_demote=[var for var in to_demote if var.shape[-1] in horizontal_lst_size]
-            #to_demote=[var for var in to_demote if var.shape[-1] == horizontal.size and var.shape[0] == horizontal.size]
     if not demote_arg :
         to_demote = [var for var in to_demote if var.name not in routine_arg]
 
@@ -160,9 +156,7 @@ def rm_KLON(routine, horizontal, horizontal_lst_size):
     var_names=tuple(var.name for var in to_demote)
     #TODO demote over all horizontal dimensions if more than one
     if var_names:
-       # demote_variables(routine, variable_names=var_names, dimensions='KLON')
         demote_variables(routine, var_names, dimensions=horizontal_size)
-        #demote_variables(routine, var_names, dimensions=horizontal.size)
 
 def alloc_temp(routine):
     routine_arg=[var.name for var in routine.arguments]
@@ -193,7 +187,7 @@ def alloc_temp(routine):
                         VAR=decls.clone(symbols=var_lst)
                         intrinsic_lst.append(VAR)
                 else: #if s is a pointer
-                    print(colored("POINTER","red"))
+                    #print(colored("POINTER","red"))
                     var_lst=[s]
                     VAR=decls.clone(symbols=var_lst)
                     intrinsic_lst.append(VAR)
@@ -210,15 +204,16 @@ def alloc_temp(routine):
     routine.spec=Transformer(temp_map).visit(routine.spec)
     
 
-def get_horizontal(routine, horizontal, horizontal_size_lst):
-    verbose=True
-    for name in horizontal_size_lst:
+def get_horizontal_size(routine, horizontal, lst_horizontal_size):
+    verbose=False
+    #verbose=True
+    for name in lst_horizontal_size:
         if name in routine.variable_map:
             if verbose: print("horizontal size = ",name)
             return(name)
     for var in FindVariables().visit(routine.body):
         for vvar in var.name.split("%"):
-            if vvar in horizontal_size_lst:
+            if vvar in lst_horizontal_size:
                 if verbose: print("horizontal size = ",name)
                 return(var.name)
     if verbose: print(colored("Horizontal size not found in routine args!", "red"))
@@ -231,7 +226,7 @@ def get_horizontal(routine, horizontal, horizontal_size_lst):
     var_lst=[var for var in var_lst if isinstance(var, symbols.Array)]
     for var in var_lst:
         for shape in var.shape: 
-            if shape in horizontal_lst_size: 
+            if shape in lst_horizontal_size: 
                 if shape not in hor_lst:
                     hor_lst.append(shape)
     if len(hor_lst)>1:
@@ -257,7 +252,7 @@ def ystack2(routine):
     routine.spec.append(Assignment(stack_local, stack_argument))
 
 
-def get_loop_variable(routine, horizontal_lst):
+def get_horizontal_idx(routine, lst_horizontal_idx):
     is_present=False
     verbose=False
     var_lst=FindVariables(unique=True).visit(routine.spec)
@@ -273,7 +268,7 @@ def get_loop_variable(routine, horizontal_lst):
 
     loop_map={}
     for loop in FindNodes(ir.Loop).visit(routine.body):
-        if loop.variable in horizontal_lst:
+        if loop.variable in lst_horizontal_idx:
             #new_loop=loop.clone(variable=routine.variable_map["JLON"])
             if verbose: print("loop_idx=",loop_index)
             new_loop=loop.clone(variable=routine.variable_map[loop_index.name])
@@ -289,30 +284,6 @@ def get_loop_variable(routine, horizontal_lst):
 
     return(loop_index)
 
-#def get_loop_variable(routine, horizontal_lst):
-#    verbose=True
-#    var_lst=FindVariables(unique=True).visit(routine.spec)
-#    var_lst=[var for var in var_lst if var.name in horizontal_lst]
-#    if var_lst : 
-#        if verbose: print(var_lst)
-#        loop_variable=var_lst[0]
-#    else:
-#        loop_variable=Scalar("JLON") #Scalar(horizontal_lst[0])
-#        jlon=Variable(name="JLON", type=SymbolAttributes(BasicType.INTEGER, kind=Variable(name='JPIM')))
-#        routine.variables+=(jlon,)
-#
-#    loop_variables=[]
-#    for loop in FindNodes(ir.Loop):
-#        if loop.variable in horizontal_lst:
-#            loop_variables.append(loop.variable)
-#            loop.variables=
-#    loop_map={}
-#    for loop in FindNodes(ir.Loop).visit(routine.body):
-#        if loop.variable in horizontal_lst:
-#            loop_map[loop]=loop.body
-#    routine.body=Transformer(loop_map).visit(routine.body)
-#
-#    return(loop_variable)
 
 def rm_sum(routine):
     call_map={}
@@ -323,7 +294,7 @@ def rm_sum(routine):
     if call_map:
         routine.body=SubstituteExpressions(call_map).visit(routine.body)
 
-def generate_interface(routine):
+def generate_interface(routine, pathw):
     removal_map={}
     imports = FindNodes(ir.Import).visit(routine.spec)
     routine_new=routine.clone()
@@ -331,7 +302,7 @@ def generate_interface(routine):
         if im.c_import==True:
             removal_map[im]=None
     routine_new.spec = Transformer(removal_map).visit(routine_new.spec)
-    Sourcefile.to_file(fgen(routine_new.interface), Path(pathW+".intfb.h"))
+    Sourcefile.to_file(fgen(routine_new.interface), Path(pathw+".intfb.h"))
 
 def write_print(routine):
     verbose=False
@@ -367,7 +338,7 @@ def find_pt(routine):
     return(tmp_pt, tmp_target)
              
              
-def get_dim_pt(routine, tmp_pt, horizontal_size):
+def get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size):
     assign_map={}
     tmp_pt_klon={}
     for assign in FindNodes(Assignment).visit(routine.body):
@@ -414,7 +385,7 @@ def nullify(routine, tmp_pt_klon):
 
 
 
-def assoc_alloc_pt(routine):
+def assoc_alloc_pt(routine, tmp_pt_klon):
     temp_map={}
     for decls in FindNodes(VariableDeclaration).visit(routine.spec):
         intrinsic_lst=[]
@@ -440,71 +411,101 @@ def assoc_alloc_pt(routine):
         temp_map[decls]=tuple(intrinsic_lst)
     routine.spec=Transformer(temp_map).visit(routine.spec)
 
-pathR=sys.argv[1]
-pathW=sys.argv[2]
+#*********************************************************
+#*********************************************************
+#*********************************************************
+#       Defining     the       transformation
+#*********************************************************
+#*********************************************************
+#*********************************************************
 
-from pathlib import Path
-pathW=pathW.replace(".F90", "")+"_openacc"
+import click
 
-#routine=load_subroutine(pathR, fileR, name)
-source=Sourcefile.from_file(pathR)
-routine=source.subroutines[0]
+@click.command()
+@click.option('--pathr', help='path of the file to open')
+@click.option('--pathw', help='path of the file to write to')
+@click.option('--horizontal_opt', default=None, help='some hor opt... for now an additionnal possible horizontal idx')
+
+def openacc_trans(pathr, pathw, horizontal_opt):
+
+#    pathR=sys.argv[1]
+#    pathW=sys.argv[2]
+    
+    verbose=True
+    #verbose=False
+    pathw=pathw.replace(".F90", "")+"_openacc"
+    
+    print(pathr)
+    print(pathw)
+    source=Sourcefile.from_file(pathr)
+    routine=source.subroutines[0]
+    
+    
+    import logical_lst
+    
+    horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
+    vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
+    
+     #lst_horizontal_idx=['JLON','JROF','JL']
+    lst_horizontal_idx=['JLON','JROF']
+    #the JL idx have to be added only when it's used at an horizontal idx, because it's used as avertical idx in some places.... this should be fixed... The transformation script could check wether JL is a hor or vert idx instead of adding JL to the lst_horizontal_idx conditionally. 
+    if horizontal_opt is not None:
+        lst_horizontal_idx.append(horizontal_opt)
+    if verbose: print("lst_horizontal_idx=",lst_horizontal_idx)
+    
+    lst_horizontal_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA", "YDDIM%NPROMA", "NPROMA"]
+    lst_horizontal_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFDIA","KEND"]]
+    
+    true_symbols, false_symbols=logical_lst.symbols()
+    false_symbols.append('LHOOK')
+    
+    horizontal_size=get_horizontal_size(routine, horizontal, lst_horizontal_size)
+    resolve_associates(routine)
+    logical.transform_subroutine(routine, true_symbols, false_symbols)
+    
+    end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
+    horizontal_idx=get_horizontal_idx(routine, lst_horizontal_idx)
+    bounds=[begin_index, end_index]
+    add_openacc2(routine)
+    
+    rename(routine)
+    acc_seq(routine)
+    stack_mod(routine)
+    rm_KLON(routine, horizontal, horizontal_size)
+    ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
+    
+    remove_loop(routine, lst_horizontal_idx)
+    ###
+    ystack1(routine)
+    rm_sum(routine)
+    generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
+    
+    ##----------------------------------------
+    ##Pointers
+    ##----------------------------------------
+    tmp_pt, tmp_target=find_pt(routine)
+    tmp_pt_klon=get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size)
+    assoc_alloc_pt(routine, tmp_pt_klon)
+    nullify(routine, tmp_pt_klon)
+    ##----------------------------------------
+    ##----------------------------------------
+    write_print(routine)
+    
+    ystack2(routine)
+    alloc_temp(routine)
+    jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx) #at the end
+    
+    
+    Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
+#    Sourcefile.to_file(fgen(routine), Path(pathW.replace(".F90", "")+"_openacc"+".F90"))
 
 
-import logical_lst
+#*********************************************************
+#*********************************************************
+#*********************************************************
+#       Calling  the       transformation
+#*********************************************************
+#*********************************************************
+#*********************************************************
 
-horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
-horizontal_lst=['JLON','JROF']
-vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
-#true_symbols=[]
-#false_symbols=['LHOOK', 'LMUSCLFA','LFLEXDIA']
-
-horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA", "YDDIM%NPROMA", "NPROMA"]
-#horizontal_lst_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA"]
-horizontal_lst_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFDIA","KEND"]]
- 
-horizontal_size=get_horizontal(routine, horizontal, horizontal_lst_size)
-resolve_associates(routine)
-true_symbols, false_symbols=logical_lst.symbols()
-false_symbols.append('LHOOK')
-logical.transform_subroutine(routine, true_symbols, false_symbols)
-
-end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, horizontal_lst_size, horizontal_lst_bounds)
-loop_variable=get_loop_variable(routine, horizontal_lst)
-#Scalar("JLON")
-#loop_variable=horizontal.index
-bounds=[begin_index, end_index]
-##add_openacc1(routine)
-add_openacc2(routine)
-
-#ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
-rename(routine)
-acc_seq(routine)
-stack_mod(routine)
-rm_KLON(routine, horizontal, horizontal_size)
-#ResolveVector.resolve_vector_dimension(routine, loop_variable, horizontal.bounds)
-ResolveVector.resolve_vector_dimension(routine, loop_variable, bounds)
-
-remove_loop(routine, horizontal_lst)
-###
-ystack1(routine)
-rm_sum(routine)
-generate_interface(routine) #must be before temp allocation and y stack, or temp will be in interface
-
-##----------------------------------------
-##Pointers
-##----------------------------------------
-tmp_pt, tmp_target=find_pt(routine)
-tmp_pt_klon=get_dim_pt(routine, tmp_pt, horizontal_size)
-assoc_alloc_pt(routine)
-nullify(routine, tmp_pt_klon)
-##----------------------------------------
-##
-write_print(routine)
-
-ystack2(routine)
-alloc_temp(routine)
-jlon_kidia(routine, end_index, begin_index, new_range, loop_variable) #at the end
-
-
-Sourcefile.to_file(fgen(routine), Path(pathW+".F90"))
+openacc_trans()
