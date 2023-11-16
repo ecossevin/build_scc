@@ -410,7 +410,16 @@ def assoc_alloc_pt(routine, tmp_pt_klon):
                 intrinsic_lst.append(VAR)
         temp_map[decls]=tuple(intrinsic_lst)
     routine.spec=Transformer(temp_map).visit(routine.spec)
+def add_contains():
+    with open('callee.F90', 'r') as file_callee:
+        callee = file_callee.read()
+    with open('caller.F90', 'r') as file_caller:
+        caller = file_caller.read()
+string="END SUBROUTINE"
+loc=caller.find(string)
 
+def inline_calls(routine):
+    
 #*********************************************************
 #*********************************************************
 #*********************************************************
@@ -425,12 +434,10 @@ import click
 @click.option('--pathr', help='path of the file to open')
 @click.option('--pathw', help='path of the file to write to')
 @click.option('--horizontal_opt', default=None, help='some hor opt... for now an additionnal possible horizontal idx')
+@click.option('--to_inline', default=None, help='names of the routine to inline')
 
-def openacc_trans(pathr, pathw, horizontal_opt):
+def openacc_trans(pathr, pathw, horizontal_opt, to_inline):
 
-#    pathR=sys.argv[1]
-#    pathW=sys.argv[2]
-    
     verbose=True
     #verbose=False
     pathw=pathw.replace(".F90", "")+"_openacc"
@@ -459,6 +466,8 @@ def openacc_trans(pathr, pathw, horizontal_opt):
     true_symbols, false_symbols=logical_lst.symbols()
     false_symbols.append('LHOOK')
     
+    inline_calls(routine)
+
     horizontal_size=get_horizontal_size(routine, horizontal, lst_horizontal_size)
     resolve_associates(routine)
     logical.transform_subroutine(routine, true_symbols, false_symbols)
