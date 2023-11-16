@@ -416,12 +416,12 @@ def add_contains():
     with open('caller.F90', 'r') as file_caller:
         caller = file_caller.read()
 
-string="END SUBROUTINE"
-loc=caller.find(string)
-if loc != -1:
-    new_caller=caller[:loc]+callee+caller[loc:]
-with open('caller.F90', 'w') as file_caller:
-    file_caller.write(new_caller)
+    string="END SUBROUTINE"
+    loc=caller.find(string)
+    if loc != -1:
+        new_caller=caller[:loc]+callee+caller[loc:]
+    with open('caller.F90', 'w') as file_caller:
+        file_caller.write(new_caller)
 
 def inline_calls(routine):
     
