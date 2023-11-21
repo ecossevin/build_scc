@@ -79,10 +79,11 @@ def add_openacc2(routine):
     stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
     stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
     for call in FindNodes(CallStatement).visit(routine.body):
-        if call.name == "ABOR1":
+        if call.name == "ABOR1" or call.name == "ABOR1_ACC":
             
         #call_lst.append(call.name.name)
-            call.name.name=call.name.name+"_ACC"
+            if call.name != "ABOR1_ACC":
+                call.name.name=call.name.name+"_ACC"
 #            call._update(kwarguments=call.kwarguments + ((stack_argument.name, stack_local),))
 
         elif call.name != "DR_HOOK":
@@ -498,7 +499,7 @@ def rename_hor(routine, lst_horizontal_idx):
     for var in FindVariables().visit(routine.body):
         for idx in lst_horizontal_idx:
             if '_'+idx in var.name:
-                rename_map[var]=var.clone(name=idx.replace("_",""))
+                rename_map[var]=var.clone(name=idx)
     routine.body=SubstituteExpressions(rename_map).visit(routine.body)
                     
      

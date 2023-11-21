@@ -11,8 +11,37 @@ from loki import (
 
 from loki.transform import resolve_associates
 
+from loki.expression.symbols import Comparison
+from loki.expression.symbols import IntLiteral
+
 import os
 
+def evaluate(comparison):
+  operator=comparison.operator
+  right=comparison.right
+  left=comparison.left
+  if operator=='==':
+    return(left==right)
+  elif operator=='<':
+    return(left<right)
+  elif operator=='>':
+    return(left>right)
+  elif operator=='!=':
+    return(left!=right)
+  elif operator=='>=':
+    return(left>=right)
+  elif operator=='<=':
+    return(left<=right)
+        
+#def evaluateCondition( ):
+#    if isinstance(my_condition, Comparison):
+#        return(evaluate(comparison))
+#    elif isinstance(my_condition, LogicalNot):
+#        evaluateCondition(my_condition.children
+#    elif isinstance(my_condition, LogicalOr):
+#        for c in my_condition.children :
+            
+    
 def evaluateCondition(my_condition, true_symbols, false_symbols):
 
   if isinstance(my_condition, DeferredTypeSymbol) or isinstance(my_condition, Scalar):
@@ -24,6 +53,15 @@ def evaluateCondition(my_condition, true_symbols, false_symbols):
     else :
       return[False, False]
 
+  elif isinstance(my_condition, Comparison):
+    if isinstance(my_condition.left, IntLiteral) and isinstance(my_condition.right, IntLiteral):
+      if evaluate(my_condition):
+        return[True, True]
+      else:
+        return[True,False]
+    else:
+      return[False, False]
+    
   elif isinstance(my_condition, LogicalNot):
     [evaluable, evaluation] = evaluateCondition(my_condition.child, true_symbols, false_symbols)
     return [evaluable, not evaluation]
@@ -79,6 +117,7 @@ def transform_subroutine(routine, true_symbols, false_symbols):
             if (symbol in true_symbols or symbol in false_symbols):
                 evaluable = True
 
+        evaluable = True
         if evaluable :
           [evaluable, evaluation] = evaluateCondition(cond.condition, true_symbols, false_symbols)
           if evaluable :
@@ -86,4 +125,6 @@ def transform_subroutine(routine, true_symbols, false_symbols):
               callmap[cond] = cond.body
             else:
               callmap[cond] = cond.else_body
+            
+
     routine.body=Transformer(callmap).visit(routine.body)
