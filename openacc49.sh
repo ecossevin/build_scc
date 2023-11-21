@@ -7,6 +7,20 @@ which python3
 export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH
 p=$(pwd)
 echo $p
+#function resolve ()
+#{
+#  f=$1
+#  for view in $(cat .gmkview)
+#  do
+#    g="src/$view/$f"
+#    if [ -f $g ]
+#    then
+#      echo $g
+#      break
+#    fi
+#  done
+#}
+
 function resolve ()
 {
   f=$1
@@ -15,12 +29,12 @@ function resolve ()
     g="src/$view/$f"
     if [ -f $g ]
     then
-      echo $g
+#      echo $g
+      echo "src/$view/"
       break
     fi
   done
 }
-
 
 for f in \
    arpifs/phys_dmn/actke.F90                       \
@@ -86,8 +100,10 @@ do
   dir=$(dirname $f)
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer 
+#  g=$(resolve $f)
+#  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
   g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
+  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
 #  exit 1
 #  openacc.pl $* \
 #   --dir src/local/ifsaux/openacc/$dir \
@@ -96,6 +112,8 @@ do
 done
 
 
+rm -Rf tmp
+mkdir tmp
 #exit 1
 for f in \
    arpifs/phys_dmn/cucalln_mf.F90                  \
@@ -123,7 +141,11 @@ do
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer \
   g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
+#  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
+# arpifs/phys_ec/cuccdia.F90
+  #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuccdia.F90
+  #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
+  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
   #exit 1
 #  openacc.pl $* \
 #   --inlined cuadjtq.F90,cubasmcn.F90,cuentr.F90,cuadjtqs.F90 \

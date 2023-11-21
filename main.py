@@ -317,6 +317,7 @@ def write_print(routine):
             intr_map[intr]=Intrinsic(new_intr)
     routine.body=Transformer(intr_map).visit(routine.body)
             
+    
 #---------------------------------------------------------
 #---------------------------------------------------------
 #Pointers
@@ -410,21 +411,97 @@ def assoc_alloc_pt(routine, tmp_pt_klon):
                 intrinsic_lst.append(VAR)
         temp_map[decls]=tuple(intrinsic_lst)
     routine.spec=Transformer(temp_map).visit(routine.spec)
-def add_contains():
-    with open('callee.F90', 'r') as file_callee:
-        callee = file_callee.read()
-    with open('caller.F90', 'r') as file_caller:
-        caller = file_caller.read()
+#def add_contains():
+#    with open('callee.F90', 'r') as file_callee:
+#        callee = file_callee.read()
+#    with open('caller.F90', 'r') as file_caller:
+#        caller = file_caller.read()
+#
+#    string="END SUBROUTINE"
+#    loc=caller.find(string)
+#    callee="CONTAINS\n\n"+callee
+#    if loc != -1:
+#        new_caller=caller[:loc]+callee+caller[loc:]
+#    with open('caller.F90', 'w') as file_caller:
+#        file_caller.write(new_caller)
 
-    string="END SUBROUTINE"
-    loc=caller.find(string)
-    if loc != -1:
-        new_caller=caller[:loc]+callee+caller[loc:]
-    with open('caller.F90', 'w') as file_caller:
-        file_caller.write(new_caller)
+#*********************************************************
+#*********************************************************
+#*********************************************************
+#      Functions    needed    for    inlining....
+#*********************************************************
+#*********************************************************
+#*********************************************************
 
-def inline_calls(routine):
-    
+#def inline_calls(inlined):
+def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+    verbose=True
+    pathr=pathpack+'/'+pathview+pathfile
+    match_inline=False
+#    for routine_name in 
+#    if routine_name=
+#    for call in FindNodes(CallStatement).visit(routine.body):
+#        if call.name in inlined:
+#            add_contains
+    dict_callee_path={}
+    if inlined != None:    
+           
+   
+        with open('/home/gmap/mrpm/cossevine/build_scc/openacc49.sh', 'r') as file_lst_callee:
+            lines=file_lst_callee.readlines()
+            for callee_name in inlined:
+                callee_path=None
+                for line in lines:
+                    callee_path=re.search('((\w*\/)+'+callee_name+')', line)
+                    if callee_path:
+                        
+                        callee_path=pathpack+'/'+pathview+callee_path.group(0)
+                        dict_callee_path[callee_name]=callee_path
+        if verbose: print("dict_callee_path=",dict_callee_path)
+
+        with open(pathr, 'r') as file_caller:
+            caller = file_caller.read()
+
+	#new_caller=caller
+        for callee_name in inlined: #look for each callee sub  in the caller
+            if caller.find(callee_name.replace(".F90","").upper())!=-1:
+                with open(dict_callee_path[callee_name], 'r') as file_callee:
+                    callee = file_callee.read()
+                if not match_inline: #add CONTAINS only for the first callee matching
+                    match_inline=True
+                    callee="CONTAINS\n\n"+callee
+                    loc=caller.find("END SUBROUTINE")
+                    if loc != -1 :
+                        caller=caller[:loc]+callee+caller[loc:]
+                else: #add the callee after the CONTAINS statement
+                    loc=caller.find("CONTAINS")
+                    if loc != -1 :
+                         loc=loc+len("CONTAINS\n\n") #insert after CONTAINS
+                         caller=caller[:loc]+callee+caller[loc:]
+        if verbose: print(pathpack+"/tmp/"+os.path.basename(pathfile))
+        if match_inline:
+            with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w") as file_caller:
+                file_caller.write(caller)
+    else:
+        if verbose: print(colored("no routine to inline", "red"))
+
+
+    return(match_inline)
+
+#diff way to do : uniformize loop or re.search(_LOOPIDX) 
+def rename_hor(routine, lst_horizontal_idx): 
+#    lst_horizontal_idx_new
+#    for idx in lst_horizontal_idx:
+#    
+#        lst_horizontal_idx_new=lst_horizontal_idx_new+
+    rename_map={}
+    for var in FindVariables().visit(routine.body):
+        for idx in lst_horizontal_idx:
+            if '_'+idx in var.name:
+                rename_map[var]=var.clone(name=idx.replace("_",""))
+    routine.body=SubstituteExpressions(rename_map).visit(routine.body)
+                    
+     
 #*********************************************************
 #*********************************************************
 #*********************************************************
@@ -436,23 +513,30 @@ def inline_calls(routine):
 import click
 
 @click.command()
-@click.option('--pathr', help='path of the file to open')
-@click.option('--pathw', help='path of the file to write to')
-@click.option('--horizontal_opt', default=None, help='some hor opt... for now an additionnal possible horizontal idx')
-@click.option('--to_inline', default=None, help='names of the routine to inline')
+#@click.option('--pathr', help='path of the file to open')
+#@click.option('--pathw', help='path of the file to write to')
+@click.option('--pathpack', help='path to the pack')
+@click.option('--pathview', help='path to src/local or whatever..')
+@click.option('--pathfile', help='path to the file')
+@click.option('--pathacc', help='path to the place acc files are stored')
 
-def openacc_trans(pathr, pathw, horizontal_opt, to_inline):
+@click.option('--horizontal_opt', default=None, help='some hor opt... for now an additionnal possible horizontal idx')
+@click.option('--inlined', '-in', default=None, multiple=True, help='names of the routine to inline')
+
+def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+
+    #setup
 
     verbose=True
     #verbose=False
+    pathr=pathpack+'/'+pathview+pathfile
+    pathw=pathpack+pathacc+'/'+pathfile
+
     pathw=pathw.replace(".F90", "")+"_openacc"
     
     print(pathr)
     print(pathw)
-    source=Sourcefile.from_file(pathr)
-    routine=source.subroutines[0]
-    
-    
+
     import logical_lst
     
     horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
@@ -471,8 +555,23 @@ def openacc_trans(pathr, pathw, horizontal_opt, to_inline):
     true_symbols, false_symbols=logical_lst.symbols()
     false_symbols.append('LHOOK')
     
-    inline_calls(routine)
+    #inlining : 
+    inline_match=inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+    if inline_match:
+        filename=os.path.basename(pathfile)
+        source=Sourcefile.from_file(pathpack+"/tmp/"+filename)
+    else:
+        source=Sourcefile.from_file(pathr)
+    routine=source.subroutines[0]
 
+    from loki.transform import inline_member_procedures
+    
+    if inline_match:
+        routine.enrich_calls(routine.members)
+        inline_member_procedures(routine)
+        rename_hor(routine, lst_horizontal_idx)
+
+    #transformations:
     horizontal_size=get_horizontal_size(routine, horizontal, lst_horizontal_size)
     resolve_associates(routine)
     logical.transform_subroutine(routine, true_symbols, false_symbols)
@@ -513,7 +612,23 @@ def openacc_trans(pathr, pathw, horizontal_opt, to_inline):
     Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
 #    Sourcefile.to_file(fgen(routine), Path(pathW.replace(".F90", "")+"_openacc"+".F90"))
 
+#*********************************************************
+#*********************************************************
+#*********************************************************
+#            TESTING     INLINE 
+#*********************************************************
+#*********************************************************
+#*********************************************************
 
+#def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+#    print("inlined=",inlined)
+#    pathr=pathpack+pathview+pathfile
+#    pathw=pathpack+pathacc+pathfile
+#    
+#    pathw=pathw.replace(".F90", "")+"_openacc"
+#    
+#    match=inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+#
 #*********************************************************
 #*********************************************************
 #*********************************************************
@@ -523,3 +638,5 @@ def openacc_trans(pathr, pathw, horizontal_opt, to_inline):
 #*********************************************************
 
 openacc_trans()
+#openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+
