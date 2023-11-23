@@ -6,18 +6,21 @@ from loki import (
     Intrinsic, Variable, SymbolAttributes,
     DerivedType, VariableDeclaration, flatten,
     BasicType, FindInlineCalls, SubstituteExpressions,
-    Nullify
+    Nullify, analyse_dataflow
 )
 
 from loki.transform import resolve_associates
 
 import os
 import sys
+import copy
 
 from termcolor import colored
 import logical
 import ResolveVector
 import ExplicitArraySyntaxes
+import transform_inline_daan as inline_daan #daan inlining
+import transform_inline_rolf as inline_rolf #rolf inlining
 
 import re
 
@@ -268,20 +271,26 @@ def get_horizontal_idx(routine, lst_horizontal_idx):
         routine.variables+=(jlon,)
 
     loop_map={}
-    for loop in FindNodes(ir.Loop).visit(routine.body):
-        if loop.variable in lst_horizontal_idx:
-            #new_loop=loop.clone(variable=routine.variable_map["JLON"])
-            if verbose: print("loop_idx=",loop_index)
-            new_loop=loop.clone(variable=routine.variable_map[loop_index.name])
-            var_map={}
-            for var in FindVariables().visit(loop.body):
-                if (var==loop.variable):
-                    var_map[var]=routine.variable_map[loop_index.name]
-            loop_map[loop]=SubstituteExpressions(var_map).visit(loop.body)
-            #loop.body=SubstituteExpressions(var_map).visit(loop.body)
-    #        loop.variable=routine.variable_map[loop_index.name]
-
-    routine.body=Transformer(loop_map).visit(routine.body)
+#    for loop in FindNodes(ir.Loop).visit(routine.body):
+#        if loop.variable in lst_horizontal_idx:
+#            #new_loop=loop.clone(variable=routine.variable_map["JLON"])
+#            if verbose: print("loop_idx=",loop_index)
+#            new_loop=loop.clone(variable=routine.variable_map[loop_index.name])
+#            var_map={}
+#            for var in FindVariables().visit(loop.body):
+#                if (var==loop.variable):
+#                    var_map[var]=routine.variable_map[loop_index.name]
+#            loop_map[loop]=SubstituteExpressions(var_map).visit(loop.body)
+#            #loop.body=SubstituteExpressions(var_map).visit(loop.body)
+#    #        loop.variable=routine.variable_map[loop_index.name]
+#    
+#    routine.body=Transformer(loop_map).visit(routine.body)
+ 
+    rename_map={}
+    for var in FindVariables().visit(routine.body):
+        if var.name in lst_horizontal_idx:
+            rename_map[var]=loop_index
+    routine.body=SubstituteExpressions(rename_map).visit(routine.body)
 
     return(loop_index)
 
@@ -436,7 +445,8 @@ def assoc_alloc_pt(routine, tmp_pt_klon):
 
 #def inline_calls(inlined):
 def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
-    verbose=True
+    verbose=False
+    #verbose=True
     pathr=pathpack+'/'+pathview+pathfile
     match_inline=False
 #    for routine_name in 
@@ -460,12 +470,51 @@ def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
                         dict_callee_path[callee_name]=callee_path
         if verbose: print("dict_callee_path=",dict_callee_path)
 
+#        with open(pathr, 'r') as file_caller:
+#            caller = file_caller.read()
+#            caller_lines=file_caller.readlines()
+#
+#	#new_caller=caller
+#        caller_name=os.path.basename(pathr)
+#        inlined_loc=copy.deepcopy(inlined) 
+#        if caller_name in inlined: #if the caller is the callee, no inlining must be done
+#            inlined_loc.remove(caller_name)
+#            print("caller_name=", caller_name)
+#            print("inlined_loc=",inlined_loc)
+#                
+#        for callee_name in inlined_loc: #look for each callee sub  in the caller
+##            if caller.find(callee_name.replace(".F90","").upper())!=-1:
+#            match=False
+#            for line in caller_lines:
+#                if re.search(line, "CALL "+callee_name.replace(".F90","").upper()+"(")!=None:
+#                    print("line=",line)
+#                    print("callee=",callee)
+#                    match=True
+#            if match:
+#                with open(dict_callee_path[callee_name], 'r') as file_callee:
+#                    callee = file_callee.read()
+#                if not match_inline: #add CONTAINS only for the first callee matching
+#                    match_inline=True
+#                    callee="CONTAINS\n\n"+callee
+#                    loc=caller.find("END SUBROUTINE")
+#                    if loc != -1 :
+#                        caller=caller[:loc]+callee+caller[loc:]
+#                else: #add the callee after the CONTAINS statement
+#                    loc=caller.find("CONTAINS")
+#                    if loc != -1 :
+#                         loc=loc+len("CONTAINS\n\n") #insert after CONTAINS
+#                         caller=caller[:loc]+callee+caller[loc:]
         with open(pathr, 'r') as file_caller:
             caller = file_caller.read()
 
 	#new_caller=caller
+#        caller_name=os.path.basename(pathr)
+#        inlined_loc=copy.deepcopy(inlined) 
+#        if caller_name in inlined: #if the caller is the callee, no inlining must be done
+#            inlined_loc.remove(caller_name)
+                
         for callee_name in inlined: #look for each callee sub  in the caller
-            if caller.find(callee_name.replace(".F90","").upper())!=-1:
+            if caller.find("CALL "+callee_name.replace(".F90","").upper()+"(")!=-1:
                 with open(dict_callee_path[callee_name], 'r') as file_callee:
                     callee = file_callee.read()
                 if not match_inline: #add CONTAINS only for the first callee matching
@@ -479,6 +528,7 @@ def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
                     if loc != -1 :
                          loc=loc+len("CONTAINS\n\n") #insert after CONTAINS
                          caller=caller[:loc]+callee+caller[loc:]
+
         if verbose: print(pathpack+"/tmp/"+os.path.basename(pathfile))
         if match_inline:
             with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w") as file_caller:
@@ -502,6 +552,16 @@ def rename_hor(routine, lst_horizontal_idx):
                 rename_map[var]=var.clone(name=idx)
     routine.body=SubstituteExpressions(rename_map).visit(routine.body)
                     
+def mv_include(routine):
+    imp_lst=[imp.module for imp in FindNodes(ir.Import).visit(routine.spec)]
+    for containedSubroutine in routine.subroutines:
+        for imp in FindNodes(ir.Import).visit(containedSubroutine.spec):
+            if not imp.module in imp_lst:
+                imp_lst.append(imp.module)
+                routine.spec.insert(0,imp)
+    
+
+
      
 #*********************************************************
 #*********************************************************
@@ -535,9 +595,6 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
 
     pathw=pathw.replace(".F90", "")+"_openacc"
     
-    print(pathr)
-    print(pathw)
-
     import logical_lst
     
     horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
@@ -557,6 +614,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     false_symbols.append('LHOOK')
     
     #inlining : 
+    inlined=list(inlined)
     inline_match=inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
     if inline_match:
         filename=os.path.basename(pathfile)
@@ -567,10 +625,25 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
 
     from loki.transform import inline_member_procedures
     
+    #inline_method='daan'
+    inline_method='ec'
+    #inline_method='rolf'
     if inline_match:
-        routine.enrich_calls(routine.members)
-        inline_member_procedures(routine)
-        rename_hor(routine, lst_horizontal_idx)
+        if inline_method=='ec':
+            mv_include(routine) #ec trans pb with include
+            routine.enrich_calls(routine.members)
+            inline_member_procedures(routine)
+            rename_hor(routine, lst_horizontal_idx)
+        elif inline_method=='daan':
+#            routine_orig=source.subroutines[0]
+#            routine=routine_orig.clone()
+            analyse_dataflow.attach_dataflow_analysis(routine)
+            routine_inlined=inline_daan.inline_contained_subroutines(routine)
+            routine=routine_inlined
+        elif inline_method=='rolf':
+            routine.enrich_calls(routine.members)
+            inline_rolf.inline_member_procedures(routine)
+            rename_hor(routine, lst_horizontal_idx)
 
     #transformations:
     horizontal_size=get_horizontal_size(routine, horizontal, lst_horizontal_size)
@@ -639,5 +712,5 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
 #*********************************************************
 
 openacc_trans()
-#openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+####openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
 

@@ -103,7 +103,7 @@ do
 #  g=$(resolve $f)
 #  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
   g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+#  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
 #  openacc.pl $* \
 #   --dir src/local/ifsaux/openacc/$dir \
 #   --nocompute ABOR1 --version \
@@ -116,6 +116,7 @@ rm -Rf tmp
 mkdir tmp
 #exit 1
 for f in \
+   arpifs/phys_ec/cuascn.F90                       \
    arpifs/phys_dmn/cucalln_mf.F90                  \
    arpifs/phys_ec/cuadjtq.F90                      \
    arpifs/phys_ec/cuascn.F90                       \
@@ -146,7 +147,7 @@ do
   #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuccdia.F90
   python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
   #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
-  #exit 1
+  exit 1
 #  openacc.pl $* \
 #   --inlined cuadjtq.F90,cubasmcn.F90,cuentr.F90,cuadjtqs.F90 \
 #   --dir src/local/ifsaux/openacc/$dir \

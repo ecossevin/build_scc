@@ -59,7 +59,8 @@ do
  mkdir -p src/local/ifsaux/openacc/$dir
  g=$(resolve $f)
  #python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f 
- python3 ~/build_scc/main.py --path $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+ #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+ python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc
  #exit 1
 
  #openacc.pl --cycle 49 --pointers --nocompute ABOR1 --version --cpg_dyn --dir src/local/ifsaux/openacc/$dir $(resolve $f)
@@ -76,7 +77,8 @@ do
  mkdir -p src/local/ifsaux/openacc/$dir
  g=$(resolve $f)
  #python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f 
- python3 ~/build_scc/main.py --path $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+ #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+ python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc 
  #openacc.pl --cycle 49 --pointers --nocompute ABOR1 --version --dir src/local/ifsaux/openacc/$dir $(resolve $f)
 
 done
