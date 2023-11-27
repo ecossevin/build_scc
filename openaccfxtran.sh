@@ -1,25 +1,6 @@
 #!/bin/bash
 
-source ~/venv/bin/activate
-which python3
-
-#export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
-export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH
-p=$(pwd)
-echo $p
-#function resolve ()
-#{
-#  f=$1
-#  for view in $(cat .gmkview)
-#  do
-#    g="src/$view/$f"
-#    if [ -f $g ]
-#    then
-#      echo $g
-#      break
-#    fi
-#  done
-#}
+export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
 
 function resolve ()
 {
@@ -29,8 +10,7 @@ function resolve ()
     g="src/$view/$f"
     if [ -f $g ]
     then
-#      echo $g
-      echo "src/$view/"
+      echo $g
       break
     fi
   done
@@ -96,25 +76,18 @@ for f in \
    arpifs/adiab/cptend_new.F90                     \
    arpifs/adiab/cpmvvps.F90                        
 do 
+
   echo "==> $f <=="
   dir=$(dirname $f)
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer 
-#  g=$(resolve $f)
-#  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
-  g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
-#  openacc.pl $* \
-#   --dir src/local/ifsaux/openacc/$dir \
-#   --nocompute ABOR1 --version \
-#   $(resolve $f)
-  #exit 1
+  openacc.pl $* \
+   --dir src/local/ifsaux/openacc/$dir \
+   --nocompute ABOR1 --version \
+   $(resolve $f)
 done
 
 
-rm -Rf tmp
-mkdir tmp
-#exit 1
 for f in \
    arpifs/phys_dmn/cucalln_mf.F90                  \
    arpifs/phys_ec/cuadjtq.F90                      \
@@ -140,18 +113,11 @@ do
   dir=$(dirname $f)
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer \
-  g=$(resolve $f)
-#  python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f --horizontal_opt "JL"
-# arpifs/phys_ec/cuccdia.F90
-  #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuccdia.F90
-  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
-  #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
-  #exit 1
-#  openacc.pl $* \
-#   --inlined cuadjtq.F90,cubasmcn.F90,cuentr.F90,cuadjtqs.F90 \
-#   --dir src/local/ifsaux/openacc/$dir \
-#   --nocompute ABOR1 --version \
-#   --jljk2jlonjlev --cycle 49 \
-#   $(resolve $f)
+  openacc.pl $* \
+   --inlined cuadjtq.F90,cubasmcn.F90,cuentr.F90,cuadjtqs.F90 \
+   --dir src/local/ifsaux/openacc/$dir \
+   --nocompute ABOR1 --version \
+   --jljk2jlonjlev --cycle 49 \
+   $(resolve $f)
 done
 

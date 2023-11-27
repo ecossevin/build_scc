@@ -44,39 +44,13 @@ def save_subroutine(path, file):
 #*********************************************************
 
 
-#def add_openacc1(routine):
-#    call_lst=[]
-#    call_map={}
-#    suffix='_OPENACC'
-#    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
-#    stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
-#
-#    for call in FindNodes(CallStatement).visit(routine.body):
-#        if call.name == "ABOR1":
-#    #        call_lst.append(call.name.name) don't add in call_lst, no #include abor1_acc
-#            new_call=call.clone(name=call.name, arguments=call.arguments)
-#            new_call._update(name=call.name.clone(name=call.name+"_ACC"))
-#            call_map.update({call : new_call})
-#        elif call.name != "DR_HOOK":
-#            call_lst.append(call.name.name)
-#            new_call=call.clone(name=call.name, arguments=call.arguments)
-#            new_call._update(name=call.name.clone(name=f'{call.name}{suffix}'))
-#            new_call._update(kwarguments=new_call.kwarguments + ((stack_argument.name, stack_local),))
-#            call_map.update({call : new_call})
-#
-#    routine_importSPEC=FindNodes(ir.Import).visit(routine.spec)
-#    imp_map={}
-#    for imp in routine_importSPEC:
-#        name=imp.module.replace(".intfb.h","").upper()
-#        if imp.c_import==True and any(call==name for call in call_lst):
-#            new_name=imp.module.replace("intfb.f","")+"_openacc"+".intfb.h"
-#            new_imp=imp.clone(module=new_name)
-#            imp_map.update({imp : new_imp})
-#    routine.body=Transformer(call_map).visit(routine.body)
-#    routine.spec=Transformer(imp_map).visit(routine.spec)
 
 
-def add_openacc2(routine):
+def add_openacc(routine):
+    """
+    Replace CALL CALLEE by CALL CALLEE_OPENACC, and CALL ABOR1 with CALL ABOR1_ACC
+    :param routine:.
+    """
     call_lst=[]
     suffix='_OPENACC'
     stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
@@ -84,28 +58,31 @@ def add_openacc2(routine):
     for call in FindNodes(CallStatement).visit(routine.body):
         if call.name == "ABOR1" or call.name == "ABOR1_ACC":
             
-        #call_lst.append(call.name.name)
+            #add _ACC to CALL ABOR1 when not already added
             if call.name != "ABOR1_ACC":
                 call.name.name=call.name.name+"_ACC"
 #            call._update(kwarguments=call.kwarguments + ((stack_argument.name, stack_local),))
 
+	#when the callee isn't ABOR1 or DR_HOOK : save call name, add _OPENACC to the call, and the stack to the args
         elif call.name != "DR_HOOK":
-            call_lst.append(call.name.name)
+            call_lst.append(call.name.name) #save the call name in order to know which include to update with _openacc
             call.name.name=call.name.name+suffix
             call._update(kwarguments=call.kwarguments + ((stack_argument.name, stack_local),))
 
+    #adding _openacc to the includes according to the lst created just above
     routine_importSPEC=FindNodes(ir.Import).visit(routine.spec)
     for imp in routine_importSPEC:
         name=imp.module.replace(".intfb.h","").upper()
         if imp.c_import==True and any(call==name for call in call_lst):
- #       # if any(call==name for call in call_lst):
- #            print("imp.module=",imp.module)
- #            print("imp.module.type=",type(imp.module))
-
             new_name=imp.module.replace(".intfb.h","")+"_openacc"+".intfb.h"
-            imp._update(module=f'{new_name}')
+            imp._update(module=f'{new_name}') #can also use map 
 
-def remove_loop(routine, lst_horizontal_idx):
+def remove_horizontal_loop(routine, lst_horizontal_idx):
+    """
+    Remove all the loops having their index in lst_horizontal_idx 
+    :param routine:.
+    :param lst_horizontal_idx: a list of given possible horizontal idx
+    """
     loop_map={}
     for loop in FindNodes(ir.Loop).visit(routine.body):
         if loop.variable in lst_horizontal_idx:
@@ -113,20 +90,37 @@ def remove_loop(routine, lst_horizontal_idx):
     routine.body=Transformer(loop_map).visit(routine.body)
 
 def rename(routine):
+    """
+    Add _OPENACC to the name of the caller
+    :param routine:.
+    """
     routine.name=routine.name+'_OPENACC'
 
 def acc_seq(routine):
+    """
+    Add acc seq to the routine
+    :param routine:.
+    """
     routine.spec.insert(0,ir.Pragma(keyword='acc', content='routine ('+routine.name+') seq'))
     routine.spec.insert(1,ir.Comment(text=''))
 
 def jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx):
-    
+    """
+    Add JLON=KIDIA to the routine
+    :param routine:.
+    :param end_idx: upper bond of the horizontal loop
+    :param begin_idx: lower bond of the horizontal loop
+    :param new_range: ???
+    :param horizontal_idx: horizontal loop variable
+    """
     routine.spec.append(Assignment(horizontal_idx, begin_index))
-#    kidia=Scalar(begin_index)
-#    routine.spec.append(Assignment(jlon, kidia))
 
 def stack_mod(routine):
-    idx=-1
+    """
+    Add before first variable declaration statement : USE STACK_MOD and #include stack.h
+    :param routine:.
+    """
+    idx=-1 #look for idx(-1) of first variable declaration 
     for spec in routine.spec.body:
 #        if type(spec)==ir.Intrinsic and spec.text=='IMPLICIT NONE':
 #            break
@@ -137,12 +131,14 @@ def stack_mod(routine):
     routine.spec.insert(idx, ir.Import(module='stack.h', c_import=True))
     routine.spec.insert(idx+1, ir.Comment(text=''))
 
-def rm_KLON(routine, horizontal, horizontal_size):
-#    if horizontal_size!=horizontal.size:
-#        print(colored("PB with HOR_DIM","red"))
-#        print("horizontal=",horizontal.size)
-#        print("horizontal_size=",horizontal_size)
-#
+def demote_horizontal(routine, horizontal_size):
+    """
+    Remove horizontal dimension from local (or not only loc according to demote_arg value) arrays that have the horizontal dim as only dimension and that aren't passed to other routines
+    1) search variable
+    2) call demote_variables
+    :param routine:.
+    :param horizontal_size: size of the horizontal dimension (NPROMA)
+    """
     demote_arg=False #rm KLON in function arg if True
     routine_arg=[var.name for var in routine.arguments]
     to_demote=FindVariables(unique=True).visit(routine.spec)
@@ -163,6 +159,10 @@ def rm_KLON(routine, horizontal, horizontal_size):
         demote_variables(routine, var_names, dimensions=horizontal_size)
 
 def alloc_temp(routine):
+    """
+    Replace local array declaration by alloc + temp macro : (the temporaries will be created in a piece of memory allocated outside of the kernel)
+    :param routine:.
+    """
     routine_arg=[var.name for var in routine.arguments]
     
 
@@ -170,9 +170,9 @@ def alloc_temp(routine):
     for decls in FindNodes(VariableDeclaration).visit(routine.spec):
         intrinsic_lst=[] #intrinsic lst for temp macro var decl
         var_lst=[] #var to keep in the decl.
-        for s in decls.symbols:
+        for s in decls.symbols: #a decl can have >1 var
             if isinstance(s, symbols.Array):
-                if not s.type.pointer:
+                if not s.type.pointer: #if pt, 
                     if s.name not in routine_arg:
                         if s.type.kind:
                             new_s='temp ('+s.type.dtype.name+' (KIND='+s.type.kind.name+'), '+s.name+', ('
@@ -208,9 +208,16 @@ def alloc_temp(routine):
     routine.spec=Transformer(temp_map).visit(routine.spec)
     
 
-def get_horizontal_size(routine, horizontal, lst_horizontal_size):
+def get_horizontal_size(routine, lst_horizontal_size):
+    """
+    Look which alias of NPROMA is currently being used in the routine.
+    :param routine:. 
+    :param lst_horizontal_size: list of aliases of NPROMA, you may add new ones
+    """
+    #TODO: fix
     verbose=False
     #verbose=True
+    #Looks for hor size in the routine variables, or if in derived type
     for name in lst_horizontal_size:
         if name in routine.variable_map:
             if verbose: print("horizontal size = ",name)
@@ -218,13 +225,14 @@ def get_horizontal_size(routine, horizontal, lst_horizontal_size):
     for var in FindVariables().visit(routine.body):
         for vvar in var.name.split("%"):
             if vvar in lst_horizontal_size:
+                if verbose: print(colored("Horizontal size in a derived type", "red"))
                 if verbose: print("horizontal size = ",name)
                 return(var.name)
     if verbose: print(colored("Horizontal size not found in routine args!", "red"))
 #    if verbose: print("horizontal size = ", horizontal.size)
     
     
-    #TODO : ajouter identification lorsque la dimension horizontale est dans un type dérivé. 
+    #Looks for hor size if used in an array without being declared (--> TODO : fix/check this)
     hor_lst=[]
     var_lst=FindVariables(unique=True).visit(routine.spec)
     var_lst=[var for var in var_lst if isinstance(var, symbols.Array)]
@@ -241,6 +249,10 @@ def get_horizontal_size(routine, horizontal, lst_horizontal_size):
 
 
 def ystack1(routine):
+    """
+    Add STACK in the routine args.
+    :param routine:.
+    """
 #    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK")),scope=routine)
     stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
     stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
@@ -248,6 +260,10 @@ def ystack1(routine):
     routine.arguments+=(stack_argument,)
 
 def ystack2(routine):
+    """
+    Add STACK in the routine args.
+    :param routine:.
+    """
 #    stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK")),scope=routine)
     stack_argument=Variable(name="YDSTACK", type=SymbolAttributes(DerivedType(name="STACK"), intent='in'))
     stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
@@ -257,6 +273,12 @@ def ystack2(routine):
 
 
 def get_horizontal_idx(routine, lst_horizontal_idx):
+    """
+    Add and replace horizontal loop index by JLON if not already present.
+    :param routine:.
+    :param lst_horizontal_idx: a list of given possible horizontal idx 
+    """
+
     is_present=False
     verbose=False
     var_lst=FindVariables(unique=True).visit(routine.spec)
@@ -286,6 +308,9 @@ def get_horizontal_idx(routine, lst_horizontal_idx):
 #    
 #    routine.body=Transformer(loop_map).visit(routine.body)
  
+    #TODO : Change this part; if horizontal loop idx # in lst_horizontal_idx...
+    #1) check bounds of the loop to try to get hor loop
+    #2) change index everywhere cf "rename_hor" function.
     rename_map={}
     for var in FindVariables().visit(routine.body):
         if var.name in lst_horizontal_idx:
@@ -296,6 +321,11 @@ def get_horizontal_idx(routine, lst_horizontal_idx):
 
 
 def rm_sum(routine):
+    """
+    Remove calls to SUM fortran function.
+    :param routine:.
+    """
+    #TODO : Check if one wants to remove it everywhere? 
     call_map={}
     for assign in FindNodes(Assignment).visit(routine.body):
         for call in FindInlineCalls().visit(assign):
@@ -305,9 +335,15 @@ def rm_sum(routine):
         routine.body=SubstituteExpressions(call_map).visit(routine.body)
 
 def generate_interface(routine, pathw):
+    """
+    Generate the interface of the new routine.
+    :param routine:. 
+    :param pathw: absolute path (path + filename) where the routine_openacc is saved.
+    """
     removal_map={}
     imports = FindNodes(ir.Import).visit(routine.spec)
     routine_new=routine.clone()
+    #import must be removed 
     for im in imports:
         if im.c_import==True:
             removal_map[im]=None
@@ -315,6 +351,10 @@ def generate_interface(routine, pathw):
     Sourcefile.to_file(fgen(routine_new.interface), Path(pathw+".intfb.h"))
 
 def write_print(routine):
+    """
+    Change WRITE statements into PRINT statements.
+    :param routine:. 
+    """
     verbose=False
     intr_map={}
     for intr in FindNodes(Intrinsic).visit(routine.body):
@@ -335,13 +375,18 @@ def write_print(routine):
 #---------------------------------------------------------
 
 def find_pt(routine):
+    """
+    Return lst of pointers and targets
+    :param routine:.
+    """
+    #TODO : mv if target.dimensions[0]=='KPROMA' here...
     tmp_pt=[]
     tmp_target=[]
     #for var in FindVariables().visit(routine.variables):
     routine_args=[var.name for var in routine.arguments]
     for decls in FindNodes(VariableDeclaration).visit(routine.spec):
         for s in decls.symbols:
-            if s.name not in routine_args:
+            if s.name not in routine_args: #we are looking only for loc pointers
                 if s.type.pointer:
                     tmp_pt.append(s)
             if s.type.target:
@@ -350,8 +395,17 @@ def find_pt(routine):
              
              
 def get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size):
+    """
+    Replace A=B by assoc(A,B). Where A : pointer and B : target.
+    The first dimension of B must be the horizontal dim, and the size must be NPROMA. If there isn't any size, the size is assume to be # from NPROMA. 
+    :param routine:. 
+    :param tmp_pt: lst of temporary pointers declared in the subroutine
+    :param tmp_pt: lst of temporary targets declared in the subroutine
+    :param horizontal_size: size of the horizontal dimension (NPROMA)
+    """
+    #TODO : replace KPROMA by horizontal_size...
     assign_map={}
-    tmp_pt_klon={}
+    tmp_pt_klon={} #dict associating pt and target 
     for assign in FindNodes(Assignment).visit(routine.body):
         assigned=False
         is_target=False
@@ -370,6 +424,7 @@ def get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size):
                    is_target=True
                    break
             if is_pt and is_target:
+#TODO: mv target.dimensions[0]=='KPROMA' in find_pt
                 if target.dimensions[0]=='KPROMA': #replace KPROMA by hor_dim... here we assume that if they are no dim, then the dim isn't NPROMA.... 
                     tmp_pt_klon[lhs[0].name]=rhs[0]
                     new_assign='assoc ('+lhs[0].name+','+rhs[0].name+')'
@@ -378,10 +433,14 @@ def get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size):
         if not assigned:
             assign_map[assign]=assign
     routine.body=Transformer(assign_map).visit(routine.body) 
-    #TODO ::: MAPING MODIFIER LES A => B en assoc(A,B)
     return(tmp_pt_klon)
 
 def nullify(routine, tmp_pt_klon):
+    """
+    Changes NULLIFY into nullptr macro 
+    :param routine:.
+    :param tmp_pt_klon: dict associating pt and target (only targets with horizontal dim of KPROMA)
+    """
 #    null=FindNodes(Nullify).visit(routine.body)
     null_map={}
     for null in FindNodes(Nullify).visit(routine.body):
@@ -397,6 +456,12 @@ def nullify(routine, tmp_pt_klon):
 
 
 def assoc_alloc_pt(routine, tmp_pt_klon):
+    """
+    Changes targets decl in tmp_pt_klon using the temp macro.
+    :param routine:.
+    :param tmp_pt_klon: dict associating pt and target (only targets with horizontal dim of KPROMA)
+    """
+    #TODO: create a func to replace allo by temp macro
     temp_map={}
     for decls in FindNodes(VariableDeclaration).visit(routine.spec):
         intrinsic_lst=[]
@@ -421,19 +486,6 @@ def assoc_alloc_pt(routine, tmp_pt_klon):
                 intrinsic_lst.append(VAR)
         temp_map[decls]=tuple(intrinsic_lst)
     routine.spec=Transformer(temp_map).visit(routine.spec)
-#def add_contains():
-#    with open('callee.F90', 'r') as file_callee:
-#        callee = file_callee.read()
-#    with open('caller.F90', 'r') as file_caller:
-#        caller = file_caller.read()
-#
-#    string="END SUBROUTINE"
-#    loc=caller.find(string)
-#    callee="CONTAINS\n\n"+callee
-#    if loc != -1:
-#        new_caller=caller[:loc]+callee+caller[loc:]
-#    with open('caller.F90', 'w') as file_caller:
-#        file_caller.write(new_caller)
 
 #*********************************************************
 #*********************************************************
@@ -443,22 +495,27 @@ def assoc_alloc_pt(routine, tmp_pt_klon):
 #*********************************************************
 #*********************************************************
 
-#def inline_calls(inlined):
-def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+#def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+    """
+    Add routine to inline as contained subroutine (loki's inliner can only inline contained subroutines)
+    :param pathpack: absolute path to the pack
+    :param pathview: path to the src/local/... or src/main/... folder
+    :param pathfile: path (+name) to the file
+    :param pathacc: path (+name) to the acc file 
+    :param horizontal_opt: additional horizontal loop index
+    :param inlined: lst of routines to inline
+    """
     verbose=False
     #verbose=True
     pathr=pathpack+'/'+pathview+pathfile
     match_inline=False
-#    for routine_name in 
-#    if routine_name=
-#    for call in FindNodes(CallStatement).visit(routine.body):
-#        if call.name in inlined:
-#            add_contains
     dict_callee_path={}
     if inlined != None:    
            
-   
-        with open('/home/gmap/mrpm/cossevine/build_scc/openacc49.sh', 'r') as file_lst_callee:
+  #creation of a dict associating the name of each callee to inline to it's path; according to the path in the openacc.sh file 
+  #TODO : create a file containing these path? 
+        with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r') as file_lst_callee:
             lines=file_lst_callee.readlines()
             for callee_name in inlined:
                 callee_path=None
@@ -470,48 +527,9 @@ def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
                         dict_callee_path[callee_name]=callee_path
         if verbose: print("dict_callee_path=",dict_callee_path)
 
-#        with open(pathr, 'r') as file_caller:
-#            caller = file_caller.read()
-#            caller_lines=file_caller.readlines()
-#
-#	#new_caller=caller
-#        caller_name=os.path.basename(pathr)
-#        inlined_loc=copy.deepcopy(inlined) 
-#        if caller_name in inlined: #if the caller is the callee, no inlining must be done
-#            inlined_loc.remove(caller_name)
-#            print("caller_name=", caller_name)
-#            print("inlined_loc=",inlined_loc)
-#                
-#        for callee_name in inlined_loc: #look for each callee sub  in the caller
-##            if caller.find(callee_name.replace(".F90","").upper())!=-1:
-#            match=False
-#            for line in caller_lines:
-#                if re.search(line, "CALL "+callee_name.replace(".F90","").upper()+"(")!=None:
-#                    print("line=",line)
-#                    print("callee=",callee)
-#                    match=True
-#            if match:
-#                with open(dict_callee_path[callee_name], 'r') as file_callee:
-#                    callee = file_callee.read()
-#                if not match_inline: #add CONTAINS only for the first callee matching
-#                    match_inline=True
-#                    callee="CONTAINS\n\n"+callee
-#                    loc=caller.find("END SUBROUTINE")
-#                    if loc != -1 :
-#                        caller=caller[:loc]+callee+caller[loc:]
-#                else: #add the callee after the CONTAINS statement
-#                    loc=caller.find("CONTAINS")
-#                    if loc != -1 :
-#                         loc=loc+len("CONTAINS\n\n") #insert after CONTAINS
-#                         caller=caller[:loc]+callee+caller[loc:]
+   #open the current routine "caller", inserts each callee when a CALL CALLEE appears in the caller. 
         with open(pathr, 'r') as file_caller:
             caller = file_caller.read()
-
-	#new_caller=caller
-#        caller_name=os.path.basename(pathr)
-#        inlined_loc=copy.deepcopy(inlined) 
-#        if caller_name in inlined: #if the caller is the callee, no inlining must be done
-#            inlined_loc.remove(caller_name)
                 
         for callee_name in inlined: #look for each callee sub  in the caller
             if caller.find("CALL "+callee_name.replace(".F90","").upper()+"(")!=-1:
@@ -541,10 +559,11 @@ def inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
 
 #diff way to do : uniformize loop or re.search(_LOOPIDX) 
 def rename_hor(routine, lst_horizontal_idx): 
-#    lst_horizontal_idx_new
-#    for idx in lst_horizontal_idx:
-#    
-#        lst_horizontal_idx_new=lst_horizontal_idx_new+
+    """
+    When the inlining is done the loop index may be CALLEE_LOOPIDX, this routine changes it to LOOPIDX
+    :param routine:.
+    :param lst_horizontal_idx: list of aliases of NPROMA, you may add new ones
+    """
     rename_map={}
     for var in FindVariables().visit(routine.body):
         for idx in lst_horizontal_idx:
@@ -553,6 +572,10 @@ def rename_hor(routine, lst_horizontal_idx):
     routine.body=SubstituteExpressions(rename_map).visit(routine.body)
                     
 def mv_include(routine):
+    """
+    Ecmwf inlining function doesn't seem to move the include from the CALLEE to the CALLER : it's done in this function.
+    :param routine:.
+    """
     imp_lst=[imp.module for imp in FindNodes(ir.Import).visit(routine.spec)]
     for containedSubroutine in routine.subroutines:
         for imp in FindNodes(ir.Import).visit(containedSubroutine.spec):
@@ -576,18 +599,21 @@ import click
 @click.command()
 #@click.option('--pathr', help='path of the file to open')
 #@click.option('--pathw', help='path of the file to write to')
-@click.option('--pathpack', help='path to the pack')
-@click.option('--pathview', help='path to src/local or whatever..')
-@click.option('--pathfile', help='path to the file')
-@click.option('--pathacc', help='path to the place acc files are stored')
+@click.option('--pathpack', help='absolute path to the pack')
+@click.option('--pathview', help='path to src/local/... or src/main/...')
+@click.option('--pathfile', help='path to the file, with the file name in the path')
+@click.option('--pathacc', help='path to the place where acc files are stored')
 
-@click.option('--horizontal_opt', default=None, help='some hor opt... for now an additionnal possible horizontal idx')
+@click.option('--horizontal_opt', default=None, help='additionnal possible horizontal idx')
 @click.option('--inlined', '-in', default=None, multiple=True, help='names of the routine to inline')
 
 def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
 
     #setup
+    """
+    SCC transformation
 
+    """
     verbose=True
     #verbose=False
     pathr=pathpack+'/'+pathview+pathfile
@@ -615,7 +641,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     
     #inlining : 
     inlined=list(inlined)
-    inline_match=inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+    inline_match=add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
     if inline_match:
         filename=os.path.basename(pathfile)
         source=Sourcefile.from_file(pathpack+"/tmp/"+filename)
@@ -641,6 +667,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
             routine_inlined=inline_daan.inline_contained_subroutines(routine)
             routine=routine_inlined
         elif inline_method=='rolf':
+            mv_include(routine) #ec trans pb with include
             routine.enrich_calls(routine.members)
             inline_rolf.inline_member_procedures(routine)
             rename_hor(routine, lst_horizontal_idx)
@@ -653,12 +680,12 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
     horizontal_idx=get_horizontal_idx(routine, lst_horizontal_idx)
     bounds=[begin_index, end_index]
-    add_openacc2(routine)
+    add_openacc(routine)
     
     rename(routine)
     acc_seq(routine)
     stack_mod(routine)
-    rm_KLON(routine, horizontal, horizontal_size)
+    demote_horizontal(routine, horizontal_size)
     ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
     
     remove_loop(routine, lst_horizontal_idx)
@@ -686,23 +713,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
 #    Sourcefile.to_file(fgen(routine), Path(pathW.replace(".F90", "")+"_openacc"+".F90"))
 
-#*********************************************************
-#*********************************************************
-#*********************************************************
-#            TESTING     INLINE 
-#*********************************************************
-#*********************************************************
-#*********************************************************
 
-#def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
-#    print("inlined=",inlined)
-#    pathr=pathpack+pathview+pathfile
-#    pathw=pathpack+pathacc+pathfile
-#    
-#    pathw=pathw.replace(".F90", "")+"_openacc"
-#    
-#    match=inline_calls(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
-#
 #*********************************************************
 #*********************************************************
 #*********************************************************
