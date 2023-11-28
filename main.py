@@ -534,7 +534,7 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
             caller = file_caller.read()
                 
         for callee_name in inlined: #look for each callee sub  in the caller
-            if caller.find("CALL "+callee_name.replace(".F90","").upper()+"(")!=-1:
+            if caller.find("CALL "+callee_name.replace(".F90","").upper())!=-1:
                 #with open(dict_callee_path[callee_name], 'r') as file_callee:
                 with open(dict_callee_path[callee_name], 'r', encoding='utf-8', errors='ignore') as file_callee:
                     callee = file_callee.read()
@@ -553,7 +553,7 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
         if verbose: print(pathpack+"/tmp/"+os.path.basename(pathfile))
         if match_inline:
             with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w", encoding='utf-8', errors='ignore') as file_caller:
-            #with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w") as file_caller:
+           # with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w") as file_caller:
                 file_caller.write(caller)
     else:
         if verbose: print(colored("no routine to inline", "red"))
@@ -612,12 +612,14 @@ import click
 @click.option('--inlined', '-in', default=None, multiple=True, help='names of the routine to inline')
 
 def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+    """
+    Meteo France SCC transformation
 
+    """
+
+    #----------------------------------------------
     #setup
-    """
-    SCC transformation
-
-    """
+    #----------------------------------------------
     verbose=True
     #verbose=False
     pathr=pathpack+'/'+pathview+pathfile
@@ -625,6 +627,9 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
 
     pathw=pathw.replace(".F90", "")+"_openacc"
     
+    if verbose: print('pathr=', pathr)
+    if verbose: print('pathw=', pathw)
+
     import logical_lst
     
     horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
@@ -643,9 +648,16 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     true_symbols, false_symbols=logical_lst.symbols()
     false_symbols.append('LHOOK')
     
+    #----------------------------------------------
     #inlining : 
+    #----------------------------------------------
     inlined=list(inlined)
-    inline_match=add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+    if inlined:
+        if verbose: print("****************INLINING****************")
+        inline_match=add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+    else:
+        inline_match=False
+
     if inline_match:
         filename=os.path.basename(pathfile)
         source=Sourcefile.from_file(pathpack+"/tmp/"+filename)
@@ -676,7 +688,9 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
             inline_rolf.inline_member_procedures(routine)
             rename_hor(routine, lst_horizontal_idx)
 
+    #----------------------------------------------
     #transformations:
+    #----------------------------------------------
     horizontal_size=get_horizontal_size(routine, lst_horizontal_size)
     resolve_associates(routine)
     logical.transform_subroutine(routine, true_symbols, false_symbols)

@@ -1,25 +1,9 @@
 #!/bin/bash
 
-source ~/venv/bin/activate
-which python3
 
-#export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
 export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH
 p=$(pwd)
 echo $p
-#function resolve ()
-#{
-#  f=$1
-#  for view in $(cat .gmkview)
-#  do
-#    g="src/$view/$f"
-#    if [ -f $g ]
-#    then
-#      echo $g
-#      break
-#    fi
-#  done
-#}
 
 function resolve ()
 {
@@ -98,15 +82,17 @@ for f in \
 do 
   echo "==> $f <=="
   dir=$(dirname $f)
-  mkdir -p src/local/ifsaux/openacc/$dir
   g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+  mkdir -p test/openacc/$dir
+  mkdir -p test/src/$dir
+  cp $g/$f test/src/$f
+  acc=$(basename $f .F90)_openacc.F90
+  accint=$(basename $f .F90)_openacc.intfb.h
+  cp src/local/ifsaux/openacc/$dir/$acc test/openacc/$dir/$acc
+  cp src/local/ifsaux/openacc/$dir/$accint test/openacc/$dir/$accint
 done
 
 
-rm -Rf tmp
-mkdir tmp
-#exit 1
 for f in \
    arpifs/phys_dmn/cucalln_mf.F90                  \
    arpifs/phys_ec/cuadjtq.F90                      \
@@ -130,10 +116,13 @@ for f in \
 do 
   echo "==> $f <=="
   dir=$(dirname $f)
-  mkdir -p src/local/ifsaux/openacc/$dir
-#  --only-if-newer \
   g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
-  #exit 1
+  mkdir -p test/openacc/$dir
+  mkdir -p test/src/$dir
+  cp $g/$f test/src/$f
+  acc=$(basename $f .F90)_openacc.F90
+  accint=$(basename $f .F90)_openacc.intfb.h
+  cp src/local/ifsaux/openacc/$dir/$acc test/openacc/$dir/$acc
+  cp src/local/ifsaux/openacc/$dir/$accint test/openacc/$dir/$accint
 done
 
