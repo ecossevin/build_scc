@@ -515,7 +515,8 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
            
   #creation of a dict associating the name of each callee to inline to it's path; according to the path in the openacc.sh file 
   #TODO : create a file containing these path? 
-        with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r') as file_lst_callee:
+        with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r', encoding='utf-8', errors='ignore') as file_lst_callee:
+        #with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r') as file_lst_callee:
             lines=file_lst_callee.readlines()
             for callee_name in inlined:
                 callee_path=None
@@ -528,12 +529,14 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
         if verbose: print("dict_callee_path=",dict_callee_path)
 
    #open the current routine "caller", inserts each callee when a CALL CALLEE appears in the caller. 
-        with open(pathr, 'r') as file_caller:
+        #with open(pathr, 'r') as file_caller:
+        with open(pathr, 'r', encoding='utf-8', errors='ignore') as file_caller:
             caller = file_caller.read()
                 
         for callee_name in inlined: #look for each callee sub  in the caller
             if caller.find("CALL "+callee_name.replace(".F90","").upper()+"(")!=-1:
-                with open(dict_callee_path[callee_name], 'r') as file_callee:
+                #with open(dict_callee_path[callee_name], 'r') as file_callee:
+                with open(dict_callee_path[callee_name], 'r', encoding='utf-8', errors='ignore') as file_callee:
                     callee = file_callee.read()
                 if not match_inline: #add CONTAINS only for the first callee matching
                     match_inline=True
@@ -549,7 +552,8 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
 
         if verbose: print(pathpack+"/tmp/"+os.path.basename(pathfile))
         if match_inline:
-            with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w") as file_caller:
+            with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w", encoding='utf-8', errors='ignore') as file_caller:
+            #with open(pathpack+"/tmp/"+os.path.basename(pathfile), "w") as file_caller:
                 file_caller.write(caller)
     else:
         if verbose: print(colored("no routine to inline", "red"))
@@ -673,7 +677,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
             rename_hor(routine, lst_horizontal_idx)
 
     #transformations:
-    horizontal_size=get_horizontal_size(routine, horizontal, lst_horizontal_size)
+    horizontal_size=get_horizontal_size(routine, lst_horizontal_size)
     resolve_associates(routine)
     logical.transform_subroutine(routine, true_symbols, false_symbols)
     
@@ -689,7 +693,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     #TODO : change resolve_vector : changes dim for all possible idx and bounds..
     ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
     
-    remove_loop(routine, lst_horizontal_idx)
+    remove_horizontal_loop(routine, lst_horizontal_idx)
     ###
     ystack1(routine)
     rm_sum(routine)
