@@ -17,6 +17,10 @@ from loki.expression.symbols import IntLiteral
 import os
 
 def evaluate(comparison):
+  """
+  Evaluates comparison when the operators are integer values.
+  :param comparison:.
+  """
   operator=comparison.operator
   right=comparison.right
   left=comparison.left
@@ -33,14 +37,6 @@ def evaluate(comparison):
   elif operator=='<=':
     return(left<=right)
         
-#def evaluateCondition( ):
-#    if isinstance(my_condition, Comparison):
-#        return(evaluate(comparison))
-#    elif isinstance(my_condition, LogicalNot):
-#        evaluateCondition(my_condition.children
-#    elif isinstance(my_condition, LogicalOr):
-#        for c in my_condition.children :
-            
     
 def evaluateCondition(my_condition, true_symbols, false_symbols):
 

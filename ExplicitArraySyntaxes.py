@@ -15,7 +15,12 @@ from loki.logging import info
 import sys
 
 def ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds):
-    
+  """
+  Remove array syntax for the horizontal dimension, and returns the upper and lower bounds of the horizontal loops.
+  :param routine:.
+  :param lst_horizontal_size: list of aliases of NPROMA
+  :param lst_horizontal_bounds: list of diff names for the horizontal lower and upper bounds
+  """
   total = 0
   assign_map={}
   
@@ -28,8 +33,10 @@ def ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds):
   define=False
   splitted1 = lst_horizontal_bounds[0][1].split('%')
   splitted2 = lst_horizontal_bounds[1][1].split('%')
+  #research of the horizontal bounds
   for var in FindVariables().visit(routine.variables):
 
+#lower bound:
     if (var.name == splitted1[0]):
       begin_index=Variable(name=f'{var.name}%{splitted1[1]}', parent=var, scope=routine)
       if verbose : print(colored("derived type " + splitted1[0] + " found", "green"))
@@ -43,6 +50,7 @@ def ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds):
       begin_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
+#upper bound :
     if (var.name == splitted2[0]):
       end_index=Variable(name=f'{var.name}%{splitted2[1]}', parent=var, scope=routine)
       if verbose : print(colored("derived type " + splitted2[0] + " found", "green"))
@@ -55,9 +63,10 @@ def ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds):
       end_index = var
       if verbose : print(colored("variable " + var.name + " found", "green"))
 
-  if verbose: print("begin_index=",begin_index)
-  if verbose: print("end_index=",end_index)
+  if verbose: print("begin_index=",begin_index) #lower bound
+  if verbose: print("end_index=",end_index) #upper bound
 
+  #remove array syntax
   for assign in FindNodes(Assignment).visit(routine.body):
     is_pointer=False
     not_found=[]  

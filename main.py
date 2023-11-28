@@ -686,6 +686,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     acc_seq(routine)
     stack_mod(routine)
     demote_horizontal(routine, horizontal_size)
+    #TODO : change resolve_vector : changes dim for all possible idx and bounds..
     ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
     
     remove_loop(routine, lst_horizontal_idx)
