@@ -108,6 +108,7 @@ rm -Rf tmp
 mkdir tmp
 #exit 1
 for f in \
+   arpifs/phys_ec/cuascn.F90                       \
    arpifs/phys_dmn/cucalln_mf.F90                  \
    arpifs/phys_ec/cuadjtq.F90                      \
    arpifs/phys_ec/cuascn.F90                       \
@@ -134,6 +135,6 @@ do
 #  --only-if-newer \
   g=$(resolve $f)
   python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
-  #exit 1
+#  exit 1
 done
 

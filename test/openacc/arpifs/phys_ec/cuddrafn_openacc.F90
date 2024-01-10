@@ -82,9 +82,6 @@ SUBROUTINE CUDDRAFN_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON,
   
 !$acc routine( CUDDRAFN_OPENACC ) seq
   
-#include "cuadjtq.func.h"
-#include "fcttre.func.h"
-#include "abor1.intfb.h"
   USE YOEPHLI, ONLY: TEPHLI
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -159,6 +156,9 @@ SUBROUTINE CUDDRAFN_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON,
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   
 #include "cuadjtq.intfb.h"
+#include "abor1.intfb.h"
+#include "fcttre.func.h"
+#include "cuadjtq.func.h"
   INTEGER(KIND=JPIM) :: CUADJTQ_JL
   REAL(KIND=JPRB) :: Z1S
   REAL(KIND=JPRB) :: Z2S
@@ -260,7 +260,7 @@ SUBROUTINE CUDDRAFN_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON,
     END IF
     
     IK = JK
-    ! [Loki] inlined member subroutine: CUADJTQ
+    ! [Loki] inlined child subroutine: CUADJTQ
     ! =========================================
     
     !----------------------------------------------------------------------
@@ -421,7 +421,7 @@ SUBROUTINE CUDDRAFN_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON,
     
   END DO
   
-  CONTAINS
+  
   
   ! (C) Copyright 1988- ECMWF.
   !

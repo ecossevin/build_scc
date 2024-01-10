@@ -506,8 +506,8 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
     :param horizontal_opt: additional horizontal loop index
     :param inlined: lst of routines to inline
     """
-    verbose=False
-    #verbose=True
+    #verbose=False
+    verbose=True
     pathr=pathpack+'/'+pathview+pathfile
     match_inline=False
     dict_callee_path={}
@@ -535,6 +535,7 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
                 
         for callee_name in inlined: #look for each callee sub  in the caller
             if caller.find("CALL "+callee_name.replace(".F90","").upper())!=-1:
+                if verbose: print("callee_name = ", callee_name)
                 #with open(dict_callee_path[callee_name], 'r') as file_callee:
                 with open(dict_callee_path[callee_name], 'r', encoding='utf-8', errors='ignore') as file_callee:
                     callee = file_callee.read()
@@ -585,7 +586,8 @@ def mv_include(routine):
         for imp in FindNodes(ir.Import).visit(containedSubroutine.spec):
             if not imp.module in imp_lst:
                 imp_lst.append(imp.module)
-                routine.spec.insert(0,imp)
+                routine.spec.append(imp)
+                #routine.spec.insert(0,imp)
     
 
 
@@ -666,6 +668,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     routine=source.subroutines[0]
 
     from loki.transform import inline_member_procedures
+    import transform_inline as tf_in
     
     #inline_method='daan'
     inline_method='ec'
@@ -673,8 +676,8 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     if inline_match:
         if inline_method=='ec':
             mv_include(routine) #ec trans pb with include
-            routine.enrich_calls(routine.members)
-            inline_member_procedures(routine)
+#            routine.enrich_calls(routine.members)
+            tf_in.inline_member_procedures(routine)
             rename_hor(routine, lst_horizontal_idx)
         elif inline_method=='daan':
 #            routine_orig=source.subroutines[0]
@@ -684,7 +687,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
             routine=routine_inlined
         elif inline_method=='rolf':
             mv_include(routine) #ec trans pb with include
-            routine.enrich_calls(routine.members)
+#            routine.enrich_calls(routine.members)
             inline_rolf.inline_member_procedures(routine)
             rename_hor(routine, lst_horizontal_idx)
 
@@ -712,10 +715,10 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     ystack1(routine)
     rm_sum(routine)
     generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
-    
-    ##----------------------------------------
-    ##Pointers
-    ##----------------------------------------
+   
+   ##----------------------------------------
+   ##Pointers
+   ##----------------------------------------
     tmp_pt, tmp_target=find_pt(routine)
     tmp_pt_klon=get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size)
     assoc_alloc_pt(routine, tmp_pt_klon)
@@ -730,9 +733,17 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     
     
     Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
-#    Sourcefile.to_file(fgen(routine), Path(pathW.replace(".F90", "")+"_openacc"+".F90"))
+    if inline_match:
+        print("inline_match = ", inline_match)
+        with open(pathw+".F90", 'r', encoding='utf-8', errors='ignore') as file_caller:
+            caller = file_caller.read()
+            new_caller=caller.replace("CONTAINS", "")
 
+        with open(pathw+".F90", 'w', encoding='utf-8', errors='ignore') as file_caller:
+            file_caller.write(new_caller)
+#            file_caller.write(caller)
 
+    
 #*********************************************************
 #*********************************************************
 #*********************************************************

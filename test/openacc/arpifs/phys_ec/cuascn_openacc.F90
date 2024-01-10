@@ -136,8 +136,6 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
   
 !$acc routine( CUASCN_OPENACC ) seq
   
-#include "cuadjtq.func.h"
-#include "abor1.intfb.h"
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
   USE YOMCST, ONLY: TCST
@@ -311,6 +309,8 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
   
   !DIR$ VFUNCTION EXPHF
 #include "fcttre.func.h"
+#include "abor1.intfb.h"
+#include "cuadjtq.func.h"
   LOGICAL :: CUENTR_LLO1
   INTEGER(KIND=JPIM) :: CUENTR_JL
   LOGICAL :: LLPERT_DETRPEN  ! SPP perturbation on?
@@ -462,7 +462,7 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
     !                  ----------------------------------------------------
     
     IK = JK
-    ! [Loki] inlined member subroutine: CUBASMCN
+    ! [Loki] inlined child subroutine: CUBASMCN
     ! =========================================
     
     !----------------------------------------------------------------------
@@ -536,7 +536,7 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
     !                   -------------------------------------
     
     IK = JK
-    ! [Loki] inlined member subroutine: CUENTR
+    ! [Loki] inlined child subroutine: CUENTR
     ! =========================================
     
     !----------------------------------------------------------------------
@@ -650,7 +650,7 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
       IK = JK
       IF (JLM > 0) THEN
         IF (YDECUMF%LSCVLIQ) THEN
-          ! [Loki] inlined member subroutine: CUADJTQ
+          ! [Loki] inlined child subroutine: CUADJTQ
           ! =========================================
           
           !----------------------------------------------------------------------
@@ -675,7 +675,7 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
             !   mixed phase saturation
             
             CUADJTQ_LLFLAG = LLFLAG
-            IF (PRESENT(LSCVFLAG(:))) THEN
+            IF (.true.) THEN
               CUADJTQ_LLFLAG = CUADJTQ_LLFLAG .and. .not.LSCVFLAG(JLON)
             ELSE
               CALL ABOR1_ACC('CUADJTQ: LDOFLAG has to be present when KCALL==6')
@@ -762,7 +762,7 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
           
           ! =========================================
         ELSE
-          ! [Loki] inlined member subroutine: CUADJTQ
+          ! [Loki] inlined child subroutine: CUADJTQ
           ! =========================================
           
           !----------------------------------------------------------------------
@@ -1166,7 +1166,7 @@ SUBROUTINE CUASCN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECLDP, YDECUMF, YDSPP_CONFIG
     PWMEAN(JLON) = SQRT(2.0_JPRB*PWMEAN(JLON))
   END IF
   
-  CONTAINS
+  
   
   ! (C) Copyright 1988- ECMWF.
   !

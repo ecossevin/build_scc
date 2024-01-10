@@ -88,8 +88,6 @@ SUBROUTINE CUDLFSN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, 
   
 !$acc routine( CUDLFSN_OPENACC ) seq
   
-#include "cuadjtq.func.h"
-#include "abor1.intfb.h"
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
   
@@ -160,6 +158,8 @@ SUBROUTINE CUDLFSN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, 
 #include "cuadjtq.intfb.h"
   
 #include "fcttre.func.h"
+#include "abor1.intfb.h"
+#include "cuadjtq.func.h"
   INTEGER(KIND=JPIM) :: CUADJTQ_JL
   REAL(KIND=JPRB) :: Z1S
   REAL(KIND=JPRB) :: Z2S
@@ -264,7 +264,7 @@ SUBROUTINE CUDLFSN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, 
       IF (IS == 0) CYCLE
       
       IK = JK
-      ! [Loki] inlined member subroutine: CUADJTQ
+      ! [Loki] inlined child subroutine: CUADJTQ
       ! =========================================
       
       !----------------------------------------------------------------------
@@ -415,7 +415,7 @@ SUBROUTINE CUDLFSN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, 
     !300  CONTINUE
   END IF
   
-  CONTAINS
+  
   
   ! (C) Copyright 1988- ECMWF.
   !
