@@ -17,7 +17,7 @@ from loki.expression import (
 from loki.ir import Import, Comment, Assignment, VariableDeclaration, CallStatement
 from loki.expression import symbols as sym
 from loki.types import BasicType
-from loki.visitors import Transformer, FindNodes
+from loki import Transformer, FindNodes
 from loki.tools import as_tuple
 from loki.logging import warning, error
 
