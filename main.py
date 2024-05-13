@@ -14,7 +14,6 @@ import click
 @click.option('--inlined', '-in', default=None, multiple=True, help='names of the routine to inline')
 
 def main_function(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
-   print("say issi")
    openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
 
 main_function()
