@@ -600,18 +600,46 @@ def mv_include(routine):
 #*********************************************************
 #*********************************************************
 
-# import click
+def openacc_trans_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_horizontal_bounds, true_symbols, false_symbols, pathw):
+    #----------------------------------------------
+    #transformations:
+    #----------------------------------------------
+    horizontal_size=get_horizontal_size(routine, lst_horizontal_size)
+    resolve_associates(routine)
+    logical.transform_subroutine(routine, true_symbols, false_symbols)
+    
+    end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
+    horizontal_idx=get_horizontal_idx(routine, lst_horizontal_idx)
+    bounds=[begin_index, end_index]
+    add_openacc(routine)
+    
+    rename(routine)
+    acc_seq(routine)
+    stack_mod(routine)
+    demote_horizontal(routine, horizontal_size)
+    #TODO : change resolve_vector : changes dim for all possible idx and bounds..
+    ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
+    
+    remove_horizontal_loop(routine, lst_horizontal_idx)
+    ###
+    ystack1(routine)
+    rm_sum(routine)
+    generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
 
-# @click.command()
-# #@click.option('--pathr', help='path of the file to open')
-# #@click.option('--pathw', help='path of the file to write to')
-# @click.option('--pathpack', help='absolute path to the pack')
-# @click.option('--pathview', help='path to src/local/... or src/main/...')
-# @click.option('--pathfile', help='path to the file, with the file name in the path')
-# @click.option('--pathacc', help='path to the place where acc files are stored')
-
-# @click.option('--horizontal_opt', default=None, help='additionnal possible horizontal idx')
-# @click.option('--inlined', '-in', default=None, multiple=True, help='names of the routine to inline')
+    ##----------------------------------------
+    ##Pointers
+    ##----------------------------------------
+    tmp_pt, tmp_target=find_pt(routine)
+    tmp_pt_klon=get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size)
+    assoc_alloc_pt(routine, tmp_pt_klon)
+    nullify(routine, tmp_pt_klon)
+    ##----------------------------------------
+    ##----------------------------------------
+    write_print(routine)
+    
+    ystack2(routine)
+    alloc_temp(routine)
+    jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx)
 
 def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
     """
@@ -691,46 +719,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
             inline_rolf.inline_member_procedures(routine)
             rename_hor(routine, lst_horizontal_idx)
 
-    #----------------------------------------------
-    #transformations:
-    #----------------------------------------------
-    horizontal_size=get_horizontal_size(routine, lst_horizontal_size)
-    resolve_associates(routine)
-    logical.transform_subroutine(routine, true_symbols, false_symbols)
-    
-    end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
-    horizontal_idx=get_horizontal_idx(routine, lst_horizontal_idx)
-    bounds=[begin_index, end_index]
-    add_openacc(routine)
-    
-    rename(routine)
-    acc_seq(routine)
-    stack_mod(routine)
-    demote_horizontal(routine, horizontal_size)
-    #TODO : change resolve_vector : changes dim for all possible idx and bounds..
-    ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
-    
-    remove_horizontal_loop(routine, lst_horizontal_idx)
-    ###
-    ystack1(routine)
-    rm_sum(routine)
-    generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
-   
-   ##----------------------------------------
-   ##Pointers
-   ##----------------------------------------
-    tmp_pt, tmp_target=find_pt(routine)
-    tmp_pt_klon=get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size)
-    assoc_alloc_pt(routine, tmp_pt_klon)
-    nullify(routine, tmp_pt_klon)
-    ##----------------------------------------
-    ##----------------------------------------
-    write_print(routine)
-    
-    ystack2(routine)
-    alloc_temp(routine)
-    jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx) #at the end
-    
+    openacc_trans_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_horizontal_bounds, true_symbols, false_symbols, pathw)    
     
     Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
     if inline_match:
@@ -742,16 +731,3 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
         with open(pathw+".F90", 'w', encoding='utf-8', errors='ignore') as file_caller:
             file_caller.write(new_caller)
 #            file_caller.write(caller)
-
-    
-#*********************************************************
-#*********************************************************
-#*********************************************************
-#       Calling  the       transformation
-#*********************************************************
-#*********************************************************
-#*********************************************************
-
-# openacc_trans()
-####openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
-
