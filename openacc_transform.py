@@ -172,7 +172,7 @@ def alloc_temp(routine):
         var_lst=[] #var to keep in the decl.
         for s in decls.symbols: #a decl can have >1 var
             if isinstance(s, symbols.Array):
-                if not s.type.pointer: #if pt, 
+                if not s.type.pointer and not s.type.parameter : #if pt, 
                     if s.name not in routine_arg:
                         if s.type.kind:
                             new_s='temp ('+s.type.dtype.name+' (KIND='+s.type.kind.name+'), '+s.name+', ('
