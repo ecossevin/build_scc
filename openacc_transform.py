@@ -600,7 +600,7 @@ def mv_include(routine):
 #*********************************************************
 #*********************************************************
 
-def openacc_trans_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_horizontal_bounds, true_symbols, false_symbols, pathw):
+def scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_horizontal_bounds, true_symbols, false_symbols, pathw = None):
     #----------------------------------------------
     #transformations:
     #----------------------------------------------
@@ -611,10 +611,10 @@ def openacc_trans_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
     horizontal_idx=get_horizontal_idx(routine, lst_horizontal_idx)
     bounds=[begin_index, end_index]
-    add_openacc(routine)
     
-    rename(routine)
-    acc_seq(routine)
+    
+    
+    
     stack_mod(routine)
     demote_horizontal(routine, horizontal_size)
     #TODO : change resolve_vector : changes dim for all possible idx and bounds..
@@ -624,7 +624,9 @@ def openacc_trans_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     ###
     ystack1(routine)
     rm_sum(routine)
-    generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
+
+    if pathw:
+        generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
 
     ##----------------------------------------
     ##Pointers
@@ -638,7 +640,7 @@ def openacc_trans_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     write_print(routine)
     
     ystack2(routine)
-    alloc_temp(routine)
+    # alloc_temp(routine)
     jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx)
 
 def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
@@ -719,7 +721,13 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
             inline_rolf.inline_member_procedures(routine)
             rename_hor(routine, lst_horizontal_idx)
 
-    openacc_trans_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_horizontal_bounds, true_symbols, false_symbols, pathw)    
+
+
+    add_openacc(routine)        
+    rename(routine)
+    acc_seq(routine)
+    scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_horizontal_bounds, true_symbols, false_symbols, pathw)    
+    alloc_temp(routine)
     
     Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
     if inline_match:
