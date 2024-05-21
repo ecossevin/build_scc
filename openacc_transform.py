@@ -113,7 +113,7 @@ def jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx):
     :param new_range: ???
     :param horizontal_idx: horizontal loop variable
     """
-    routine.spec.append(Assignment(horizontal_idx, begin_index))
+    routine.body.prepend(Assignment(horizontal_idx, begin_index))
 
 def stack_mod(routine):
     """
@@ -165,6 +165,7 @@ def alloc_temp(routine):
     """
     routine_arg=[var.name for var in routine.arguments]
     
+    allocs_list=[]
 
     temp_map={}
     for decls in FindNodes(VariableDeclaration).visit(routine.spec):
@@ -183,7 +184,7 @@ def alloc_temp(routine):
                         new_s=new_s[:-2]
                         new_s=new_s+'))'
                         alloc='alloc ('+s.name+')'
-                        routine.spec.append(Intrinsic(alloc))
+                        allocs_list.append(Intrinsic(alloc))
                         intrinsic_lst.append(Intrinsic(new_s))
                     else: #if array in routine args
 #                        var_lst.append(decls.clone(symbols=s))
@@ -206,6 +207,15 @@ def alloc_temp(routine):
 #        intrinsic_lst.append(VAR)
 
     routine.spec=Transformer(temp_map).visit(routine.spec)
+
+    # Find the YLSTACK = YDSTACK assignement, insert "alloc" macros afterwards
+    idx=0
+    for node in FindNodes(ir.Node).visit(routine.body):
+        if type(node)==ir.Assignment:
+            if node.lhs.name == 'YLSTACK':
+                break
+        idx=idx+1
+    routine.body.insert(idx, tuple(allocs_list))
     
 
 def get_horizontal_size(routine, lst_horizontal_size):
@@ -269,7 +279,7 @@ def ystack2(routine):
     stack_local=Variable(name="YLSTACK", type=SymbolAttributes(DerivedType(name="STACK")), scope=routine)
 
     routine.variables+=(stack_argument, stack_local,)
-    routine.spec.append(Assignment(stack_local, stack_argument))
+    routine.body.prepend(Assignment(stack_local, stack_argument))
 
 
 def get_horizontal_idx(routine, lst_horizontal_idx):
@@ -639,9 +649,9 @@ def scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     ##----------------------------------------
     write_print(routine)
     
+    jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx)
     ystack2(routine)
     # alloc_temp(routine)
-    jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx)
 
 def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
     """
@@ -728,6 +738,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     acc_seq(routine)
     scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_horizontal_bounds, true_symbols, false_symbols, pathw)    
     alloc_temp(routine)
+
     
     Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
     if inline_match:
