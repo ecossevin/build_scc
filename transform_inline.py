@@ -19,12 +19,12 @@ from loki.expression import (
 from loki.ir import Import, Comment, Assignment, VariableDeclaration, CallStatement
 from loki.expression import symbols as sym
 from loki.types import BasicType
-from loki.visitors import Transformer, FindNodes
+from loki import Transformer, FindNodes
 from loki.tools import as_tuple
 from loki.logging import warning, error
-from loki.pragma_utils import pragmas_attached, is_loki_pragma
+from loki.ir import pragmas_attached, is_loki_pragma
 
-from loki.transform.transform_utilities import (
+from loki.transformations.utilities import (
     single_variable_declaration,
     recursive_expression_map_update
 )

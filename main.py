@@ -9,7 +9,7 @@ from loki import (
     Nullify, analyse_dataflow
 )
 
-from loki.transform import resolve_associates
+from loki.transformations.sanitise import resolve_associates
 
 import os
 import sys
@@ -667,7 +667,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
         source=Sourcefile.from_file(pathr)
     routine=source.subroutines[0]
 
-    from loki.transform import inline_member_procedures
+    from loki.transformations import inline_member_procedures
     import transform_inline as tf_in
     
     #inline_method='daan'

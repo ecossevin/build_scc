@@ -3,7 +3,7 @@
 set -x
 set -e
 
-source ~/venv/bin/activate
+source ~/loki_env/bin/activate
 which python3
 
 export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH

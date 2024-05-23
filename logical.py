@@ -9,7 +9,7 @@ from loki import (
     LogicalAnd,
 )
 
-from loki.transform import resolve_associates
+from loki.transformations.sanitise import resolve_associates
 
 from loki.expression.symbols import Comparison
 from loki.expression.symbols import IntLiteral
