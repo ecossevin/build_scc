@@ -52,7 +52,7 @@ SUBROUTINE GPHLWI_OPENACC (YDDIMV, KPROMA, KST, KEND, PLNPR, PALPH, PWW, LDVERIN
   !        K. Yessad (Dec 2008): remove dummy CDLOCK
   !     ----------------------------------------------------------------------
   
-!$acc routine( GPHLWI_OPENACC ) seq
+!$acc routine( GPHLWI_OPENACC )
   
   USE YOMDIMV, ONLY: TDIMV
   USE PARKIND1, ONLY: JPIM, JPRB

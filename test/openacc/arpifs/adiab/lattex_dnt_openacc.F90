@@ -85,7 +85,7 @@ SUBROUTINE LATTEX_DNT_OPENACC (KSTEP, YDGEOMETRY, YDLDDH, YDRIP, YDDYN, YDDYNA, 
   ! End Modifications
   !------------------------------------------------------------------------------
   
-!$acc routine( LATTEX_DNT_OPENACC ) seq
+!$acc routine( LATTEX_DNT_OPENACC )
   
   USE GEOMETRY_MOD, ONLY: GEOMETRY
   USE PARKIND1, ONLY: JPIM, JPRB

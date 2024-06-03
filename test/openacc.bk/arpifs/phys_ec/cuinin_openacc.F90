@@ -75,9 +75,6 @@ SUBROUTINE CUININ_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, K
   
 !$acc routine( CUININ_OPENACC ) seq
   
-#include "cuadjtq.func.h"
-#include "abor1.intfb.h"
-#include "fcttre.func.h"
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
   
@@ -132,6 +129,9 @@ SUBROUTINE CUININ_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, K
   
 #include "cuadjtq.intfb.h"
 #include "cuadjtqs.intfb.h"
+#include "fcttre.func.h"
+#include "abor1.intfb.h"
+#include "cuadjtq.func.h"
   REAL(KIND=JPRB) :: Z3ES
   REAL(KIND=JPRB) :: Z4ES
   REAL(KIND=JPRB) :: Z5ALCP
@@ -191,7 +191,7 @@ SUBROUTINE CUININ_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, K
     IF (JK >= KLEV - 1 .or. JK < YDECUMF%NJKT2) CYCLE
     IK = JK
     IF (YDEPHLI%LPHYLIN) THEN
-      ! [Loki] inlined member subroutine: CUADJTQS
+      ! [Loki] inlined child subroutine: CUADJTQS
       ! =========================================
       !----------------------------------------------------------------------
       
@@ -253,7 +253,7 @@ SUBROUTINE CUININ_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, K
       
       ! =========================================
     ELSE
-      ! [Loki] inlined member subroutine: CUADJTQ
+      ! [Loki] inlined child subroutine: CUADJTQ
       ! =========================================
       
       !----------------------------------------------------------------------
@@ -355,7 +355,7 @@ SUBROUTINE CUININ_OPENACC (YDCST, YDTHF, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, K
     KLAB(JLON, JK) = 0
   END DO
   
-  CONTAINS
+  
   
   ! (C) Copyright 1988- ECMWF.
   !

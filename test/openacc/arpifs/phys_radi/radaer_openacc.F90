@@ -94,7 +94,7 @@ SUBROUTINE RADAER_OPENACC (YDEAERD, YDERAD, YDPHY, KIDIA, KFDIA, KLON, KLEV, PAP
   !                            mixed with Land aerosols
   !-----------------------------------------------------------------------
   
-!$acc routine( RADAER_OPENACC ) seq
+!$acc routine( RADAER_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: DR_HOOK, JPHOOK, LHOOK
@@ -166,7 +166,15 @@ SUBROUTINE RADAER_OPENACC (YDEAERD, YDERAD, YDPHY, KIDIA, KFDIA, KLON, KLEV, PAP
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZTH)
+  IF (KIND (ZTH) == 8) THEN
+    alloc8 (ZTH)
+  ELSE
+    IF (KIND (ZTH) == 8) THEN
+      alloc4 (ZTH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

@@ -60,7 +60,7 @@ SUBROUTINE GP_SPV_OPENACC (YDGEOMETRY, YDDYN, YDDYNA, YDSIMPHL, LDTL, KST, KEND,
   ! End Modifications
   !------------------------------------------------------------------------------
   
-!$acc routine( GP_SPV_OPENACC ) seq
+!$acc routine( GP_SPV_OPENACC )
   
   USE GEOMETRY_MOD, ONLY: GEOMETRY
   USE PARKIND1, ONLY: JPIM, JPRB

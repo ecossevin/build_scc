@@ -60,7 +60,7 @@ SUBROUTINE CUADJTQS_OPENACC (YDTHF, YDCST, KIDIA, KFDIA, KLON, KLEV, KK, PSP, PT
   
   !----------------------------------------------------------------------
   
-!$acc routine( CUADJTQS_OPENACC ) seq
+!$acc routine( CUADJTQS_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

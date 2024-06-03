@@ -83,7 +83,7 @@ SUBROUTINE ACTQSAT_OPENACC (YDCST, YDPHY, KIDIA, KFDIA, KLON, KTDIA, KLEV, PAPRS
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACTQSAT_OPENACC ) seq
+!$acc routine( ACTQSAT_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

@@ -41,7 +41,7 @@ SUBROUTINE GPRT_OPENACC (LDSPRT, KPROMA, KST, KEND, KLEV, PRD, PRV, PR, PT, PTL,
   !     H Petithomme (Dec 2020): tests simplification and hoisting
   !----------------------------------------------------------
   
-!$acc routine( GPRT_OPENACC ) seq
+!$acc routine( GPRT_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

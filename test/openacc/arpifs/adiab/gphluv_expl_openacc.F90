@@ -60,7 +60,7 @@ SUBROUTINE GPHLUV_EXPL_OPENACC (YDDIMV, KPROMA, KST, KEND, PU, PV, PWWI, PUH, PV
   ! End Modifications
   !------------------------------------------------------------------
   
-!$acc routine( GPHLUV_EXPL_OPENACC ) seq
+!$acc routine( GPHLUV_EXPL_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK

@@ -135,7 +135,7 @@ SUBROUTINE ACNEBCOND_OPENACC (YDCST, YDRIP, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTD
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-------------------------------------------------------------------------
   
-!$acc routine( ACNEBCOND_OPENACC ) seq
+!$acc routine( ACNEBCOND_OPENACC )
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB, JPRD
@@ -311,12 +311,60 @@ SUBROUTINE ACNEBCOND_OPENACC (YDCST, YDRIP, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTD
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZQTOT)
-  alloc (ZRHL)
-  alloc (ZS)
-  alloc (ZSHALTEMP)
-  alloc (ZHCUTMP)
-  alloc (ZLSTMP)
+  IF (KIND (ZQTOT) == 8) THEN
+    alloc8 (ZQTOT)
+  ELSE
+    IF (KIND (ZQTOT) == 8) THEN
+      alloc4 (ZQTOT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRHL) == 8) THEN
+    alloc8 (ZRHL)
+  ELSE
+    IF (KIND (ZRHL) == 8) THEN
+      alloc4 (ZRHL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZS) == 8) THEN
+    alloc8 (ZS)
+  ELSE
+    IF (KIND (ZS) == 8) THEN
+      alloc4 (ZS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZSHALTEMP) == 8) THEN
+    alloc8 (ZSHALTEMP)
+  ELSE
+    IF (KIND (ZSHALTEMP) == 8) THEN
+      alloc4 (ZSHALTEMP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZHCUTMP) == 8) THEN
+    alloc8 (ZHCUTMP)
+  ELSE
+    IF (KIND (ZHCUTMP) == 8) THEN
+      alloc4 (ZHCUTMP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLSTMP) == 8) THEN
+    alloc8 (ZLSTMP)
+  ELSE
+    IF (KIND (ZLSTMP) == 8) THEN
+      alloc4 (ZLSTMP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

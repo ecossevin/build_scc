@@ -6,7 +6,7 @@ from loki import (
     Intrinsic, Variable, SymbolAttributes,
     DerivedType, VariableDeclaration, flatten,
     BasicType, FindInlineCalls, SubstituteExpressions,
-    Nullify, analyse_dataflow
+    Nullify, analyse_dataflow, Comparison
 )
 
 from loki.transformations.sanitise import resolve_associates
@@ -182,8 +182,32 @@ def alloc_temp(routine):
                             new_s=new_s+str(shape)+', '
                         new_s=new_s[:-2]
                         new_s=new_s+'))'
-                        alloc='alloc ('+s.name+')'
-                        routine.spec.append(Intrinsic(alloc))
+                        kind = symbols.DeferredTypeSymbol(name=f"KIND ({s.name})")
+                        #kind = symbols.InlineCall(symbols.Variable(name='KIND'), parameters=(new_s,))
+                        
+                        cond8 = Comparison(
+                        		left=kind,
+                        		operator='==',
+                        		right=symbols.IntLiteral(value=8))
+                        cond4 = Comparison(
+                        		left=kind,
+                        		operator='==',
+                        		right=symbols.IntLiteral(value=8))
+                        alloc8='alloc8 ('+s.name+')'
+                        alloc4='alloc4 ('+s.name+')'
+                        stop='STOP 1'
+                        else_cond = ir.Conditional(
+                        		condition=cond4,
+                        		body=(Intrinsic(alloc4),),
+                        		else_body=(Intrinsic(stop),)
+                                    )
+                        alloc_block = ir.Conditional(
+                        	condition=cond8,
+                        	body=(Intrinsic(alloc8),),
+                        	else_body=(else_cond,),
+                        	hase_elseif=True
+                        		)
+                        routine.spec.append(alloc_block)
                         intrinsic_lst.append(Intrinsic(new_s))
                     else: #if array in routine args
 #                        var_lst.append(decls.clone(symbols=s))

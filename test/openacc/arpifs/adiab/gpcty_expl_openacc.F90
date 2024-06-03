@@ -131,7 +131,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   !   H Petithomme (Dec 2020): use of pointer, add directives for dependencies
   !     ------------------------------------------------------------------
   
-!$acc routine( GPCTY_EXPL_OPENACC ) seq
+!$acc routine( GPCTY_EXPL_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK

@@ -65,7 +65,7 @@ SUBROUTINE DPRECIPS_XFU_OPENACC (KIDIA, KFDIA, KLON, KDTPREC, KSTATS, PDPRECIPS,
   !     --------------
   !     ------------------------------------------------------------------
   
-!$acc routine( DPRECIPS_XFU_OPENACC ) seq
+!$acc routine( DPRECIPS_XFU_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

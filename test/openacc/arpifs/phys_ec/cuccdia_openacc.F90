@@ -42,7 +42,7 @@ SUBROUTINE CUCCDIA_OPENACC (YDERAD, YDEPHLI, YDEPHY, KIDIA, KFDIA, KLON, KLEV, K
   
   !-----------------------------------------------------------------------
   
-!$acc routine( CUCCDIA_OPENACC ) seq
+!$acc routine( CUCCDIA_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

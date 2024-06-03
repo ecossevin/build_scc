@@ -67,7 +67,7 @@ SUBROUTINE RADHEAT_OPENACC (YDCST, YDTHF, YDERAD, YDERDI, YDML_PHY_MF, KIDIA, KF
   !      Y. Bouteloup Jun 2015 : Re-activation of LMSE protection
   !-----------------------------------------------------------------------
   
-!$acc routine( RADHEAT_OPENACC ) seq
+!$acc routine( RADHEAT_OPENACC )
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB

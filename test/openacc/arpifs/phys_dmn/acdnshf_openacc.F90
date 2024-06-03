@@ -88,7 +88,7 @@ SUBROUTINE ACDNSHF_OPENACC (YDCST, YDPHY, YDPHY1, KIDIA, KFDIA, KLON, KTDIA, KLE
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !     ------------------------------------------------------------------
   
-!$acc routine( ACDNSHF_OPENACC ) seq
+!$acc routine( ACDNSHF_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

@@ -69,7 +69,7 @@ SUBROUTINE LASURE_OPENACC (YDGEOMETRY, YDEPHY, YDDYN, YDEDYN, YDPHY, KST, KEND, 
   !      T. Wilhelmsson (Sept 2013) Geometry and setup refactoring.
   !     ------------------------------------------------------------------
   
-!$acc routine( LASURE_OPENACC ) seq
+!$acc routine( LASURE_OPENACC )
   
   USE GEOMETRY_MOD, ONLY: GEOMETRY
   USE PARKIND1, ONLY: JPIM, JPRB

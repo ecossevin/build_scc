@@ -71,7 +71,7 @@ SUBROUTINE SUOZON_OPENACC (KIDIA, KFDIA, KLON, KLEV, PROFO3, LDQINT, PRESI, PRDE
   
   !     ------------------------------------------------------------------
   
-!$acc routine( SUOZON_OPENACC ) seq
+!$acc routine( SUOZON_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

@@ -54,7 +54,7 @@ SUBROUTINE ACUPTQ_OPENACC (YDCST, KLON, KIDIA, KFDIA, KFLEV, LDPTQ, PFRSO, PFRTH
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACUPTQ_OPENACC ) seq
+!$acc routine( ACUPTQ_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -107,9 +107,33 @@ SUBROUTINE ACUPTQ_OPENACC (YDCST, KLON, KIDIA, KFDIA, KFLEV, LDPTQ, PFRSO, PFRTH
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZGSDP)
-  alloc (ZJTOT)
-  alloc (ZTI)
+  IF (KIND (ZGSDP) == 8) THEN
+    alloc8 (ZGSDP)
+  ELSE
+    IF (KIND (ZGSDP) == 8) THEN
+      alloc4 (ZGSDP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZJTOT) == 8) THEN
+    alloc8 (ZJTOT)
+  ELSE
+    IF (KIND (ZJTOT) == 8) THEN
+      alloc4 (ZJTOT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTI) == 8) THEN
+    alloc8 (ZTI)
+  ELSE
+    IF (KIND (ZTI) == 8) THEN
+      alloc4 (ZTI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

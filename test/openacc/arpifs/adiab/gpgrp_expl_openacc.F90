@@ -68,7 +68,7 @@ SUBROUTINE GPGRP_EXPL_OPENACC (YDGEOMETRY, KST, KEND, PRT, PRTL, PRTM, PREL, PRE
   !   H Petithomme (Dec 2020): merge VFD loops
   !     ------------------------------------------------------------------
   
-!$acc routine( GPGRP_EXPL_OPENACC ) seq
+!$acc routine( GPGRP_EXPL_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK

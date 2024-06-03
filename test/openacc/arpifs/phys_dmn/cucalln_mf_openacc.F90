@@ -145,7 +145,7 @@ SUBROUTINE CUCALLN_MF_OPENACC (PPLDARE, PPLRG, KSTEP, YDTHF, YDCST, YDERAD, YDML
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !----------------------------------------------------------------------
   
-!$acc routine( CUCALLN_MF_OPENACC ) seq
+!$acc routine( CUCALLN_MF_OPENACC )
   
   USE MODEL_PHYSICS_ECMWF_MOD, ONLY: MODEL_PHYSICS_ECMWF_TYPE
   USE MODEL_PHYSICS_SIMPLINEAR_MOD, ONLY: MODEL_PHYSICS_SIMPLINEAR_TYPE
@@ -299,21 +299,141 @@ SUBROUTINE CUCALLN_MF_OPENACC (PPLDARE, PPLRG, KSTEP, YDTHF, YDCST, YDERAD, YDML
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZTP1)
-  alloc (ZQP1)
-  alloc (ZUP1)
-  alloc (ZVP1)
-  alloc (ZTU)
-  alloc (ZQU)
-  alloc (ZQSAT)
-  alloc (ZRAIN)
-  alloc (ZCP1)
-  alloc (ZQEA)
-  alloc (ZTEA)
-  alloc (ZVEA)
-  alloc (ZUEA)
-  alloc (ZENTHD)
-  alloc (ZENTHS)
+  IF (KIND (ZTP1) == 8) THEN
+    alloc8 (ZTP1)
+  ELSE
+    IF (KIND (ZTP1) == 8) THEN
+      alloc4 (ZTP1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQP1) == 8) THEN
+    alloc8 (ZQP1)
+  ELSE
+    IF (KIND (ZQP1) == 8) THEN
+      alloc4 (ZQP1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZUP1) == 8) THEN
+    alloc8 (ZUP1)
+  ELSE
+    IF (KIND (ZUP1) == 8) THEN
+      alloc4 (ZUP1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZVP1) == 8) THEN
+    alloc8 (ZVP1)
+  ELSE
+    IF (KIND (ZVP1) == 8) THEN
+      alloc4 (ZVP1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTU) == 8) THEN
+    alloc8 (ZTU)
+  ELSE
+    IF (KIND (ZTU) == 8) THEN
+      alloc4 (ZTU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQU) == 8) THEN
+    alloc8 (ZQU)
+  ELSE
+    IF (KIND (ZQU) == 8) THEN
+      alloc4 (ZQU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQSAT) == 8) THEN
+    alloc8 (ZQSAT)
+  ELSE
+    IF (KIND (ZQSAT) == 8) THEN
+      alloc4 (ZQSAT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRAIN) == 8) THEN
+    alloc8 (ZRAIN)
+  ELSE
+    IF (KIND (ZRAIN) == 8) THEN
+      alloc4 (ZRAIN)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZCP1) == 8) THEN
+    alloc8 (ZCP1)
+  ELSE
+    IF (KIND (ZCP1) == 8) THEN
+      alloc4 (ZCP1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQEA) == 8) THEN
+    alloc8 (ZQEA)
+  ELSE
+    IF (KIND (ZQEA) == 8) THEN
+      alloc4 (ZQEA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTEA) == 8) THEN
+    alloc8 (ZTEA)
+  ELSE
+    IF (KIND (ZTEA) == 8) THEN
+      alloc4 (ZTEA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZVEA) == 8) THEN
+    alloc8 (ZVEA)
+  ELSE
+    IF (KIND (ZVEA) == 8) THEN
+      alloc4 (ZVEA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZUEA) == 8) THEN
+    alloc8 (ZUEA)
+  ELSE
+    IF (KIND (ZUEA) == 8) THEN
+      alloc4 (ZUEA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZENTHD) == 8) THEN
+    alloc8 (ZENTHD)
+  ELSE
+    IF (KIND (ZENTHD) == 8) THEN
+      alloc4 (ZENTHD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZENTHS) == 8) THEN
+    alloc8 (ZENTHS)
+  ELSE
+    IF (KIND (ZENTHS) == 8) THEN
+      alloc4 (ZENTHS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

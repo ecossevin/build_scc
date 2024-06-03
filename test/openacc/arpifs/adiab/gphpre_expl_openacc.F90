@@ -50,7 +50,7 @@ SUBROUTINE GPHPRE_EXPL_OPENACC (YDCVER, TOPPRES, YDCST, KPROMA, KFLEV, KST, KEND
   !   H Petithomme (Dec 2020): add options, use of pointers, group VFE tests
   !     ------------------------------------------------------------------
   
-!$acc routine( GPHPRE_EXPL_OPENACC ) seq
+!$acc routine( GPHPRE_EXPL_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK

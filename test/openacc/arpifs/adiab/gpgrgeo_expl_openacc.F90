@@ -105,7 +105,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   !      H. Petithomme (Nov 2020): use of pointers for avoiding array copies
   !     ------------------------------------------------------------------
   
-!$acc routine( GPGRGEO_EXPL_OPENACC ) seq
+!$acc routine( GPGRGEO_EXPL_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK
@@ -201,7 +201,8 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   PHIHM(JLON, KFLEV) = POROGM(JLON)
   
   IF (LLNHEE) THEN
-    IF (.not.(PRESENT(PRNHPPI) .and. PRESENT(PQCHAL) .and. PRESENT(PQCHAM))) CALL ABOR1_ACC(' GPGRGEO_EXPL: missing input PRNHPPI, PQCHAL, PQCHAM !!!')
+    IF (.not.(PRESENT(PRNHPPI) .and. PRESENT(PQCHAL) .and. PRESENT(PQCHAM))) CALL ABOR1_ACC(' GPGRGEO_EXPL: missing input  &
+    & PRNHPPI, PQCHAL, PQCHAM !!!')
     
     DO JLEV=1,KFLEV
       ZNH1L(JLON, JLEV) = -PRT(JLON, JLEV)*PQCHAL(JLON, JLEV)

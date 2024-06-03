@@ -112,8 +112,6 @@ SUBROUTINE CUBASEN_OPENACC (PPLDARE, PPLRG, YDTHF, YDCST, YDEPHLI, YDECLDP, YDEC
   
 !$acc routine( CUBASEN_OPENACC ) seq
   
-#include "cuadjtq.func.h"
-#include "abor1.intfb.h"
   USE YOEPHLI, ONLY: TEPHLI
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -266,6 +264,8 @@ SUBROUTINE CUBASEN_OPENACC (PPLDARE, PPLRG, YDTHF, YDCST, YDEPHLI, YDECLDP, YDEC
   
 #include "cuadjtq.intfb.h"
 #include "fcttre.func.h"
+#include "abor1.intfb.h"
+#include "cuadjtq.func.h"
   INTEGER(KIND=JPIM) :: CUADJTQ_JL
   REAL(KIND=JPRB) :: Z1S
   REAL(KIND=JPRB) :: Z2S
@@ -521,7 +521,7 @@ SUBROUTINE CUBASEN_OPENACC (PPLDARE, PPLRG, YDTHF, YDCST, YDEPHLI, YDECLDP, YDEC
       
       IK = JK
       
-      ! [Loki] inlined member subroutine: CUADJTQ
+      ! [Loki] inlined child subroutine: CUADJTQ
       ! =========================================
       
       !----------------------------------------------------------------------
@@ -864,7 +864,7 @@ SUBROUTINE CUBASEN_OPENACC (PPLDARE, PPLRG, YDTHF, YDCST, YDEPHLI, YDECLDP, YDEC
   ! chose maximum CAPE value
   PCAPE(JLON) = MAXVAL(ZCAPE(JLON, :))
   
-  CONTAINS
+  
   
   ! (C) Copyright 1988- ECMWF.
   !

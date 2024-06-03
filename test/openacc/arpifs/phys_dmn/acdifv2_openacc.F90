@@ -144,7 +144,7 @@ SUBROUTINE ACDIFV2_OPENACC (LDSFORCS, YDCST, YGFL, YDML_PHY_MF, KIDIA, KFDIA, KL
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACDIFV2_OPENACC ) seq
+!$acc routine( ACDIFV2_OPENACC )
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -258,18 +258,114 @@ SUBROUTINE ACDIFV2_OPENACC (LDSFORCS, YDCST, YGFL, YDML_PHY_MF, KIDIA, KFDIA, KL
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZKQRV)
-  alloc (ZKSRV)
-  alloc (ZN1)
-  alloc (ZN2)
-  alloc (ZNSV1)
-  alloc (ZKSVRV)
-  alloc (ZEDMFQ)
-  alloc (ZEDMFS)
-  alloc (ZEDMFU)
-  alloc (ZEDMFV)
-  alloc (ZIPOI)
-  alloc (ZSUB1)
+  IF (KIND (ZKQRV) == 8) THEN
+    alloc8 (ZKQRV)
+  ELSE
+    IF (KIND (ZKQRV) == 8) THEN
+      alloc4 (ZKQRV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZKSRV) == 8) THEN
+    alloc8 (ZKSRV)
+  ELSE
+    IF (KIND (ZKSRV) == 8) THEN
+      alloc4 (ZKSRV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZN1) == 8) THEN
+    alloc8 (ZN1)
+  ELSE
+    IF (KIND (ZN1) == 8) THEN
+      alloc4 (ZN1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZN2) == 8) THEN
+    alloc8 (ZN2)
+  ELSE
+    IF (KIND (ZN2) == 8) THEN
+      alloc4 (ZN2)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNSV1) == 8) THEN
+    alloc8 (ZNSV1)
+  ELSE
+    IF (KIND (ZNSV1) == 8) THEN
+      alloc4 (ZNSV1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZKSVRV) == 8) THEN
+    alloc8 (ZKSVRV)
+  ELSE
+    IF (KIND (ZKSVRV) == 8) THEN
+      alloc4 (ZKSVRV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZEDMFQ) == 8) THEN
+    alloc8 (ZEDMFQ)
+  ELSE
+    IF (KIND (ZEDMFQ) == 8) THEN
+      alloc4 (ZEDMFQ)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZEDMFS) == 8) THEN
+    alloc8 (ZEDMFS)
+  ELSE
+    IF (KIND (ZEDMFS) == 8) THEN
+      alloc4 (ZEDMFS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZEDMFU) == 8) THEN
+    alloc8 (ZEDMFU)
+  ELSE
+    IF (KIND (ZEDMFU) == 8) THEN
+      alloc4 (ZEDMFU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZEDMFV) == 8) THEN
+    alloc8 (ZEDMFV)
+  ELSE
+    IF (KIND (ZEDMFV) == 8) THEN
+      alloc4 (ZEDMFV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZIPOI) == 8) THEN
+    alloc8 (ZIPOI)
+  ELSE
+    IF (KIND (ZIPOI) == 8) THEN
+      alloc4 (ZIPOI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZSUB1) == 8) THEN
+    alloc8 (ZSUB1)
+  ELSE
+    IF (KIND (ZSUB1) == 8) THEN
+      alloc4 (ZSUB1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

@@ -85,7 +85,7 @@ SUBROUTINE ACMICRO_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   
   !-----------------------------------------------------------------------
   
-!$acc routine( ACMICRO_OPENACC ) seq
+!$acc routine( ACMICRO_OPENACC )
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -136,10 +136,42 @@ SUBROUTINE ACMICRO_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZAUTOL)
-  alloc (ZAUTOI)
-  alloc (ZDELT)
-  alloc (ZEFFA)
+  IF (KIND (ZAUTOL) == 8) THEN
+    alloc8 (ZAUTOL)
+  ELSE
+    IF (KIND (ZAUTOL) == 8) THEN
+      alloc4 (ZAUTOL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZAUTOI) == 8) THEN
+    alloc8 (ZAUTOI)
+  ELSE
+    IF (KIND (ZAUTOI) == 8) THEN
+      alloc4 (ZAUTOI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDELT) == 8) THEN
+    alloc8 (ZDELT)
+  ELSE
+    IF (KIND (ZDELT) == 8) THEN
+      alloc4 (ZDELT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZEFFA) == 8) THEN
+    alloc8 (ZEFFA)
+  ELSE
+    IF (KIND (ZEFFA) == 8) THEN
+      alloc4 (ZEFFA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

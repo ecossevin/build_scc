@@ -79,7 +79,7 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   !
   !     ------------------------------------------------------------------
   
-!$acc routine( DPRECIPS_OPENACC ) seq
+!$acc routine( DPRECIPS_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -143,7 +143,15 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZHF)
+  IF (KIND (ZHF) == 8) THEN
+    alloc8 (ZHF)
+  ELSE
+    IF (KIND (ZHF) == 8) THEN
+      alloc4 (ZHF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   !     ------------------------------------------------------------------
   

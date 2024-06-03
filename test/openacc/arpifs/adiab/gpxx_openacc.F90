@@ -74,7 +74,7 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   ! End Modifications
   !---------------------------------------------------------------------
   
-!$acc routine( GPXX_OPENACC ) seq
+!$acc routine( GPXX_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB, JPRD
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

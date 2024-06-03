@@ -64,7 +64,7 @@ SUBROUTINE CUENTR_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !----------------------------------------------------------------------
   
-!$acc routine( CUENTR_OPENACC ) seq
+!$acc routine( CUENTR_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

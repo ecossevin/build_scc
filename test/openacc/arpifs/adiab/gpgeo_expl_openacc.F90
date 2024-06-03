@@ -79,7 +79,7 @@ SUBROUTINE GPGEO_EXPL_OPENACC (KPROMA, KST, KEND, KFLEV, PHI, PHIF, PT, PR, PLNP
   !      H Petithomme (Dec 2020): merge VFD loops
   !     ------------------------------------------------------------------
   
-!$acc routine( GPGEO_EXPL_OPENACC ) seq
+!$acc routine( GPGEO_EXPL_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK

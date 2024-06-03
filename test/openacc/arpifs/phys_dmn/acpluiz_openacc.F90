@@ -140,7 +140,7 @@ SUBROUTINE ACPLUIZ_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   
   !-----------------------------------------------------------------------
   
-!$acc routine( ACPLUIZ_OPENACC ) seq
+!$acc routine( ACPLUIZ_OPENACC )
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -230,16 +230,96 @@ SUBROUTINE ACPLUIZ_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZRHCRI)
-  alloc (ZRMF)
-  alloc (ZQSATS)
-  alloc (ZT)
-  alloc (ZQ)
-  alloc (ZAUTOL)
-  alloc (ZAUTOI)
-  alloc (ZQL)
-  alloc (ZQI)
-  alloc (ZFLUXCOR)
+  IF (KIND (ZRHCRI) == 8) THEN
+    alloc8 (ZRHCRI)
+  ELSE
+    IF (KIND (ZRHCRI) == 8) THEN
+      alloc4 (ZRHCRI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRMF) == 8) THEN
+    alloc8 (ZRMF)
+  ELSE
+    IF (KIND (ZRMF) == 8) THEN
+      alloc4 (ZRMF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQSATS) == 8) THEN
+    alloc8 (ZQSATS)
+  ELSE
+    IF (KIND (ZQSATS) == 8) THEN
+      alloc4 (ZQSATS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZT) == 8) THEN
+    alloc8 (ZT)
+  ELSE
+    IF (KIND (ZT) == 8) THEN
+      alloc4 (ZT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQ) == 8) THEN
+    alloc8 (ZQ)
+  ELSE
+    IF (KIND (ZQ) == 8) THEN
+      alloc4 (ZQ)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZAUTOL) == 8) THEN
+    alloc8 (ZAUTOL)
+  ELSE
+    IF (KIND (ZAUTOL) == 8) THEN
+      alloc4 (ZAUTOL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZAUTOI) == 8) THEN
+    alloc8 (ZAUTOI)
+  ELSE
+    IF (KIND (ZAUTOI) == 8) THEN
+      alloc4 (ZAUTOI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQL) == 8) THEN
+    alloc8 (ZQL)
+  ELSE
+    IF (KIND (ZQL) == 8) THEN
+      alloc4 (ZQL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQI) == 8) THEN
+    alloc8 (ZQI)
+  ELSE
+    IF (KIND (ZQI) == 8) THEN
+      alloc4 (ZQI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFLUXCOR) == 8) THEN
+    alloc8 (ZFLUXCOR)
+  ELSE
+    IF (KIND (ZFLUXCOR) == 8) THEN
+      alloc4 (ZFLUXCOR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

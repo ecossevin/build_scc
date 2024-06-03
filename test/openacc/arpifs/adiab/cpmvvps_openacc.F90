@@ -56,7 +56,7 @@ SUBROUTINE CPMVVPS_OPENACC (YDCST, YDVAB, KLON, KIDIA, KFDIA, KFLEV, PDT, PFP, P
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !    ------------------------------------------------------------------
   
-!$acc routine( CPMVVPS_OPENACC ) seq
+!$acc routine( CPMVVPS_OPENACC )
   
   USE YOMVERT, ONLY: TVAB
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -96,7 +96,15 @@ SUBROUTINE CPMVVPS_OPENACC (YDCST, YDVAB, KLON, KIDIA, KFDIA, KFLEV, PDT, PFP, P
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZFE)
+  IF (KIND (ZFE) == 8) THEN
+    alloc8 (ZFE)
+  ELSE
+    IF (KIND (ZFE) == 8) THEN
+      alloc4 (ZFE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

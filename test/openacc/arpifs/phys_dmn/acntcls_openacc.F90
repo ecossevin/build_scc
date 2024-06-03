@@ -120,7 +120,7 @@ SUBROUTINE ACNTCLS_OPENACC (YDPHY, YDPHY0, YDCST, KIDIA, KFDIA, KLON, KLEV, PAPR
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACNTCLS_OPENACC ) seq
+!$acc routine( ACNTCLS_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

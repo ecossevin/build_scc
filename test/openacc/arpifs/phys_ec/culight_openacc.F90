@@ -99,7 +99,7 @@ SUBROUTINE CULIGHT_OPENACC (PPLDARE, PPLRG, YDTHF, YDCST, YDEPHY, YGFL, YDECUMF,
   !
   !----------------------------------------------------------------------
   
-!$acc routine( CULIGHT_OPENACC ) seq
+!$acc routine( CULIGHT_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

@@ -2,7 +2,7 @@
 
 source ~/loki_env/bin/activate
 
-export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH
+export PATH=~/build_scc:$PATH
 p=$(pwd)
 
 

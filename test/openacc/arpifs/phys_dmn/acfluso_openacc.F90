@@ -139,7 +139,7 @@ SUBROUTINE ACFLUSO_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KLEV, PAPHI,
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACFLUSO_OPENACC ) seq
+!$acc routine( ACFLUSO_OPENACC )
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB, JPRD

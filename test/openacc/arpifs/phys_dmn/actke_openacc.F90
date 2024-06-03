@@ -127,7 +127,7 @@ SUBROUTINE ACTKE_OPENACC (YDCST, YDLDDH, YDMDDH, YDML_PHY_MF, KIDIA, KFDIA, KLON
   
   !-----------------------------------------------------------------------
   
-!$acc routine( ACTKE_OPENACC ) seq
+!$acc routine( ACTKE_OPENACC )
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE YOMMDDH, ONLY: TMDDH
@@ -251,34 +251,258 @@ SUBROUTINE ACTKE_OPENACC (YDCST, YDLDDH, YDMDDH, YDML_PHY_MF, KIDIA, KFDIA, KLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZUSLE)
-  alloc (ZLMECT)
-  alloc (ZPHI3)
-  alloc (ZPRODTH)
-  alloc (ZPRDY)
-  alloc (ZDIAG)
-  alloc (ZDIFF)
-  alloc (ZDISS)
-  alloc (ZECT)
-  alloc (ZECT1)
-  alloc (ZDELPSG)
-  alloc (ZDET)
-  alloc (ZKCLS)
-  alloc (ZECTCLS)
-  alloc (ZTABHL)
-  alloc (ZTABFL)
-  alloc (ZDIFFAR)
-  alloc (ZFPRTH)
-  alloc (ZFPRDY)
-  alloc (ZFDISS)
-  alloc (ZFDIFF)
-  alloc (ZFCORTKE)
-  alloc (ZTPRTH)
-  alloc (ZTDISS)
-  alloc (ZTDIFF)
-  alloc (ZTCORTKE)
-  alloc (ZEDR)
-  alloc (LLCONV)
+  IF (KIND (ZUSLE) == 8) THEN
+    alloc8 (ZUSLE)
+  ELSE
+    IF (KIND (ZUSLE) == 8) THEN
+      alloc4 (ZUSLE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLMECT) == 8) THEN
+    alloc8 (ZLMECT)
+  ELSE
+    IF (KIND (ZLMECT) == 8) THEN
+      alloc4 (ZLMECT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPHI3) == 8) THEN
+    alloc8 (ZPHI3)
+  ELSE
+    IF (KIND (ZPHI3) == 8) THEN
+      alloc4 (ZPHI3)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPRODTH) == 8) THEN
+    alloc8 (ZPRODTH)
+  ELSE
+    IF (KIND (ZPRODTH) == 8) THEN
+      alloc4 (ZPRODTH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPRDY) == 8) THEN
+    alloc8 (ZPRDY)
+  ELSE
+    IF (KIND (ZPRDY) == 8) THEN
+      alloc4 (ZPRDY)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDIAG) == 8) THEN
+    alloc8 (ZDIAG)
+  ELSE
+    IF (KIND (ZDIAG) == 8) THEN
+      alloc4 (ZDIAG)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDIFF) == 8) THEN
+    alloc8 (ZDIFF)
+  ELSE
+    IF (KIND (ZDIFF) == 8) THEN
+      alloc4 (ZDIFF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDISS) == 8) THEN
+    alloc8 (ZDISS)
+  ELSE
+    IF (KIND (ZDISS) == 8) THEN
+      alloc4 (ZDISS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZECT) == 8) THEN
+    alloc8 (ZECT)
+  ELSE
+    IF (KIND (ZECT) == 8) THEN
+      alloc4 (ZECT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZECT1) == 8) THEN
+    alloc8 (ZECT1)
+  ELSE
+    IF (KIND (ZECT1) == 8) THEN
+      alloc4 (ZECT1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDELPSG) == 8) THEN
+    alloc8 (ZDELPSG)
+  ELSE
+    IF (KIND (ZDELPSG) == 8) THEN
+      alloc4 (ZDELPSG)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDET) == 8) THEN
+    alloc8 (ZDET)
+  ELSE
+    IF (KIND (ZDET) == 8) THEN
+      alloc4 (ZDET)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZKCLS) == 8) THEN
+    alloc8 (ZKCLS)
+  ELSE
+    IF (KIND (ZKCLS) == 8) THEN
+      alloc4 (ZKCLS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZECTCLS) == 8) THEN
+    alloc8 (ZECTCLS)
+  ELSE
+    IF (KIND (ZECTCLS) == 8) THEN
+      alloc4 (ZECTCLS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTABHL) == 8) THEN
+    alloc8 (ZTABHL)
+  ELSE
+    IF (KIND (ZTABHL) == 8) THEN
+      alloc4 (ZTABHL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTABFL) == 8) THEN
+    alloc8 (ZTABFL)
+  ELSE
+    IF (KIND (ZTABFL) == 8) THEN
+      alloc4 (ZTABFL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDIFFAR) == 8) THEN
+    alloc8 (ZDIFFAR)
+  ELSE
+    IF (KIND (ZDIFFAR) == 8) THEN
+      alloc4 (ZDIFFAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFPRTH) == 8) THEN
+    alloc8 (ZFPRTH)
+  ELSE
+    IF (KIND (ZFPRTH) == 8) THEN
+      alloc4 (ZFPRTH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFPRDY) == 8) THEN
+    alloc8 (ZFPRDY)
+  ELSE
+    IF (KIND (ZFPRDY) == 8) THEN
+      alloc4 (ZFPRDY)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFDISS) == 8) THEN
+    alloc8 (ZFDISS)
+  ELSE
+    IF (KIND (ZFDISS) == 8) THEN
+      alloc4 (ZFDISS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFDIFF) == 8) THEN
+    alloc8 (ZFDIFF)
+  ELSE
+    IF (KIND (ZFDIFF) == 8) THEN
+      alloc4 (ZFDIFF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFCORTKE) == 8) THEN
+    alloc8 (ZFCORTKE)
+  ELSE
+    IF (KIND (ZFCORTKE) == 8) THEN
+      alloc4 (ZFCORTKE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTPRTH) == 8) THEN
+    alloc8 (ZTPRTH)
+  ELSE
+    IF (KIND (ZTPRTH) == 8) THEN
+      alloc4 (ZTPRTH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTDISS) == 8) THEN
+    alloc8 (ZTDISS)
+  ELSE
+    IF (KIND (ZTDISS) == 8) THEN
+      alloc4 (ZTDISS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTDIFF) == 8) THEN
+    alloc8 (ZTDIFF)
+  ELSE
+    IF (KIND (ZTDIFF) == 8) THEN
+      alloc4 (ZTDIFF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTCORTKE) == 8) THEN
+    alloc8 (ZTCORTKE)
+  ELSE
+    IF (KIND (ZTCORTKE) == 8) THEN
+      alloc4 (ZTCORTKE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZEDR) == 8) THEN
+    alloc8 (ZEDR)
+  ELSE
+    IF (KIND (ZEDR) == 8) THEN
+      alloc4 (ZEDR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (LLCONV) == 8) THEN
+    alloc8 (LLCONV)
+  ELSE
+    IF (KIND (LLCONV) == 8) THEN
+      alloc4 (LLCONV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

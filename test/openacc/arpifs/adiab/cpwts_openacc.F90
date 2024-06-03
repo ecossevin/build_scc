@@ -70,7 +70,7 @@ SUBROUTINE CPWTS_OPENACC (YDCST, YDCPG_OPTS, YDMCC, YDPHY, YDPHY1, KLON, KIDIA, 
   !     ------------------------------------------------------------------
   
   
-!$acc routine( CPWTS_OPENACC ) seq
+!$acc routine( CPWTS_OPENACC )
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: DR_HOOK, JPHOOK, LHOOK

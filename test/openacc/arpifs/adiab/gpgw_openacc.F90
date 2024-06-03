@@ -75,7 +75,7 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   !   H. Petithomme (Dec 2020): optimisation and test re-organization
   !------------------------------------------------------------------
   
-!$acc routine( GPGW_OPENACC ) seq
+!$acc routine( GPGW_OPENACC )
   
   USE GEOMETRY_MOD, ONLY: GEOMETRY
   USE PARKIND1, ONLY: JPIM, JPRB
