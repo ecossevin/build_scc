@@ -75,7 +75,7 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   !   H. Petithomme (Dec 2020): optimisation and test re-organization
   !------------------------------------------------------------------
   
-!$acc routine( GPGW_OPENACC )
+!$acc routine( GPGW_OPENACC ) seq
   
   USE GEOMETRY_MOD, ONLY: GEOMETRY
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -128,7 +128,7 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   IF (KIND (ZGDW0) == 8) THEN
     alloc8 (ZGDW0)
   ELSE
-    IF (KIND (ZGDW0) == 8) THEN
+    IF (KIND (ZGDW0) == 4) THEN
       alloc4 (ZGDW0)
     ELSE
       STOP 1
@@ -137,7 +137,7 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   IF (KIND (ZIN) == 8) THEN
     alloc8 (ZIN)
   ELSE
-    IF (KIND (ZIN) == 8) THEN
+    IF (KIND (ZIN) == 4) THEN
       alloc4 (ZIN)
     ELSE
       STOP 1
@@ -146,7 +146,7 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   IF (KIND (ZGWH) == 8) THEN
     alloc8 (ZGWH)
   ELSE
-    IF (KIND (ZGWH) == 8) THEN
+    IF (KIND (ZGWH) == 4) THEN
       alloc4 (ZGWH)
     ELSE
       STOP 1

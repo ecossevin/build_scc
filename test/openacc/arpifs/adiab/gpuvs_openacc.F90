@@ -60,7 +60,7 @@ SUBROUTINE GPUVS_OPENACC (KFLEV, KPROMA, KST, KEND, LDER, PUF, PVF, PUS, PVS, PD
   !   N. Wedi and K. Yessad (Jan 2008): different dev for NH model and PC scheme
   !------------------------------------------------------------------
   
-!$acc routine( GPUVS_OPENACC )
+!$acc routine( GPUVS_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

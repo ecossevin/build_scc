@@ -70,7 +70,7 @@ SUBROUTINE LATTEX_TNT_OPENACC (YDGEOMETRY, YDLDDH, YDDYN, KST, KEND, KXLAG, PESG
   !     F. Vana   22-Feb-2011 : optin N[X]LAG=4
   !     ------------------------------------------------------------------
   
-!$acc routine( LATTEX_TNT_OPENACC )
+!$acc routine( LATTEX_TNT_OPENACC ) seq
   
   USE GEOMETRY_MOD, ONLY: GEOMETRY
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -118,7 +118,7 @@ SUBROUTINE LATTEX_TNT_OPENACC (YDGEOMETRY, YDLDDH, YDDYN, KST, KEND, KXLAG, PESG
   IF (KIND (ZMOYXNL) == 8) THEN
     alloc8 (ZMOYXNL)
   ELSE
-    IF (KIND (ZMOYXNL) == 8) THEN
+    IF (KIND (ZMOYXNL) == 4) THEN
       alloc4 (ZMOYXNL)
     ELSE
       STOP 1

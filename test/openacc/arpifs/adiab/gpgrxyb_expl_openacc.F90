@@ -113,7 +113,7 @@ SUBROUTINE GPGRXYB_EXPL_OPENACC (YDCVER, KPROMA, KST, KEND, KFLEV, LDCOEF, YDVAB
   !        H. Petithomme (Dec 2020): use of pointers for optimisation
   !     ------------------------------------------------------------------
   
-!$acc routine( GPGRXYB_EXPL_OPENACC )
+!$acc routine( GPGRXYB_EXPL_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK

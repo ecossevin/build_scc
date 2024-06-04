@@ -41,6 +41,7 @@ my_dict_arpege = {
     "YDMODEL%YRML_PHY_MF%YRSIMPHL%LTRAJPS" : '.FALSE.',
     "LTRAJSAVE" : '.FALSE.',
     "YDMODEL%YRML_DYN%YRDYNA%LSLAG" : '.TRUE.',
+    "LLVERINT_ON_CPU" : '.FALSE.',
 }
 
 my_dict = {

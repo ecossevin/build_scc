@@ -105,7 +105,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   !      H. Petithomme (Nov 2020): use of pointers for avoiding array copies
   !     ------------------------------------------------------------------
   
-!$acc routine( GPGRGEO_EXPL_OPENACC )
+!$acc routine( GPGRGEO_EXPL_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK
@@ -173,7 +173,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   IF (KIND (ZNH1L) == 8) THEN
     alloc8 (ZNH1L)
   ELSE
-    IF (KIND (ZNH1L) == 8) THEN
+    IF (KIND (ZNH1L) == 4) THEN
       alloc4 (ZNH1L)
     ELSE
       STOP 1
@@ -182,7 +182,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   IF (KIND (ZNH1M) == 8) THEN
     alloc8 (ZNH1M)
   ELSE
-    IF (KIND (ZNH1M) == 8) THEN
+    IF (KIND (ZNH1M) == 4) THEN
       alloc4 (ZNH1M)
     ELSE
       STOP 1
@@ -191,7 +191,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   IF (KIND (ZGPHL) == 8) THEN
     alloc8 (ZGPHL)
   ELSE
-    IF (KIND (ZGPHL) == 8) THEN
+    IF (KIND (ZGPHL) == 4) THEN
       alloc4 (ZGPHL)
     ELSE
       STOP 1
@@ -200,7 +200,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   IF (KIND (ZGPHM) == 8) THEN
     alloc8 (ZGPHM)
   ELSE
-    IF (KIND (ZGPHM) == 8) THEN
+    IF (KIND (ZGPHM) == 4) THEN
       alloc4 (ZGPHM)
     ELSE
       STOP 1
@@ -209,7 +209,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   IF (KIND (ZINL) == 8) THEN
     alloc8 (ZINL)
   ELSE
-    IF (KIND (ZINL) == 8) THEN
+    IF (KIND (ZINL) == 4) THEN
       alloc4 (ZINL)
     ELSE
       STOP 1
@@ -218,7 +218,7 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   IF (KIND (ZINM) == 8) THEN
     alloc8 (ZINM)
   ELSE
-    IF (KIND (ZINM) == 8) THEN
+    IF (KIND (ZINM) == 4) THEN
       alloc4 (ZINM)
     ELSE
       STOP 1

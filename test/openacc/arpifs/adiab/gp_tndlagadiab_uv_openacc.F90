@@ -66,7 +66,7 @@ SUBROUTINE GP_TNDLAGADIAB_UV_OPENACC (LDRPLANE, YDGEOMETRY, YDEPHY, YDDYN, KST, 
   !------------------------------------------------------------------------------
   ! End Modifications
   
-!$acc routine( GP_TNDLAGADIAB_UV_OPENACC )
+!$acc routine( GP_TNDLAGADIAB_UV_OPENACC ) seq
   
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK
   USE PARKIND1, ONLY: JPIM, JPRB

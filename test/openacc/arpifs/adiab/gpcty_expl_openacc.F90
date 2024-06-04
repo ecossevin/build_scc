@@ -131,7 +131,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   !   H Petithomme (Dec 2020): use of pointer, add directives for dependencies
   !     ------------------------------------------------------------------
   
-!$acc routine( GPCTY_EXPL_OPENACC )
+!$acc routine( GPCTY_EXPL_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK
@@ -199,7 +199,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   IF (KIND (ZSDIV) == 8) THEN
     alloc8 (ZSDIV)
   ELSE
-    IF (KIND (ZSDIV) == 8) THEN
+    IF (KIND (ZSDIV) == 4) THEN
       alloc4 (ZSDIV)
     ELSE
       STOP 1
@@ -208,7 +208,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   IF (KIND (ZPSDIVFE) == 8) THEN
     alloc8 (ZPSDIVFE)
   ELSE
-    IF (KIND (ZPSDIVFE) == 8) THEN
+    IF (KIND (ZPSDIVFE) == 4) THEN
       alloc4 (ZPSDIVFE)
     ELSE
       STOP 1
@@ -217,7 +217,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   IF (KIND (ZVP) == 8) THEN
     alloc8 (ZVP)
   ELSE
-    IF (KIND (ZVP) == 8) THEN
+    IF (KIND (ZVP) == 4) THEN
       alloc4 (ZVP)
     ELSE
       STOP 1

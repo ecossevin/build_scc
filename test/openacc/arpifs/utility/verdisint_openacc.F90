@@ -67,7 +67,7 @@ SUBROUTINE VERDISINT_OPENACC (YDVFE, YDCVER, CDOPER, CDBC, KPROMA, KST, KEND, KF
   !        P.Smolikova (Sep 2020): VFE pruning.
   !     ------------------------------------------------------------------
   
-!$acc routine( VERDISINT_OPENACC )
+!$acc routine( VERDISINT_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB, JPRD
   USE YOMCVER, ONLY: TCVER

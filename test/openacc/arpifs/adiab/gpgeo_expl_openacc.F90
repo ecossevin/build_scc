@@ -79,7 +79,7 @@ SUBROUTINE GPGEO_EXPL_OPENACC (KPROMA, KST, KEND, KFLEV, PHI, PHIF, PT, PR, PLNP
   !      H Petithomme (Dec 2020): merge VFD loops
   !     ------------------------------------------------------------------
   
-!$acc routine( GPGEO_EXPL_OPENACC )
+!$acc routine( GPGEO_EXPL_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, JPHOOK, DR_HOOK
@@ -122,7 +122,7 @@ SUBROUTINE GPGEO_EXPL_OPENACC (KPROMA, KST, KEND, KFLEV, PHI, PHIF, PT, PR, PLNP
   IF (KIND (ZPHI) == 8) THEN
     alloc8 (ZPHI)
   ELSE
-    IF (KIND (ZPHI) == 8) THEN
+    IF (KIND (ZPHI) == 4) THEN
       alloc4 (ZPHI)
     ELSE
       STOP 1
@@ -131,7 +131,7 @@ SUBROUTINE GPGEO_EXPL_OPENACC (KPROMA, KST, KEND, KFLEV, PHI, PHIF, PT, PR, PLNP
   IF (KIND (ZOUT) == 8) THEN
     alloc8 (ZOUT)
   ELSE
-    IF (KIND (ZOUT) == 8) THEN
+    IF (KIND (ZOUT) == 4) THEN
       alloc4 (ZOUT)
     ELSE
       STOP 1

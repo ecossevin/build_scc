@@ -85,7 +85,7 @@ SUBROUTINE LATTEX_DNT_OPENACC (KSTEP, YDGEOMETRY, YDLDDH, YDRIP, YDDYN, YDDYNA, 
   ! End Modifications
   !------------------------------------------------------------------------------
   
-!$acc routine( LATTEX_DNT_OPENACC )
+!$acc routine( LATTEX_DNT_OPENACC ) seq
   
   USE GEOMETRY_MOD, ONLY: GEOMETRY
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -162,7 +162,7 @@ SUBROUTINE LATTEX_DNT_OPENACC (KSTEP, YDGEOMETRY, YDLDDH, YDRIP, YDDYN, YDDYNA, 
   IF (KIND (ZXNLT1) == 8) THEN
     alloc8 (ZXNLT1)
   ELSE
-    IF (KIND (ZXNLT1) == 8) THEN
+    IF (KIND (ZXNLT1) == 4) THEN
       alloc4 (ZXNLT1)
     ELSE
       STOP 1
@@ -171,7 +171,7 @@ SUBROUTINE LATTEX_DNT_OPENACC (KSTEP, YDGEOMETRY, YDLDDH, YDRIP, YDDYN, YDDYNA, 
   IF (KIND (ZXNLT0) == 8) THEN
     alloc8 (ZXNLT0)
   ELSE
-    IF (KIND (ZXNLT0) == 8) THEN
+    IF (KIND (ZXNLT0) == 4) THEN
       alloc4 (ZXNLT0)
     ELSE
       STOP 1

@@ -74,7 +74,7 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   ! End Modifications
   !---------------------------------------------------------------------
   
-!$acc routine( GPXX_OPENACC )
+!$acc routine( GPXX_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB, JPRD
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -129,7 +129,7 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   IF (KIND (ZDUF) == 8) THEN
     alloc8 (ZDUF)
   ELSE
-    IF (KIND (ZDUF) == 8) THEN
+    IF (KIND (ZDUF) == 4) THEN
       alloc4 (ZDUF)
     ELSE
       STOP 1
@@ -138,7 +138,7 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   IF (KIND (ZDVF) == 8) THEN
     alloc8 (ZDVF)
   ELSE
-    IF (KIND (ZDVF) == 8) THEN
+    IF (KIND (ZDVF) == 4) THEN
       alloc4 (ZDVF)
     ELSE
       STOP 1
@@ -147,7 +147,7 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   IF (KIND (ZF) == 8) THEN
     alloc8 (ZF)
   ELSE
-    IF (KIND (ZF) == 8) THEN
+    IF (KIND (ZF) == 4) THEN
       alloc4 (ZF)
     ELSE
       STOP 1
