@@ -41,7 +41,7 @@ SUBROUTINE CPPHINP_OPENACC (YDGEOMETRY, YDMODEL, KIDIA, KFDIA, PGEMU, PGELAM, PU
   !      2011-05-10 E. Bazile: PMU0M=PMU0 for NRADFR=1
   !     ------------------------------------------------------------------
   
-!$acc routine( CPPHINP_OPENACC )
+!$acc routine( CPPHINP_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

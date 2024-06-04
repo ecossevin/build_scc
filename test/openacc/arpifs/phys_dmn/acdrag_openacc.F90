@@ -100,7 +100,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACDRAG_OPENACC )
+!$acc routine( ACDRAG_OPENACC ) seq
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB, JPRD
@@ -231,7 +231,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   IF (KIND (ZIPOI) == 8) THEN
     alloc8 (ZIPOI)
   ELSE
-    IF (KIND (ZIPOI) == 8) THEN
+    IF (KIND (ZIPOI) == 4) THEN
       alloc4 (ZIPOI)
     ELSE
       STOP 1
@@ -240,7 +240,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   IF (KIND (ZNFNO) == 8) THEN
     alloc8 (ZNFNO)
   ELSE
-    IF (KIND (ZNFNO) == 8) THEN
+    IF (KIND (ZNFNO) == 4) THEN
       alloc4 (ZNFNO)
     ELSE
       STOP 1
@@ -249,7 +249,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   IF (KIND (ZPOID) == 8) THEN
     alloc8 (ZPOID)
   ELSE
-    IF (KIND (ZPOID) == 8) THEN
+    IF (KIND (ZPOID) == 4) THEN
       alloc4 (ZPOID)
     ELSE
       STOP 1
@@ -258,7 +258,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   IF (KIND (ZRAPP) == 8) THEN
     alloc8 (ZRAPP)
   ELSE
-    IF (KIND (ZRAPP) == 8) THEN
+    IF (KIND (ZRAPP) == 4) THEN
       alloc4 (ZRAPP)
     ELSE
       STOP 1
@@ -267,7 +267,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   IF (KIND (ZU) == 8) THEN
     alloc8 (ZU)
   ELSE
-    IF (KIND (ZU) == 8) THEN
+    IF (KIND (ZU) == 4) THEN
       alloc4 (ZU)
     ELSE
       STOP 1
@@ -276,7 +276,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   IF (KIND (ZV) == 8) THEN
     alloc8 (ZV)
   ELSE
-    IF (KIND (ZV) == 8) THEN
+    IF (KIND (ZV) == 4) THEN
       alloc4 (ZV)
     ELSE
       STOP 1
@@ -285,7 +285,7 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   IF (KIND (ZWGHT) == 8) THEN
     alloc8 (ZWGHT)
   ELSE
-    IF (KIND (ZWGHT) == 8) THEN
+    IF (KIND (ZWGHT) == 4) THEN
       alloc4 (ZWGHT)
     ELSE
       STOP 1

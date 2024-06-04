@@ -126,9 +126,33 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZDUF)
-  alloc (ZDVF)
-  alloc (ZF)
+  IF (KIND (ZDUF) == 8) THEN
+    alloc8 (ZDUF)
+  ELSE
+    IF (KIND (ZDUF) == 8) THEN
+      alloc4 (ZDUF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDVF) == 8) THEN
+    alloc8 (ZDVF)
+  ELSE
+    IF (KIND (ZDVF) == 8) THEN
+      alloc4 (ZDVF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZF) == 8) THEN
+    alloc8 (ZF)
+  ELSE
+    IF (KIND (ZF) == 8) THEN
+      alloc4 (ZF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   ! -----------------------------------------------------------------------------

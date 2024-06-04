@@ -52,7 +52,7 @@ SUBROUTINE CUBIDIAG_OPENACC (KIDIA, KFDIA, KLON, KLEV, KCTOP, LD_LCUMASK, PA, PB
   
   !----------------------------------------------------------------------
   
-!$acc routine( CUBIDIAG_OPENACC )
+!$acc routine( CUBIDIAG_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

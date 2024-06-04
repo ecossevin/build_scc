@@ -112,7 +112,7 @@ SUBROUTINE ACVEG_OPENACC (YDPHY, YDPHY1, KIDIA, KFDIA, KLON, KLEV, PFRSO, PQ, PQ
   !      K. Yessad (Jul 2009): remove CDLOCK + some cleanings
   !-----------------------------------------------------------------------
   
-!$acc routine( ACVEG_OPENACC )
+!$acc routine( ACVEG_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

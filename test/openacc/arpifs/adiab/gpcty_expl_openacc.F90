@@ -196,9 +196,33 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZSDIV)
-  alloc (ZPSDIVFE)
-  alloc (ZVP)
+  IF (KIND (ZSDIV) == 8) THEN
+    alloc8 (ZSDIV)
+  ELSE
+    IF (KIND (ZSDIV) == 8) THEN
+      alloc4 (ZSDIV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPSDIVFE) == 8) THEN
+    alloc8 (ZPSDIVFE)
+  ELSE
+    IF (KIND (ZPSDIVFE) == 8) THEN
+      alloc4 (ZPSDIVFE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZVP) == 8) THEN
+    alloc8 (ZVP)
+  ELSE
+    IF (KIND (ZVP) == 8) THEN
+      alloc4 (ZVP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   !     ------------------------------------------------------------------

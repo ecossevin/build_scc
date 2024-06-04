@@ -124,7 +124,7 @@ SUBROUTINE ACSOL_OPENACC (YDCLI, YDCST, YDPHY, YDPHY1, KIDIA, KFDIA, KLON, PARG,
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACSOL_OPENACC )
+!$acc routine( ACSOL_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -237,7 +237,7 @@ SUBROUTINE ACSOL_OPENACC (YDCLI, YDCST, YDPHY, YDPHY1, KIDIA, KFDIA, KLON, PARG,
   IF (KIND (ZWSAT) == 8) THEN
     alloc8 (ZWSAT)
   ELSE
-    IF (KIND (ZWSAT) == 8) THEN
+    IF (KIND (ZWSAT) == 4) THEN
       alloc4 (ZWSAT)
     ELSE
       STOP 1

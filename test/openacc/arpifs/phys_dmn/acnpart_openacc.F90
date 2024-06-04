@@ -79,7 +79,7 @@ SUBROUTINE ACNPART_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   ! End Modifications
   !-------------------------------------------------------------------------------
   
-!$acc routine( ACNPART_OPENACC )
+!$acc routine( ACNPART_OPENACC ) seq
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB

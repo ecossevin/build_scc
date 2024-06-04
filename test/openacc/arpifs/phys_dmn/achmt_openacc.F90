@@ -205,7 +205,7 @@ SUBROUTINE ACHMT_OPENACC (YDCLI, YDPHY, YDPHY0, YDPHY1, YDPHY2, YDCST, KIDIA, KF
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACHMT_OPENACC )
+!$acc routine( ACHMT_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB, JPRD
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -402,7 +402,7 @@ SUBROUTINE ACHMT_OPENACC (YDCLI, YDPHY, YDPHY0, YDPHY1, YDPHY2, YDCST, KIDIA, KF
   IF (KIND (ZCDNH) == 8) THEN
     alloc8 (ZCDNH)
   ELSE
-    IF (KIND (ZCDNH) == 8) THEN
+    IF (KIND (ZCDNH) == 4) THEN
       alloc4 (ZCDNH)
     ELSE
       STOP 1
@@ -411,7 +411,7 @@ SUBROUTINE ACHMT_OPENACC (YDCLI, YDPHY, YDPHY0, YDPHY1, YDPHY2, YDCST, KIDIA, KF
   IF (KIND (ZDPHI) == 8) THEN
     alloc8 (ZDPHI)
   ELSE
-    IF (KIND (ZDPHI) == 8) THEN
+    IF (KIND (ZDPHI) == 4) THEN
       alloc4 (ZDPHI)
     ELSE
       STOP 1
@@ -420,7 +420,7 @@ SUBROUTINE ACHMT_OPENACC (YDCLI, YDPHY, YDPHY0, YDPHY1, YDPHY2, YDCST, KIDIA, KF
   IF (KIND (ZCDMR) == 8) THEN
     alloc8 (ZCDMR)
   ELSE
-    IF (KIND (ZCDMR) == 8) THEN
+    IF (KIND (ZCDMR) == 4) THEN
       alloc4 (ZCDMR)
     ELSE
       STOP 1
@@ -429,7 +429,7 @@ SUBROUTINE ACHMT_OPENACC (YDCLI, YDPHY, YDPHY0, YDPHY1, YDPHY2, YDCST, KIDIA, KF
   IF (KIND (ZCDNMR) == 8) THEN
     alloc8 (ZCDNMR)
   ELSE
-    IF (KIND (ZCDNMR) == 8) THEN
+    IF (KIND (ZCDNMR) == 4) THEN
       alloc4 (ZCDNMR)
     ELSE
       STOP 1

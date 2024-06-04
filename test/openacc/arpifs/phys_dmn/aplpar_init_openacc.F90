@@ -6,7 +6,7 @@ SUBROUTINE APLPAR_INIT_OPENACC (LDAROME, KIDIA, KFDIA, KLON, KLEV, KSGST, KCSS, 
   !---------------------------------------------------------------------
   ! - OUTPUT .
   
-!$acc routine( APLPAR_INIT_OPENACC )
+!$acc routine( APLPAR_INIT_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

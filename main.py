@@ -192,7 +192,7 @@ def alloc_temp(routine):
                         cond4 = Comparison(
                         		left=kind,
                         		operator='==',
-                        		right=symbols.IntLiteral(value=8))
+                        		right=symbols.IntLiteral(value=4))
                         alloc8='alloc8 ('+s.name+')'
                         alloc4='alloc4 ('+s.name+')'
                         stop='STOP 1'

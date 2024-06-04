@@ -94,7 +94,7 @@ SUBROUTINE CUFLXN_OPENACC (YDTHF, YDCST, YDEPHLI, YDECUMF, KIDIA, KFDIA, KLON, K
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !----------------------------------------------------------------------
   
-!$acc routine( CUFLXN_OPENACC )
+!$acc routine( CUFLXN_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

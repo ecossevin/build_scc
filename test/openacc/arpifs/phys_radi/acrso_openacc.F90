@@ -66,7 +66,7 @@ SUBROUTINE ACRSO_OPENACC (YDPHY0, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST, PGEMU,
   !-----------------------------------------------------------------------
   
   
-!$acc routine( ACRSO_OPENACC )
+!$acc routine( ACRSO_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -105,7 +105,7 @@ SUBROUTINE ACRSO_OPENACC (YDPHY0, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST, PGEMU,
   IF (KIND (ZRSO) == 8) THEN
     alloc8 (ZRSO)
   ELSE
-    IF (KIND (ZRSO) == 8) THEN
+    IF (KIND (ZRSO) == 4) THEN
       alloc4 (ZRSO)
     ELSE
       STOP 1
@@ -114,7 +114,7 @@ SUBROUTINE ACRSO_OPENACC (YDPHY0, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST, PGEMU,
   IF (KIND (ZTEND) == 8) THEN
     alloc8 (ZTEND)
   ELSE
-    IF (KIND (ZTEND) == 8) THEN
+    IF (KIND (ZTEND) == 4) THEN
       alloc4 (ZTEND)
     ELSE
       STOP 1

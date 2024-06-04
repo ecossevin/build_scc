@@ -143,6 +143,7 @@ do
   mkdir -p src/local/ifsaux/openacc/$dir
   g=$(resolve $f)
   python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+  python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
 done
 
 
@@ -193,6 +194,7 @@ do
 #  --only-if-newer \
   g=$(resolve $f)
   python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
+  python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
 #  exit 1
 done
 

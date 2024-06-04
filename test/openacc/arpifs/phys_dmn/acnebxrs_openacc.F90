@@ -76,7 +76,7 @@ SUBROUTINE ACNEBXRS_OPENACC (YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIA, KLEV, PQ,
   
   !-----------------------------------------------------------------------
   
-!$acc routine( ACNEBXRS_OPENACC )
+!$acc routine( ACNEBXRS_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

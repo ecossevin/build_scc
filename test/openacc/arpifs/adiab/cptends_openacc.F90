@@ -100,7 +100,7 @@ SUBROUTINE CPTENDS_OPENACC (YDCST, YDML_PHY_MF, KLON, KIDIA, KFDIA, KFLEV, KCSS,
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !     ------------------------------------------------------------------
   
-!$acc routine( CPTENDS_OPENACC )
+!$acc routine( CPTENDS_OPENACC ) seq
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB

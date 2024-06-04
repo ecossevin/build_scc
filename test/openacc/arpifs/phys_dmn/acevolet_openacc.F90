@@ -111,7 +111,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACEVOLET_OPENACC )
+!$acc routine( ACEVOLET_OPENACC ) seq
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -197,7 +197,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   IF (KIND (ZA) == 8) THEN
     alloc8 (ZA)
   ELSE
-    IF (KIND (ZA) == 8) THEN
+    IF (KIND (ZA) == 4) THEN
       alloc4 (ZA)
     ELSE
       STOP 1
@@ -206,7 +206,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   IF (KIND (ZE) == 8) THEN
     alloc8 (ZE)
   ELSE
-    IF (KIND (ZE) == 8) THEN
+    IF (KIND (ZE) == 4) THEN
       alloc4 (ZE)
     ELSE
       STOP 1
@@ -215,7 +215,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   IF (KIND (ZPA) == 8) THEN
     alloc8 (ZPA)
   ELSE
-    IF (KIND (ZPA) == 8) THEN
+    IF (KIND (ZPA) == 4) THEN
       alloc4 (ZPA)
     ELSE
       STOP 1
@@ -224,7 +224,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   IF (KIND (ZGKU) == 8) THEN
     alloc8 (ZGKU)
   ELSE
-    IF (KIND (ZGKU) == 8) THEN
+    IF (KIND (ZGKU) == 4) THEN
       alloc4 (ZGKU)
     ELSE
       STOP 1
@@ -233,7 +233,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   IF (KIND (ZDET) == 8) THEN
     alloc8 (ZDET)
   ELSE
-    IF (KIND (ZDET) == 8) THEN
+    IF (KIND (ZDET) == 4) THEN
       alloc4 (ZDET)
     ELSE
       STOP 1
@@ -242,7 +242,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   IF (KIND (ZGKEF) == 8) THEN
     alloc8 (ZGKEF)
   ELSE
-    IF (KIND (ZGKEF) == 8) THEN
+    IF (KIND (ZGKEF) == 4) THEN
       alloc4 (ZGKEF)
     ELSE
       STOP 1

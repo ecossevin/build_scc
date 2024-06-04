@@ -121,13 +121,69 @@ SUBROUTINE GPHPRE_EXPL_VERTFE0_OPENACC (YDCVER, TOPPRES, YDCST, KPROMA, KFLEV, K
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZZDELP)
-  alloc (ZZLNPR)
-  alloc (ZZRDELP)
-  alloc (ZZALPH)
-  alloc (ZZRTGR)
-  alloc (ZZRPRE)
-  alloc (ZZRPP)
+  IF (KIND (ZZDELP) == 8) THEN
+    alloc8 (ZZDELP)
+  ELSE
+    IF (KIND (ZZDELP) == 8) THEN
+      alloc4 (ZZDELP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZZLNPR) == 8) THEN
+    alloc8 (ZZLNPR)
+  ELSE
+    IF (KIND (ZZLNPR) == 8) THEN
+      alloc4 (ZZLNPR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZZRDELP) == 8) THEN
+    alloc8 (ZZRDELP)
+  ELSE
+    IF (KIND (ZZRDELP) == 8) THEN
+      alloc4 (ZZRDELP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZZALPH) == 8) THEN
+    alloc8 (ZZALPH)
+  ELSE
+    IF (KIND (ZZALPH) == 8) THEN
+      alloc4 (ZZALPH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZZRTGR) == 8) THEN
+    alloc8 (ZZRTGR)
+  ELSE
+    IF (KIND (ZZRTGR) == 8) THEN
+      alloc4 (ZZRTGR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZZRPRE) == 8) THEN
+    alloc8 (ZZRPRE)
+  ELSE
+    IF (KIND (ZZRPRE) == 8) THEN
+      alloc4 (ZZRPRE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZZRPP) == 8) THEN
+    alloc8 (ZZRPP)
+  ELSE
+    IF (KIND (ZZRPP) == 8) THEN
+      alloc4 (ZZRPP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   

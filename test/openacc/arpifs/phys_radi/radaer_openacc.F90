@@ -94,7 +94,7 @@ SUBROUTINE RADAER_OPENACC (YDEAERD, YDERAD, YDPHY, KIDIA, KFDIA, KLON, KLEV, PAP
   !                            mixed with Land aerosols
   !-----------------------------------------------------------------------
   
-!$acc routine( RADAER_OPENACC )
+!$acc routine( RADAER_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: DR_HOOK, JPHOOK, LHOOK
@@ -169,7 +169,7 @@ SUBROUTINE RADAER_OPENACC (YDEAERD, YDERAD, YDPHY, KIDIA, KFDIA, KLON, KLEV, PAP
   IF (KIND (ZTH) == 8) THEN
     alloc8 (ZTH)
   ELSE
-    IF (KIND (ZTH) == 8) THEN
+    IF (KIND (ZTH) == 4) THEN
       alloc4 (ZTH)
     ELSE
       STOP 1

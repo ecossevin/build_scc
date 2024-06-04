@@ -170,12 +170,60 @@ SUBROUTINE GPGRGEO_EXPL_OPENACC (YDGEOMETRY, KPROMA, KST, KEND, KFLEV, PRT, PRTL
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZNH1L)
-  alloc (ZNH1M)
-  alloc (ZGPHL)
-  alloc (ZGPHM)
-  alloc (ZINL)
-  alloc (ZINM)
+  IF (KIND (ZNH1L) == 8) THEN
+    alloc8 (ZNH1L)
+  ELSE
+    IF (KIND (ZNH1L) == 8) THEN
+      alloc4 (ZNH1L)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNH1M) == 8) THEN
+    alloc8 (ZNH1M)
+  ELSE
+    IF (KIND (ZNH1M) == 8) THEN
+      alloc4 (ZNH1M)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZGPHL) == 8) THEN
+    alloc8 (ZGPHL)
+  ELSE
+    IF (KIND (ZGPHL) == 8) THEN
+      alloc4 (ZGPHL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZGPHM) == 8) THEN
+    alloc8 (ZGPHM)
+  ELSE
+    IF (KIND (ZGPHM) == 8) THEN
+      alloc4 (ZGPHM)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZINL) == 8) THEN
+    alloc8 (ZINL)
+  ELSE
+    IF (KIND (ZINL) == 8) THEN
+      alloc4 (ZINL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZINM) == 8) THEN
+    alloc8 (ZINM)
+  ELSE
+    IF (KIND (ZINM) == 8) THEN
+      alloc4 (ZINM)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   !     ------------------------------------------------------------------

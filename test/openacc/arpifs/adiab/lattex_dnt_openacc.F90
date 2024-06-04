@@ -159,8 +159,24 @@ SUBROUTINE LATTEX_DNT_OPENACC (KSTEP, YDGEOMETRY, YDLDDH, YDRIP, YDDYN, YDDYNA, 
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZXNLT1)
-  alloc (ZXNLT0)
+  IF (KIND (ZXNLT1) == 8) THEN
+    alloc8 (ZXNLT1)
+  ELSE
+    IF (KIND (ZXNLT1) == 8) THEN
+      alloc4 (ZXNLT1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZXNLT0) == 8) THEN
+    alloc8 (ZXNLT0)
+  ELSE
+    IF (KIND (ZXNLT0) == 8) THEN
+      alloc4 (ZXNLT0)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   !     ------------------------------------------------------------------

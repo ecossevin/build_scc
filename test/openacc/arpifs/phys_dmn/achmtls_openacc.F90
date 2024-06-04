@@ -137,7 +137,7 @@ SUBROUTINE ACHMTLS_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KLEV, PAPHI,
   
   !-----------------------------------------------------------------------
   
-!$acc routine( ACHMTLS_OPENACC )
+!$acc routine( ACHMTLS_OPENACC ) seq
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB

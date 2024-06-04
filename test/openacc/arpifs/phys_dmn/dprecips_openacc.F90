@@ -79,7 +79,7 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   !
   !     ------------------------------------------------------------------
   
-!$acc routine( DPRECIPS_OPENACC )
+!$acc routine( DPRECIPS_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -146,7 +146,7 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   IF (KIND (ZHF) == 8) THEN
     alloc8 (ZHF)
   ELSE
-    IF (KIND (ZHF) == 8) THEN
+    IF (KIND (ZHF) == 4) THEN
       alloc4 (ZHF)
     ELSE
       STOP 1

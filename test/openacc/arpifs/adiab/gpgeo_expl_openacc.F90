@@ -119,8 +119,24 @@ SUBROUTINE GPGEO_EXPL_OPENACC (KPROMA, KST, KEND, KFLEV, PHI, PHIF, PT, PR, PLNP
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZPHI)
-  alloc (ZOUT)
+  IF (KIND (ZPHI) == 8) THEN
+    alloc8 (ZPHI)
+  ELSE
+    IF (KIND (ZPHI) == 8) THEN
+      alloc4 (ZPHI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZOUT) == 8) THEN
+    alloc8 (ZOUT)
+  ELSE
+    IF (KIND (ZOUT) == 8) THEN
+      alloc4 (ZOUT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   !     ------------------------------------------------------------------

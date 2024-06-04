@@ -102,7 +102,7 @@ SUBROUTINE ACPLUIS_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACPLUIS_OPENACC )
+!$acc routine( ACPLUIS_OPENACC ) seq
   
   USE MODEL_PHYSICS_MF_MOD, ONLY: MODEL_PHYSICS_MF_TYPE
   USE PARKIND1, ONLY: JPIM, JPRB
@@ -201,7 +201,7 @@ SUBROUTINE ACPLUIS_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   IF (KIND (ZFONTE) == 8) THEN
     alloc8 (ZFONTE)
   ELSE
-    IF (KIND (ZFONTE) == 8) THEN
+    IF (KIND (ZFONTE) == 4) THEN
       alloc4 (ZFONTE)
     ELSE
       STOP 1

@@ -39,7 +39,7 @@ SUBROUTINE RADOZCMF_OPENACC (YDCST, YDEOZOC, KIDIA, KFDIA, KLON, KLEV, PAPRS, PG
   
   !-----------------------------------------------------------------------
   
-!$acc routine( RADOZCMF_OPENACC )
+!$acc routine( RADOZCMF_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -91,7 +91,7 @@ SUBROUTINE RADOZCMF_OPENACC (YDCST, YDEOZOC, KIDIA, KFDIA, KLON, KLEV, PAPRS, PG
   IF (KIND (ZOZLT) == 8) THEN
     alloc8 (ZOZLT)
   ELSE
-    IF (KIND (ZOZLT) == 8) THEN
+    IF (KIND (ZOZLT) == 4) THEN
       alloc4 (ZOZLT)
     ELSE
       STOP 1
@@ -100,7 +100,7 @@ SUBROUTINE RADOZCMF_OPENACC (YDCST, YDEOZOC, KIDIA, KFDIA, KLON, KLEV, PAPRS, PG
   IF (KIND (ZOZON) == 8) THEN
     alloc8 (ZOZON)
   ELSE
-    IF (KIND (ZOZON) == 8) THEN
+    IF (KIND (ZOZON) == 4) THEN
       alloc4 (ZOZON)
     ELSE
       STOP 1
@@ -109,7 +109,7 @@ SUBROUTINE RADOZCMF_OPENACC (YDCST, YDEOZOC, KIDIA, KFDIA, KLON, KLEV, PAPRS, PG
   IF (KIND (ZRRR) == 8) THEN
     alloc8 (ZRRR)
   ELSE
-    IF (KIND (ZRRR) == 8) THEN
+    IF (KIND (ZRRR) == 4) THEN
       alloc4 (ZRRR)
     ELSE
       STOP 1

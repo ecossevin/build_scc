@@ -114,7 +114,7 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-----------------------------------------------------------------------
   
-!$acc routine( ACDRME_OPENACC )
+!$acc routine( ACDRME_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -170,7 +170,7 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
   IF (KIND (ZTENU) == 8) THEN
     alloc8 (ZTENU)
   ELSE
-    IF (KIND (ZTENU) == 8) THEN
+    IF (KIND (ZTENU) == 4) THEN
       alloc4 (ZTENU)
     ELSE
       STOP 1
@@ -179,7 +179,7 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
   IF (KIND (ZTENV) == 8) THEN
     alloc8 (ZTENV)
   ELSE
-    IF (KIND (ZTENV) == 8) THEN
+    IF (KIND (ZTENV) == 4) THEN
       alloc4 (ZTENV)
     ELSE
       STOP 1
@@ -188,7 +188,7 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
   IF (KIND (ZTENT) == 8) THEN
     alloc8 (ZTENT)
   ELSE
-    IF (KIND (ZTENT) == 8) THEN
+    IF (KIND (ZTENT) == 4) THEN
       alloc4 (ZTENT)
     ELSE
       STOP 1
@@ -197,7 +197,7 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
   IF (KIND (ZTENQ) == 8) THEN
     alloc8 (ZTENQ)
   ELSE
-    IF (KIND (ZTENQ) == 8) THEN
+    IF (KIND (ZTENQ) == 4) THEN
       alloc4 (ZTENQ)
     ELSE
       STOP 1

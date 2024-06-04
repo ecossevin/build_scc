@@ -72,7 +72,7 @@ SUBROUTINE CUBASMCN_OPENACC (YDCST, YDECUMF, KIDIA, KFDIA, KLON, KLEV, KK, PTEN,
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !----------------------------------------------------------------------
   
-!$acc routine( CUBASMCN_OPENACC )
+!$acc routine( CUBASMCN_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

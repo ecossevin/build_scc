@@ -115,7 +115,15 @@ SUBROUTINE LATTEX_TNT_OPENACC (YDGEOMETRY, YDLDDH, YDDYN, KST, KEND, KXLAG, PESG
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZMOYXNL)
+  IF (KIND (ZMOYXNL) == 8) THEN
+    alloc8 (ZMOYXNL)
+  ELSE
+    IF (KIND (ZMOYXNL) == 8) THEN
+      alloc4 (ZMOYXNL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   !     ------------------------------------------------------------------

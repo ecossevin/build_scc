@@ -76,7 +76,7 @@ SUBROUTINE QNGCOR_OPENACC (YDCST, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLEV, PQ, P
   
   !---------------------------------------------------------------------
   
-!$acc routine( QNGCOR_OPENACC )
+!$acc routine( QNGCOR_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -137,7 +137,7 @@ SUBROUTINE QNGCOR_OPENACC (YDCST, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLEV, PQ, P
   IF (KIND (ZGSDPDT) == 8) THEN
     alloc8 (ZGSDPDT)
   ELSE
-    IF (KIND (ZGSDPDT) == 8) THEN
+    IF (KIND (ZGSDPDT) == 4) THEN
       alloc4 (ZGSDPDT)
     ELSE
       STOP 1
@@ -146,7 +146,7 @@ SUBROUTINE QNGCOR_OPENACC (YDCST, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLEV, PQ, P
   IF (KIND (ZFCQNG) == 8) THEN
     alloc8 (ZFCQNG)
   ELSE
-    IF (KIND (ZFCQNG) == 8) THEN
+    IF (KIND (ZFCQNG) == 4) THEN
       alloc4 (ZFCQNG)
     ELSE
       STOP 1
@@ -155,7 +155,7 @@ SUBROUTINE QNGCOR_OPENACC (YDCST, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLEV, PQ, P
   IF (KIND (ZQL) == 8) THEN
     alloc8 (ZQL)
   ELSE
-    IF (KIND (ZQL) == 8) THEN
+    IF (KIND (ZQL) == 4) THEN
       alloc4 (ZQL)
     ELSE
       STOP 1
@@ -164,7 +164,7 @@ SUBROUTINE QNGCOR_OPENACC (YDCST, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLEV, PQ, P
   IF (KIND (ZQI) == 8) THEN
     alloc8 (ZQI)
   ELSE
-    IF (KIND (ZQI) == 8) THEN
+    IF (KIND (ZQI) == 4) THEN
       alloc4 (ZQI)
     ELSE
       STOP 1

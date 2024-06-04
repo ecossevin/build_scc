@@ -110,7 +110,7 @@ SUBROUTINE ACVISIH_OPENACC (YDCST, YDVISI, KIDIA, KFDIA, KLON, KTDIA, KLEV, PAPH
   !
   !-----------------------------------------------------------------------
   
-!$acc routine( ACVISIH_OPENACC )
+!$acc routine( ACVISIH_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
@@ -181,7 +181,7 @@ SUBROUTINE ACVISIH_OPENACC (YDCST, YDVISI, KIDIA, KFDIA, KLON, KTDIA, KLEV, PAPH
   IF (KIND (ZRHOAIR) == 8) THEN
     alloc8 (ZRHOAIR)
   ELSE
-    IF (KIND (ZRHOAIR) == 8) THEN
+    IF (KIND (ZRHOAIR) == 4) THEN
       alloc4 (ZRHOAIR)
     ELSE
       STOP 1

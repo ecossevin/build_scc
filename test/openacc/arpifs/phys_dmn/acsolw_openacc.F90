@@ -98,7 +98,7 @@ SUBROUTINE ACSOLW_OPENACC (YDPHY1, KIDIA, KFDIA, KLON, PARG, PD2, PLSM, PIVEG, P
   !        2011-06: M. Jerczynski - some cleaning to meet norms
   !-----------------------------------------------------------------------
   
-!$acc routine( ACSOLW_OPENACC )
+!$acc routine( ACSOLW_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

@@ -125,9 +125,33 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZGDW0)
-  alloc (ZIN)
-  alloc (ZGWH)
+  IF (KIND (ZGDW0) == 8) THEN
+    alloc8 (ZGDW0)
+  ELSE
+    IF (KIND (ZGDW0) == 8) THEN
+      alloc4 (ZGDW0)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZIN) == 8) THEN
+    alloc8 (ZIN)
+  ELSE
+    IF (KIND (ZIN) == 8) THEN
+      alloc4 (ZIN)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZGWH) == 8) THEN
+    alloc8 (ZGWH)
+  ELSE
+    IF (KIND (ZGWH) == 8) THEN
+      alloc4 (ZGWH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   

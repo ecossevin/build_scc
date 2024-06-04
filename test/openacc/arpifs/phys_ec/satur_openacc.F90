@@ -49,7 +49,7 @@ SUBROUTINE SATUR_OPENACC (YDTHF, YDCST, KIDIA, KFDIA, KLON, KTDIA, KLEV, LDPHYLI
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
   !-------------------------------------------------------------------------
   
-!$acc routine( SATUR_OPENACC )
+!$acc routine( SATUR_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK

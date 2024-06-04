@@ -101,8 +101,24 @@ SUBROUTINE DPRECIPS_XFU_OPENACC (KIDIA, KFDIA, KLON, KDTPREC, KSTATS, PDPRECIPS,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (IDPRECIPS)
-  alloc (INDPTYPE)
+  IF (KIND (IDPRECIPS) == 8) THEN
+    alloc8 (IDPRECIPS)
+  ELSE
+    IF (KIND (IDPRECIPS) == 8) THEN
+      alloc4 (IDPRECIPS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (INDPTYPE) == 8) THEN
+    alloc8 (INDPTYPE)
+  ELSE
+    IF (KIND (INDPTYPE) == 8) THEN
+      alloc4 (INDPTYPE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

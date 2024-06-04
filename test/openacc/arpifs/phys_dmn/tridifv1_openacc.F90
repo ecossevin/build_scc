@@ -69,7 +69,7 @@ SUBROUTINE TRIDIFV1_OPENACC (YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIA, KLEV, PA,
   !                              transport in combined (cv-turb) computation
   !-----------------------------------------------------------------------
   
-!$acc routine( TRIDIFV1_OPENACC )
+!$acc routine( TRIDIFV1_OPENACC ) seq
   
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMPHY, ONLY: TPHY
@@ -116,7 +116,7 @@ SUBROUTINE TRIDIFV1_OPENACC (YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIA, KLEV, PA,
   IF (KIND (ZY) == 8) THEN
     alloc8 (ZY)
   ELSE
-    IF (KIND (ZY) == 8) THEN
+    IF (KIND (ZY) == 4) THEN
       alloc4 (ZY)
     ELSE
       STOP 1
