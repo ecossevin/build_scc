@@ -114,6 +114,7 @@ SUBROUTINE CUBASEN &
 !      M. Leutbecher (Oct 2020) SPP abstraction
 !      20210913 : Modifications for Arpege Y.Bouteloup (LDTDKMF)
 !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+!     R. El Khatib 06-Sep-2023 vectorization
 !----------------------------------------------------------------------
 
 USE YOEPHLI   , ONLY : TEPHLI
@@ -231,7 +232,7 @@ ASSOCIATE(RLMIN=>YDECLDP%RLMIN, &
  & RCPD=>YDCST%RCPD, RD=>YDCST%RD, RETV=>YDCST%RETV, RG=>YDCST%RG, &
  & R4IES=>YDTHF%R4IES, R4LES=>YDTHF%R4LES, R5IES=>YDTHF%R5IES, R5LES=>YDTHF%R5LES, &
  & RALFDCP=>YDTHF%RALFDCP, &
- & ENTRORG=>YDECUMF%ENTRORG, ENTSTPC1=>YDECUMF%ENTSTPC1, ENTSTPC2=>YDECUMF%ENTSTPC2, &
+ & ENTRORG=>YDECUMF%ENTRORG, ENTRTEST=>YDECUMF%ENTRTEST, ENTSTPC1=>YDECUMF%ENTSTPC1, ENTSTPC2=>YDECUMF%ENTSTPC2, &
  & ENTSTPC3=>YDECUMF%ENTSTPC3, NJKT2=>YDECUMF%NJKT2, RDEPTHS=>YDECUMF%RDEPTHS)
 ZAW    = 1.0_JPRB
 ZBW    = 1.0_JPRB
@@ -468,7 +469,7 @@ DO JKK=KLEV,JKT1,-1 ! Big external loop for level testing:
             ZXENTRORG=ENTRORG*EXP(PN1%MU(1)+PN1%XMAG(1)*PGP2DSPP(JL, IPENTRORG))
           ENDIF
           ZDZ(JL)    = (PGEOH(JL,JK) - PGEOH(JL,JK+1))*ZRG
-          ZMIX(JL)=0.4_JPRB*ZXENTRORG*ZDZ(JL)*MIN(1.0_JPRB,(PQSEN(JL,JK)/PQSEN(JL,KLEV))**3)
+          ZMIX(JL)=ENTRTEST*ZXENTRORG*ZDZ(JL)*MIN(1.0_JPRB,(PQSEN(JL,JK)/PQSEN(JL,KLEV))**3)
         ENDIF
       ENDDO
 
@@ -721,8 +722,11 @@ DO JKK=KLEV,JKT1,-1 ! Big external loop for level testing:
 ENDDO ! end of big loop for search of departure level     
 
       ! chose maximum CAPE value
-DO JL=KIDIA,KFDIA
-  PCAPE(JL) = MAXVAL(ZCAPE(JL,:))
+PCAPE(KIDIA:KFDIA) = ZCAPE(KIDIA:KFDIA,1)
+DO JK=2,KLEV
+  DO JL=KIDIA,KFDIA
+    PCAPE(JL) = MAX(PCAPE(JL),ZCAPE(JL,JK))
+  ENDDO
 ENDDO
 
 END ASSOCIATE

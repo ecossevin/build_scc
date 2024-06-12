@@ -1,5 +1,5 @@
-SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHIFL, PHIFM, PLNPR, PRT, PUF, PVF, PUH, PVH, PX,  &
-& PNHPPI, LDVFE, YDSTACK)
+SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHIFL, PHIFM, PLNPR, PRT, PUF, PVF, PUH, PVH,  &
+& PWF2H, PX, PNHPPI, PTAUX_NL, LDVFE, YDSTACK)
   
   ! GPXX - Diagnose NHX-term
   
@@ -39,12 +39,14 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   !   PVF          : V-wind at full levels.
   !   PUH          : U-wind at half levels.
   !   PVH          : V-wind at half levels.
+  !   PWF2H        : Full-to-Half levels interpolation weights.
   
   !   * OUTPUT:
   !   PX           : NHX-term at full levels.
   
   !   * OPTIONAL INPUT:
   !   PNHPPI       : [pre/prehyd] at full levels (NHEE model).
+  !   PTAUX_NL     : control parameter tau for LNHHY.
   !   LDVFE        : T if VFE discretisation is used in this routine.
   
   ! Externals
@@ -71,6 +73,9 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   !   J. Vivoda and P. Smolikova (Sep 2020): VFE pruning.
   !   R. El Khatib 31-Jan-2022 Optional VFE
   !   C. Wastl and C. Wittmann (Feb 2022): Add updraft helicity
+  !   J. Vivoda and P. Smolikova (Aug-2023): Blended NH/HYD system.
+  !   F. Voitus (Sep-2023): compatible vfe discretisation
+  !
   ! End Modifications
   !---------------------------------------------------------------------
   
@@ -104,8 +109,10 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   REAL(KIND=JPRB), INTENT(IN) :: PVF(KPROMA, KFLEV)
   REAL(KIND=JPRB), INTENT(IN) :: PUH(KPROMA, 0:KFLEV)
   REAL(KIND=JPRB), INTENT(IN) :: PVH(KPROMA, 0:KFLEV)
+  REAL(KIND=JPRB), INTENT(IN) :: PWF2H(KPROMA, 0:KFLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PX(KPROMA, KFLEV)
   REAL(KIND=JPRB), OPTIONAL, INTENT(IN) :: PNHPPI(KPROMA, KFLEV)
+  REAL(KIND=JPRB), OPTIONAL, INTENT(IN) :: PTAUX_NL
   LOGICAL, OPTIONAL, INTENT(IN) :: LDVFE
   
   ! -----------------------------------------------------------------------------
@@ -115,6 +122,8 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   temp (REAL (KIND=JPRB), ZDUF, (KPROMA, KFLEV))
   temp (REAL (KIND=JPRB), ZDVF, (KPROMA, KFLEV))
   temp (REAL (KIND=JPRB), ZF, (KPROMA, 0:KFLEV + 1))
+  temp (REAL (KIND=JPRB), ZUVH, (KPROMA, 0:KFLEV))
+  temp (REAL (KIND=JPRB), ZNHPPI, (KPROMA, KFLEV))
   LOGICAL :: LLVFE
   
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
@@ -153,6 +162,24 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
       STOP 1
     END IF
   END IF
+  IF (KIND (ZUVH) == 8) THEN
+    alloc8 (ZUVH)
+  ELSE
+    IF (KIND (ZUVH) == 4) THEN
+      alloc4 (ZUVH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNHPPI) == 8) THEN
+    alloc8 (ZNHPPI)
+  ELSE
+    IF (KIND (ZNHPPI) == 4) THEN
+      alloc4 (ZNHPPI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   ! -----------------------------------------------------------------------------
@@ -163,7 +190,18 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   IF (PRESENT(LDVFE)) THEN
     LLVFE = LDVFE
   ELSE
-    LLVFE = YDGEOMETRY%YRVERT_GEOM%YRCVER%LVERTFE
+    LLVFE = YDGEOMETRY%YRVERT_GEOM%YRCVER%LVERTFE .and. .not.YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_COMPATIBLE
+  END IF
+  
+  ! possibility to use hydrostatic divergence in full model
+  IF (PRESENT(PNHPPI)) THEN
+    IF (PRESENT(PTAUX_NL)) THEN
+      DO JLEV=1,KFLEV
+        ZNHPPI(JLON, JLEV) = 1.0_JPRB + PTAUX_NL*(PNHPPI(JLON, JLEV) - 1.0_JPRB)
+      END DO
+    ELSE
+      ZNHPPI(JLON, 1:KFLEV) = PNHPPI(JLON, 1:KFLEV)
+    END IF
   END IF
   
   IF (LLVFE) THEN
@@ -180,7 +218,7 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
     
     IF (PRESENT(PNHPPI)) THEN
       DO JLEV=1,KFLEV
-        PX(JLON, JLEV) = REAL(PNHPPI(JLON, JLEV), kind=JPRD) / REAL(PRT(JLON, JLEV)*PLNPR(JLON, JLEV), kind=JPRD) &
+        PX(JLON, JLEV) = REAL(ZNHPPI(JLON, JLEV), kind=JPRD) / REAL(PRT(JLON, JLEV)*PLNPR(JLON, JLEV), kind=JPRD) &
         & *REAL(PHIFL(JLON, JLEV)*ZDUF(JLON, JLEV) + PHIFM(JLON, JLEV)*ZDVF(JLON, JLEV), kind=JPRD) /  &
         & YDGEOMETRY%YRVERT_GEOM%YRVETA%VFE_RDETAH(JLEV)
       END DO
@@ -191,13 +229,40 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
       END DO
     END IF
     
+  ELSE IF (YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_COMPATIBLE .or. YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFD_COMPATIBLE) THEN
+    
+    DO JLEV=1,KFLEV - 1
+      ZUVH(JLON, JLEV) = (PUF(JLON, JLEV + 1)*PHIFL(JLON, JLEV + 1) + PVF(JLON, JLEV + 1)*PHIFM(JLON, JLEV + 1) + PWF2H(JLON,  &
+      & JLEV)*(PUF(JLON, JLEV)*PHIFL(JLON, JLEV) - PUF(JLON, JLEV + 1)*PHIFL(JLON, JLEV + 1) + PVF(JLON, JLEV)*PHIFM(JLON, JLEV)  &
+      & - PVF(JLON, JLEV + 1)*PHIFM(JLON, JLEV + 1)))
+    END DO
+    
+    !* top and bottom boundary treatment
+    ZUVH(JLON, 0) = PUF(JLON, 1)*PHIHL(JLON, 0) + PVF(JLON, 1)*PHIHM(JLON, 0)
+    ZUVH(JLON, KFLEV) = PUF(JLON, KFLEV)*PHIHL(JLON, KFLEV) + PVF(JLON, KFLEV)*PHIHM(JLON, KFLEV)
+    
+    IF (PRESENT(PNHPPI)) THEN
+      DO JLEV=1,KFLEV
+        PX(JLON, JLEV) = YDGEOMETRY%YRVERT_GEOM%YRVETA%VDETA_RATIO(JLEV)*((REAL((ZUVH(JLON, JLEV) - ZUVH(JLON, JLEV - 1)),  &
+        & kind=JPRD) - PUF(JLON, JLEV)*REAL(PHIHL(JLON, JLEV) - PHIHL(JLON, JLEV - 1), kind=JPRD) - PVF(JLON, JLEV) &
+        & *REAL(PHIHM(JLON, JLEV) - PHIHM(JLON, JLEV - 1), kind=JPRD))*REAL(PNHPPI(JLON, JLEV), kind=JPRD) / REAL(PRT(JLON, JLEV) &
+        & *PLNPR(JLON, JLEV), kind=JPRD))
+      END DO
+    ELSE
+      DO JLEV=1,KFLEV
+        PX(JLON, JLEV) = YDGEOMETRY%YRVERT_GEOM%YRVETA%VDETA_RATIO(JLEV)*((REAL(ZUVH(JLON, JLEV) - ZUVH(JLON, JLEV - 1),  &
+        & kind=JPRD) - PUF(JLON, JLEV)*REAL(PHIHL(JLON, JLEV) - PHIHL(JLON, JLEV - 1), kind=JPRD) - PVF(JLON, JLEV) &
+        & *REAL(PHIHM(JLON, JLEV) - PHIHM(JLON, JLEV - 1), kind=JPRD)) / REAL(PRT(JLON, JLEV)*PLNPR(JLON, JLEV), kind=JPRD))
+      END DO
+    END IF
+    
   ELSE
     
     IF (PRESENT(PNHPPI)) THEN
       DO JLEV=1,KFLEV
         PX(JLON, JLEV) = (REAL(PUH(JLON, JLEV) - PUF(JLON, JLEV), kind=JPRD)*PHIHL(JLON, JLEV) + REAL(PVH(JLON, JLEV) - PVF(JLON, &
         &  JLEV), kind=JPRD)*PHIHM(JLON, JLEV) + REAL(PUF(JLON, JLEV) - PUH(JLON, JLEV - 1), kind=JPRD)*PHIHL(JLON, JLEV - 1) +  &
-        & REAL(PVF(JLON, JLEV) - PVH(JLON, JLEV - 1), kind=JPRD)*PHIHM(JLON, JLEV - 1))*REAL(PNHPPI(JLON, JLEV), kind=JPRD) /  &
+        & REAL(PVF(JLON, JLEV) - PVH(JLON, JLEV - 1), kind=JPRD)*PHIHM(JLON, JLEV - 1))*REAL(ZNHPPI(JLON, JLEV), kind=JPRD) /  &
         & REAL(PRT(JLON, JLEV)*PLNPR(JLON, JLEV), kind=JPRD)
       END DO
     ELSE

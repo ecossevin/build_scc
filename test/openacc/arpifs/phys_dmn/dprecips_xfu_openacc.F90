@@ -63,6 +63,7 @@ SUBROUTINE DPRECIPS_XFU_OPENACC (KIDIA, KFDIA, KLON, KDTPREC, KSTATS, PDPRECIPS,
   
   !     Modifications.
   !     --------------
+  !      R. El Khatib 06-Mar-2023 Enhance vectorization
   !     ------------------------------------------------------------------
   
 !$acc routine( DPRECIPS_XFU_OPENACC ) seq
@@ -86,101 +87,93 @@ SUBROUTINE DPRECIPS_XFU_OPENACC (KIDIA, KFDIA, KLON, KDTPREC, KSTATS, PDPRECIPS,
   REAL(KIND=JPRB), INTENT(INOUT) :: PXPTYPE(KLON)
   LOGICAL, INTENT(IN) :: LDRESET
   
+  REAL(KIND=JPRB) :: ZTYPE
   INTEGER(KIND=JPIM) :: JLON
   INTEGER(KIND=JPIM) :: JPREC
   INTEGER(KIND=JPIM) :: JTYPE
   INTEGER(KIND=JPIM) :: INB
-  temp (INTEGER (KIND=JPIM), IDPRECIPS, (KLON, 11))
+  INTEGER(KIND=JPIM) :: IDPRECIPS(11)
   INTEGER(KIND=JPIM) :: INDTOT
   INTEGER(KIND=JPIM) :: ITYPE
-  
-  
-  temp (INTEGER (KIND=JPIM), INDPTYPE, (11))
+  INTEGER(KIND=JPIM), PARAMETER :: JPTYPES = 11
+  INTEGER(KIND=JPIM), PARAMETER :: INDPTYPE(JPTYPES) = (/ 11, 1, 7, 8, 9, 5, 6, 193, 10, 12, 3 /)
+  !ordering important : from less dangerous to most dangerous
+  !INDPTYPE(1)=11
+  !INDPTYPE(2)=1
+  !INDPTYPE(3)=7
+  !INDPTYPE(4)=8
+  !INDPTYPE(5)=9
+  !INDPTYPE(6)=5
+  !INDPTYPE(7)=6
+  !INDPTYPE(8)=193
+  !INDPTYPE(9)=10
+  !INDPTYPE(10)=12
+  !INDPTYPE(11)=3
   
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  IF (KIND (IDPRECIPS) == 8) THEN
-    alloc8 (IDPRECIPS)
-  ELSE
-    IF (KIND (IDPRECIPS) == 4) THEN
-      alloc4 (IDPRECIPS)
-    ELSE
-      STOP 1
-    END IF
-  END IF
-  IF (KIND (INDPTYPE) == 8) THEN
-    alloc8 (INDPTYPE)
-  ELSE
-    IF (KIND (INDPTYPE) == 4) THEN
-      alloc4 (INDPTYPE)
-    ELSE
-      STOP 1
-    END IF
-  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------
-  
-  
-  !     ------------------------------------------------------------------
-  
   
   IF (LDRESET) THEN
     PXPTYPE(JLON) = 0._JPRB
   END IF
   
-  ! Initialisations
-  IDPRECIPS(JLON, :) = 0_JPIM
-  INDTOT = 0_JPIM
-  ITYPE = 0_JPIM
-  
-  !
   
   ! Number of ptype occurences
-  
-  INB = 0
-  DO JTYPE=1,11
+  DO JTYPE=1,JPTYPES
+    ZTYPE = REAL(INDPTYPE(JTYPE), kind=JPRB)
+    IDPRECIPS(JTYPE) = 0_JPIM
     DO JPREC=1,KDTPREC
-      IF (PDPRECIPS(JLON, JPREC) == FLOAT(INDPTYPE(JTYPE))) THEN
-        IDPRECIPS(JLON, JTYPE) = IDPRECIPS(JLON, JTYPE) + 1_JPIM
+      IF (PDPRECIPS(JLON, JPREC) == ZTYPE) THEN
+        IDPRECIPS(JTYPE) = IDPRECIPS(JTYPE) + 1_JPIM
       END IF
     END DO
-    
-    ! Most Frequent ptype
-    IF (KSTATS == 0) THEN
-      IF (IDPRECIPS(JLON, JTYPE) >= INB) THEN
-        ITYPE = INDPTYPE(JTYPE)
-        INB = IDPRECIPS(JLON, JTYPE)
-      END IF
-      ! Most severe ptype
-    ELSE IF (KSTATS == 2) THEN
-      IF (IDPRECIPS(JLON, JTYPE) > 0_JPIM) THEN
-        ITYPE = INDPTYPE(JTYPE)
-        INB = IDPRECIPS(JLON, JTYPE)
-      END IF
-    END IF
-    INDTOT = INDTOT + IDPRECIPS(JLON, JTYPE)
   END DO
   
+  INDTOT = SUM(IDPRECIPS(:))
+  
+  INB = 0
+  
+  ITYPE = 0_JPIM
+  IF (KSTATS == 0) THEN
+    ! Most Frequent ptype
+    DO JTYPE=1,JPTYPES
+      IF (IDPRECIPS(JTYPE) >= INB) THEN
+        ITYPE = INDPTYPE(JTYPE)
+        INB = IDPRECIPS(JTYPE)
+      END IF
+    END DO
+  ELSE IF (KSTATS == 2) THEN
+    ! Most severe ptype
+    DO JTYPE=1,JPTYPES
+      IF (IDPRECIPS(JTYPE) > 0_JPIM) THEN
+        ITYPE = INDPTYPE(JTYPE)
+      END IF
+    END DO
+  END IF
   
   
   !set to 0 when only 1/12 NDTPERIOD is concerned by precipitations (except for hail)
-  IF (INDTOT < INT(FLOAT(KDTPREC) / 12._JPRB) .and. ITYPE /= 10_JPIM) THEN
+  IF (INDTOT < INT(REAL(KDTPREC, kind=JPRB) / 12._JPRB) .and. ITYPE /= 10_JPIM) THEN
     ITYPE = 0_JPIM
   END IF
   
   ! Intermittent character
-  IF (INDTOT < INT(FLOAT(KDTPREC)*5._JPRB / 6._JPRB)) THEN
+  IF (INDTOT < INT(REAL(KDTPREC, kind=JPRB)*5._JPRB / 6._JPRB)) THEN
     IF (ITYPE == 1_JPIM) ITYPE = 201_JPRB
     IF (ITYPE == 7_JPIM) ITYPE = 207_JPRB
     IF (ITYPE == 6_JPIM) ITYPE = 206_JPRB
     IF (ITYPE == 5_JPIM) ITYPE = 205_JPRB
     IF (ITYPE == 193_JPIM) ITYPE = 213_JPRB
+    IF (ITYPE == 11_JPIM) ITYPE = 201_JPRB
+    ! to avoid drizzle (=very light precipitation) around thunderstorm cells
   END IF
   
-  PXPTYPE(JLON) = FLOAT(ITYPE)
+  PXPTYPE(JLON) = REAL(ITYPE, kind=JPRB)
   
   
 END SUBROUTINE DPRECIPS_XFU_OPENACC

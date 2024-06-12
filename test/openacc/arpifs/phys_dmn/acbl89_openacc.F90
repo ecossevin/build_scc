@@ -130,6 +130,7 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   !      K. Yessad (Jul 2009): remove CDLOCK + some cleanings
   !      R. El Khatib 22-Jul-2014 Vectorizations
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+  !     R. El Khatib 06-Sep-2023 loop fusion
   !-----------------------------------------------------------------------
   
 !$acc routine( ACBL89_OPENACC ) seq
@@ -201,7 +202,6 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   REAL(KIND=JPRB) :: ZDLDN
   REAL(KIND=JPRB) :: ZDLDN1
   REAL(KIND=JPRB) :: ZDLDN2
-  REAL(KIND=JPRB) :: ZQV
   REAL(KIND=JPRB) :: ZDLUP
   REAL(KIND=JPRB) :: ZDLUP1
   REAL(KIND=JPRB) :: ZDLUP2
@@ -215,8 +215,6 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   REAL(KIND=JPRB) :: ZGLMINF
   REAL(KIND=JPRB) :: ZGLMIX
   REAL(KIND=JPRB) :: ZPHI3MAX
-  REAL(KIND=JPRB) :: ZPREF
-  REAL(KIND=JPRB) :: ZQC
   REAL(KIND=JPRB) :: ZTEST
   REAL(KIND=JPRB) :: ZTEST0
   REAL(KIND=JPRB) :: ZTESTM
@@ -379,17 +377,11 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   ! CALCULS DE THETA (sec)
   ! - - - - - - - - - - -
   DO JLEV=KTDIAN,KLEV
-    ZPREF = PAPRSF(JLON, JLEV)
-    ZTHETA(JLON, JLEV) = PT(JLON, JLEV)*(YDCST%RATM / ZPREF)**YDCST%RKAPPA
-  END DO
-  
-  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  ! CALCUL DE (THETA)vl = THETA * ( 1 + RETV*Qv - (Ql+Qi) )
-  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  DO JLEV=KTDIAN,KLEV
-    ZQV = PQV(JLON, JLEV)
-    ZQC = PQLI(JLON, JLEV) + PQICE(JLON, JLEV)
-    ZTHETA(JLON, JLEV) = ZTHETA(JLON, JLEV)*(1.0_JPRB + YDCST%RETV*ZQV - ZQC)
+    ZTHETA(JLON, JLEV) = (PT(JLON, JLEV)*(YDCST%RATM / PAPRSF(JLON, JLEV))**YDCST%RKAPPA)*(1.0_JPRB + YDCST%RETV*PQV(JLON, JLEV)  &
+    & - (PQLI(JLON, JLEV) + PQICE(JLON, JLEV)))
+    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ! CALCUL DE (THETA)vl = THETA * ( 1 + RETV*Qv - (Ql+Qi) )
+    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   END DO
   
   ! - - - - - - - - - - - - - - - - -
@@ -619,7 +611,7 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
     ! BOUCLE GENERALE Nr 2
     !     --------------------------------------
     
-    !  On veut que a monte et descende au moins  la mme hauteur !!
+    !  On veut que ca monte et descende au moins a la meme hauteur !!
     
     ZGLMUP(JLON, JLEV) = MAX(ZGLMUP(JLON, JLEV), ZGLMUP(JLON, JLEV + 1) + PAPHI(JLON, JLEV + 1) - PAPHI(JLON, JLEV))
     

@@ -1,5 +1,5 @@
 SUBROUTINE CUDUDV &
- & ( YDCST, YDECUMF,YDSPP_CONFIG, KIDIA,    KFDIA,    KLON,     KLEV, &
+ & (YDCST,   YDECUMF,  YDSPP_CONFIG,       YDPERTPAR,KIDIA,    KFDIA,    KLON,     KLEV, &
  & KTOPM2,   KTYPE,    KCBOT,    KCTOP,    LDCUM,    PTSPHY,&
  & PAPH,     PAP,      PUEN,     PVEN,     PMFU,     PMFD,&
  & PMFUO,    PMFDO,    PUU,      PUD,      PVU,      PVD,  PGP2DSPP,&
@@ -79,6 +79,7 @@ SUBROUTINE CUDUDV &
 !      L. Descamps 2020-02-25 Introduced perturbed parameter option for PEARP (LPERTPAR)
 !      M. Leutbecher & S. Lang Oct 2020    SPP abstraction and revision
 !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+!     R. El Khatib 20-Jul-2024 Remove PM's Q&D patch after LD's merge fix.
 !----------------------------------------------------------------------
 
 USE PARKIND1 , ONLY : JPIM     ,JPRB
@@ -87,7 +88,7 @@ USE YOMHOOK  , ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE YOMCST   , ONLY : TCST
 USE YOECUMF  , ONLY : TECUMF
 USE SPP_MOD     , ONLY : TSPP_CONFIG
-USE YOMPERTPAR , ONLY : LPERTPAR, LPERT_CUDUV, CUDU_MOD, CUDV_MOD
+USE YOMPERTPAR , ONLY : TPERTPAR
 USE SPP_GEN_MOD , ONLY : SPP_PERT
 
 IMPLICIT NONE
@@ -95,6 +96,7 @@ IMPLICIT NONE
 TYPE(TCST)         ,INTENT(IN)     :: YDCST
 TYPE(TECUMF)       ,INTENT(IN)     :: YDECUMF
 TYPE(TSPP_CONFIG)  ,INTENT(IN)     :: YDSPP_CONFIG
+TYPE(TPERTPAR)     ,INTENT(IN)     :: YDPERTPAR
 INTEGER(KIND=JPIM) ,INTENT(IN)     :: KIDIA 
 INTEGER(KIND=JPIM) ,INTENT(IN)     :: KFDIA 
 INTEGER(KIND=JPIM) ,INTENT(IN)     :: KLON 
@@ -295,12 +297,13 @@ ENDDO
          &( KIDIA, KFDIA, KLON, KLEV, &
          &  KCTOP, LLCUMBAS, &
          &  ZMFUU,    ZB,    ZDVDT,   ZR2 )
-
+     ! prepare RP perturbations (MF PEARP)
+      LLPPAR_CUDUV=YDPERTPAR%LPERTPAR.AND.YDPERTPAR%LPERT_CUDUV
      ! prepare SPP perturbations
       IF (YDSPP_CONFIG%LSPP) THEN
         IPN1 = YDSPP_CONFIG%PPTR%CUDUDV
         LLPERT_CUDUDV= IPN1 > 0
-        IF (LLPERT_CUDUDV .OR. LLPPAR_CUDUV) THEN
+        IF (LLPERT_CUDUDV) THEN
           PN1=YDSPP_CONFIG%SM%PN(IPN1)
           IPCUDU = PN1%MP
           IF (PN1%NRF == 1) THEN
@@ -325,15 +328,14 @@ ENDDO
         LLPERT_CUDUDVS=.FALSE.
       ENDIF
 
-      IF (YDSPP_CONFIG%LSPP) THEN
-        IF (LLPERT_CUDUDV .OR. LLPERT_CUDUDVS) THEN
+      IF (LLPERT_CUDUDV .OR. LLPERT_CUDUDVS .OR. LLPPAR_CUDUV) THEN
           ZMDU   = 1.0_JPRB    ! mean      zonal momentum transport pdf
           ZMDV   = 1.0_JPRB    ! mean meridional momentum transport pdf
           ZLIMN2 = 9.0_JPRB*PN1%SDEV**2    ! limit for norm squared (3 stdev)
 
           DO JL=KIDIA,KFDIA
-            IF ((KTYPE(JL)==1 .AND. LLPERT_CUDUDV) .OR. &
-              & (KTYPE(JL)==2 .AND. LLPERT_CUDUDVS)) THEN  !perturb deep/shallow convection
+          IF ((KTYPE(JL)==1 .AND. (LLPERT_CUDUDV .OR. LLPPAR_CUDUV)) .OR. &
+            & (KTYPE(JL)==2 .AND. (LLPERT_CUDUDVS .OR. LLPPAR_CUDUV))) THEN  !perturb deep/shallow convection
 
               IF (KTYPE(JL)==1) THEN
                 IF (.NOT.LLPPAR_CUDUV) THEN
@@ -342,16 +344,21 @@ ENDDO
                   ZXU_MAG = PN1%XMAG(1)
                   ZXV_MAG = PN1%XMAG(2)
                 ELSE
-                  ZXU=CUDU_MOD
-                  ZXV=CUDV_MOD
+                  ZXU=YDPERTPAR%CUDU_MOD
+                  ZXV=YDPERTPAR%CUDV_MOD
                 ENDIF
               ENDIF
 
               IF (KTYPE(JL)==2) THEN
+             IF (.NOT.LLPPAR_CUDUV) THEN
                 ZXU=PGP2DSPP(JL, IPCUDUS)
                 ZXV=PGP2DSPP(JL, IPCUDVS)
                 ZXU_MAG = PN2%XMAG(1)
                 ZXV_MAG = PN2%XMAG(2)
+             ELSE
+              ZXU=YDPERTPAR%CUDU_MOD
+              ZXV=YDPERTPAR%CUDV_MOD
+             ENDIF
               ENDIF
 
               ZN2=ZXU**2+ZXV**2
@@ -372,7 +379,6 @@ ENDDO
               ZRDV(JL)=ZMDV
             ENDIF
           ENDDO
-        ENDIF
       ENDIF
 
      

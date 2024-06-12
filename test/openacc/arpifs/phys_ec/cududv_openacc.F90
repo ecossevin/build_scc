@@ -1,5 +1,5 @@
-SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLEV, KTOPM2, KTYPE, KCBOT, KCTOP, LDCUM, PTSPHY,  &
-& PAPH, PAP, PUEN, PVEN, PMFU, PMFD, PMFUO, PMFDO, PUU, PUD, PVU, PVD, PGP2DSPP, PTENU, PTENV, YDSTACK)
+SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, YDPERTPAR, KIDIA, KFDIA, KLON, KLEV, KTOPM2, KTYPE, KCBOT, KCTOP,  &
+& LDCUM, PTSPHY, PAPH, PAP, PUEN, PVEN, PMFU, PMFD, PMFUO, PMFDO, PUU, PUD, PVU, PVD, PGP2DSPP, PTENU, PTENV, YDSTACK)
   
   !**** *CUDUDV* - UPDATES U AND V TENDENCIES,
   !                DOES GLOBAL DIAGNOSTIC OF DISSIPATION
@@ -75,6 +75,7 @@ SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
   !      L. Descamps 2020-02-25 Introduced perturbed parameter option for PEARP (LPERTPAR)
   !      M. Leutbecher & S. Lang Oct 2020    SPP abstraction and revision
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+  !     R. El Khatib 20-Jul-2024 Remove PM's Q&D patch after LD's merge fix.
   !----------------------------------------------------------------------
   
 !$acc routine( CUDUDV_OPENACC ) seq
@@ -85,7 +86,7 @@ SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
   USE YOMCST, ONLY: TCST
   USE YOECUMF, ONLY: TECUMF
   USE SPP_MOD, ONLY: TSPP_CONFIG
-  USE YOMPERTPAR, ONLY: LPERTPAR, LPERT_CUDUV, CUDU_MOD, CUDV_MOD
+  USE YOMPERTPAR, ONLY: TPERTPAR
   USE SPP_GEN_MOD, ONLY: SPP_PERT
   
   USE STACK_MOD
@@ -96,6 +97,7 @@ SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
   TYPE(TCST), INTENT(IN) :: YDCST
   TYPE(TECUMF), INTENT(IN) :: YDECUMF
   TYPE(TSPP_CONFIG), INTENT(IN) :: YDSPP_CONFIG
+  TYPE(TPERTPAR), INTENT(IN) :: YDPERTPAR
   INTEGER(KIND=JPIM), INTENT(IN) :: KIDIA
   INTEGER(KIND=JPIM), INTENT(IN) :: KFDIA
   INTEGER(KIND=JPIM), INTENT(IN) :: KLON
@@ -401,11 +403,64 @@ SUBROUTINE CUDUDV_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
     CALL CUBIDIAG_OPENACC(KIDIA, KFDIA, KLON, KLEV, KCTOP, LLCUMBAS, ZMFUU, ZB, ZDUDT, ZR1, YDSTACK=YLSTACK)
     
     CALL CUBIDIAG_OPENACC(KIDIA, KFDIA, KLON, KLEV, KCTOP, LLCUMBAS, ZMFUU, ZB, ZDVDT, ZR2, YDSTACK=YLSTACK)
-    
+    ! prepare RP perturbations (MF PEARP)
+    LLPPAR_CUDUV = YDPERTPAR%LPERTPAR .and. YDPERTPAR%LPERT_CUDUV
     ! prepare SPP perturbations
     LLPERT_CUDUDV = .false.
     LLPERT_CUDUDVS = .false.
     
+    IF (LLPERT_CUDUDV .or. LLPERT_CUDUDVS .or. LLPPAR_CUDUV) THEN
+      ZMDU = 1.0_JPRB        ! mean      zonal momentum transport pdf
+      ZMDV = 1.0_JPRB        ! mean meridional momentum transport pdf
+      ZLIMN2 = 9.0_JPRB*PN1%SDEV**2        ! limit for norm squared (3 stdev)
+      
+      IF (KTYPE(JLON) == 1 .and. (LLPERT_CUDUDV .or. LLPPAR_CUDUV) .or. KTYPE(JLON) == 2 .and. (LLPERT_CUDUDVS .or. LLPPAR_CUDUV) &
+      & ) THEN
+        !perturb deep/shallow convection
+        
+        IF (KTYPE(JLON) == 1) THEN
+          IF (.not.LLPPAR_CUDUV) THEN
+            ZXU = PGP2DSPP(JLON, IPCUDU)
+            ZXV = PGP2DSPP(JLON, IPCUDV)
+            ZXU_MAG = PN1%XMAG(1)
+            ZXV_MAG = PN1%XMAG(2)
+          ELSE
+            ZXU = YDPERTPAR%CUDU_MOD
+            ZXV = YDPERTPAR%CUDV_MOD
+          END IF
+        END IF
+        
+        IF (KTYPE(JLON) == 2) THEN
+          IF (.not.LLPPAR_CUDUV) THEN
+            ZXU = PGP2DSPP(JLON, IPCUDUS)
+            ZXV = PGP2DSPP(JLON, IPCUDVS)
+            ZXU_MAG = PN2%XMAG(1)
+            ZXV_MAG = PN2%XMAG(2)
+          ELSE
+            ZXU = YDPERTPAR%CUDU_MOD
+            ZXV = YDPERTPAR%CUDV_MOD
+          END IF
+        END IF
+        
+        ZN2 = ZXU**2 + ZXV**2
+        IF (ZN2 > ZLIMN2) THEN
+          ZFAC = SQRT(ZLIMN2 / ZN2)
+          ZXU = ZFAC*ZXU
+          ZXV = ZFAC*ZXV
+        END IF
+        IF (.not.LLPPAR_CUDUV) THEN
+          ZRDU = ZMDU + ZXU_MAG*ZXU
+          ZRDV = ZMDV + ZXV_MAG*ZXV
+        ELSE
+          ZRDU = ZMDU + ZXU
+          ZRDV = ZMDV + ZXV
+        END IF
+      ELSE
+        !other convection - unperturbed
+        ZRDU = ZMDU
+        ZRDV = ZMDV
+      END IF
+    END IF
     
     
     ! Compute tendencies

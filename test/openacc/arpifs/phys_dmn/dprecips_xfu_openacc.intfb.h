@@ -20,8 +20,18 @@ INTERFACE
     REAL(KIND=JPRB), INTENT(INOUT) :: PXPTYPE(KLON)
     LOGICAL, INTENT(IN) :: LDRESET
     
-    
-    
+    !ordering important : from less dangerous to most dangerous
+    !INDPTYPE(1)=11
+    !INDPTYPE(2)=1
+    !INDPTYPE(3)=7
+    !INDPTYPE(4)=8
+    !INDPTYPE(5)=9
+    !INDPTYPE(6)=5
+    !INDPTYPE(7)=6
+    !INDPTYPE(8)=193
+    !INDPTYPE(9)=10
+    !INDPTYPE(10)=12
+    !INDPTYPE(11)=3
     
     TYPE(STACK), INTENT(IN) :: YDSTACK
   END SUBROUTINE DPRECIPS_XFU_OPENACC

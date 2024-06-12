@@ -133,6 +133,7 @@ SUBROUTINE ACBL89  ( YDCST, YDPHY,YDPHY0,KIDIA,  KFDIA,    KLON,   KTDIAN, KLEV,
 !      K. Yessad (Jul 2009): remove CDLOCK + some cleanings
 !      R. El Khatib 22-Jul-2014 Vectorizations
 !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+!     R. El Khatib 06-Sep-2023 loop fusion
 !-----------------------------------------------------------------------
 
 USE PARKIND1 , ONLY : JPIM     ,JPRB
@@ -185,12 +186,12 @@ REAL(KIND=JPRB) :: ZTESTSAVE(KLON)
 
 INTEGER(KIND=JPIM) :: JJLEV, JLEV, JLON
 
-REAL(KIND=JPRB) ::  ZDLDN,  ZDLDN1,  ZDLDN2,   ZQV, &
+REAL(KIND=JPRB) ::  ZDLDN,  ZDLDN1,  ZDLDN2,   &
  & ZDLUP,  ZDLUP1,  ZDLUP2,   ZDPHI, &
  & ZEPSX,  ZINCR,   ZG2L2SLD2, &
  & ZGLDIS, ZGLKARMN,ZGLMCBR, &
  & ZGLMINF,ZGLMIX,  ZPHI3MAX, &
- & ZPREF,   ZQC,      ZTEST,   ZTEST0, &
+ & ZTEST,   ZTEST0, &
  & ZTESTM, ZUSX,    ZX,       ZZDTHVL, ZZDTHVLP, &
  & ZZTHVL, ZZTHVLP, ZQCS, ZGZLCVPUP, ZGZLCVPDN, &
  & Z2SQRT2, ZLUP(KLON), ZLDN,ZLWK0,ZLWK1(KLON)
@@ -267,19 +268,12 @@ ENDDO
 ! - - - - - - - - - - -
 DO JLEV=KTDIAN,KLEV
   DO JLON=KIDIA,KFDIA
-    ZPREF              = PAPRSF(JLON,JLEV)
-    ZTHETA(JLON,JLEV)  = PT(JLON,JLEV)*(RATM/ZPREF)**(RKAPPA)
-  ENDDO
-ENDDO
+    ZTHETA(JLON,JLEV)  = (PT(JLON,JLEV)*(RATM/PAPRSF(JLON,JLEV))**(RKAPPA)) &
 
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! CALCUL DE (THETA)vl = THETA * ( 1 + RETV*Qv - (Ql+Qi) )
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-DO JLEV=KTDIAN,KLEV
-  DO JLON=KIDIA,KFDIA
-    ZQV               =   PQV (JLON,JLEV)
-    ZQC               =   PQLI(JLON,JLEV)+PQICE(JLON,JLEV)
-    ZTHETA(JLON,JLEV) = ZTHETA(JLON,JLEV)*(1.0_JPRB+RETV*ZQV-ZQC)
+    & *(1.0_JPRB+RETV*PQV(JLON,JLEV)-(PQLI(JLON,JLEV)+PQICE(JLON,JLEV)))
   ENDDO
 ENDDO
 
@@ -529,7 +523,7 @@ DO JLEV=KLEV-2,KTDIAN,-1 ! BOUCLE GENERALE Nr 2
 !     --------------------------------------
   DO JLON=KIDIA,KFDIA
 
-    !  On veut que ça monte et descende au moins à la même hauteur !!
+    !  On veut que ca monte et descende au moins a la meme hauteur !!
     
     ZGLMUP(JLON,JLEV) = MAX(ZGLMUP(JLON,JLEV),ZGLMUP(JLON,JLEV+1)&
     &  + PAPHI(JLON,JLEV+1) - PAPHI(JLON,JLEV))

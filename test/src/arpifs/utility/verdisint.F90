@@ -1,4 +1,5 @@
-SUBROUTINE VERDISINT(YDVFE,YDCVER,CDOPER,CDBC,KPROMA,KST,KEND,KFLEV,PIN,POUT,KCHUNK)
+SUBROUTINE VERDISINT(YDVFE,YDCVER,CDOPER,CDBC,KPROMA,KST,KEND,KFLEV,PIN,POUT,POUTS,PINS,&
+ & KCHUNK,KLOUT)
 
 !**** *VERDISINT*   VERtical DIScretization -
 !                INTerface for finite element type vertical operations:
@@ -32,23 +33,32 @@ SUBROUTINE VERDISINT(YDVFE,YDCVER,CDOPER,CDBC,KPROMA,KST,KEND,KFLEV,PIN,POUT,KCH
 !                      first digit for top, second digit for bottom,
 !                      0 for value prescribed, 1 for derivative prescribed)
 !          KPROMA    - horizontal dimension.
-!          KSTART    - first element of work.
-!          KPROF     - depth of work.
+!          KST       - first element of work.
+!          KEND      - depth of work.
 !          KFLEV     - vertical dimension for array PIN.
-!          PIN       - input field
+!          PIN       - 3D input field
 !        OPTIONAL INPUT:
+!          PINS      - "surface component" (phis, gws,...) to be added internally to POUT
 !          KCHUNK    - Use NPROMA as blocking factor when called outside 
 !                      OpenMP threaded region
+!          KLOUT     - number of levels to work on (integration only)
+!                      if present, should be ILEVOUT-1 (ie NFLEVG), avoiding full integral
+!                      to be computed (ie useless supplementary level of POUT)
 
-!        OUTPUT: 
-!          POUT      - integral or derivative of PIN according to CDOPER
+!        OPTIONAL OUTPUT:
+!          POUT      - 3D integral or derivative of PIN according to CDOPER
+!          POUTS     - the vertical integral (replace the old supplementary level of POUT)
 
 !        Implicit arguments :
 !        --------------------
 
 !     Method.
 !     -------
-!        See documentation
+!        Matrix multiply computing 3D integrals/derivatives + full integral:
+!        - 3D int/der: POUT = ZOPER*t(ZIN) [+PINS]
+!        - 2D full int: POUTS = ZOPER(N,:)*ZIN(:,N)
+!        Both operations are optional
+!        Adding the "surface component" (PINS) is also optional
 
 !     Externals.
 !     ----------
@@ -65,6 +75,7 @@ SUBROUTINE VERDISINT(YDVFE,YDCVER,CDOPER,CDBC,KPROMA,KST,KEND,KFLEV,PIN,POUT,KCH
 !     --------------
 !        Original : Sep 2017
 !        P.Smolikova (Sep 2020): VFE pruning.
+!        H. Petithomme (July 2023): new options POUTS/PINS (ie integral and surface)
 !     ------------------------------------------------------------------
 
 USE PARKIND1,ONLY : JPIM, JPRB, JPRD
@@ -72,40 +83,54 @@ USE YOMCVER ,ONLY : TCVER
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK, JPHOOK
 USE YOMLUN  ,ONLY : NULERR
 USE YOMVERT ,ONLY : TVFE
+USE OML_MOD ,ONLY : OML_MAX_THREADS
 
 !     ---------------------------------------------------------------------------
 
 IMPLICIT NONE
 TYPE(TVFE),TARGET ,INTENT(IN) :: YDVFE
-TYPE(TCVER)       ,INTENT(IN)    :: YDCVER
-CHARACTER(LEN=*)  ,INTENT(IN) :: CDOPER, CDBC
+TYPE(TCVER)       ,INTENT(IN) :: YDCVER
+CHARACTER(LEN=*)  ,INTENT(IN) :: CDOPER
+CHARACTER(LEN=2)  ,INTENT(IN) :: CDBC
 INTEGER(KIND=JPIM),INTENT(IN) :: KPROMA, KST, KEND, KFLEV
-INTEGER(KIND=JPIM),OPTIONAL,INTENT(IN) :: KCHUNK
+INTEGER(KIND=JPIM),OPTIONAL,INTENT(IN) :: KCHUNK,KLOUT
 REAL(KIND=JPRB)   ,INTENT(IN) :: PIN(KPROMA,0:KFLEV+1)
-REAL(KIND=JPRB)   ,INTENT(OUT):: POUT(KPROMA,KFLEV+1) 
+REAL(KIND=JPRB),OPTIONAL,INTENT(OUT):: POUT(KPROMA,*),POUTS(KPROMA)
+REAL(KIND=JPRB),OPTIONAL,INTENT(IN) :: PINS(KPROMA)
 
 !     ------------------------------------------------------------------
+
+LOGICAL :: LLVERINT_ON_CPU
 
 CHARACTER(LEN=2)   :: CLBC
 INTEGER(KIND=JPIM) :: ILEVIN, ILEVOUT, IND, IEND, ITYPE, JCHUNK
 REAL(KIND=JPRD),CONTIGUOUS,POINTER :: ZOPER(:,:)
-REAL(KIND=JPHOOK)  :: ZHOOK_HANDLE
+REAL(KIND=JPRD) :: ZOUTS(KPROMA)
+INTEGER(KIND=JPIM) :: IMAXTHREADS
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !     ------------------------------------------------------------------
 
 #include "abor1.intfb.h"
 #include "verder.intfb.h"
 #include "verint.intfb.h"
+#include "verints.intfb.h"
 
 !     ------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('VERDISINT',0,ZHOOK_HANDLE)
 !     ------------------------------------------------------------------
 
+IF (LLVERINT_ON_CPU) THEN
+  IMAXTHREADS = OML_MAX_THREADS ()
+ELSE
+  IMAXTHREADS = 1
+ENDIF
+
 !*   1. Initialization and control
 !    -----------------------------
 
 IF (YDCVER%LVFE_ECMWF) THEN
-  IF (CDOPER /= 'FDER'.OR.YDCVER%LVFE_NOBC) THEN
+  IF (CDOPER(1:4) /= 'FDER'.OR.YDCVER%LVFE_NOBC) THEN
     CLBC='XX' ! no BC applied for derivatives
   ELSE
     CLBC='BC' ! BC according to Hortal applied on derivatives
@@ -118,22 +143,22 @@ ENDIF
 !*   2. Set operator size according to boundary conditions applied
 !    --------------------------------------------------------------
 
-IF (CDOPER=='FDER'.OR.CDOPER=='DDER') THEN
+IF (CDOPER(1:4)=='FDER'.OR.CDOPER(1:4)=='DDER') THEN
   ILEVOUT = KFLEV
 ELSE
   ILEVOUT = KFLEV+1
 ENDIF
 
-IF (CDOPER=='IBOT') THEN
+IF (CDOPER(1:4)=='IBOT') THEN
   ITYPE=1
 ELSE
   ITYPE=0
 ENDIF
 
-IF (CDOPER=='INGW'.OR.CDOPER=='DEGW') THEN
+IF (CDOPER(1:4)=='INGW'.OR.CDOPER(1:4)=='DEGW') THEN
   IND=0
   ILEVIN = KFLEV+1
-ELSEIF (CLBC=='XX') THEN
+ELSEIF (CLBC=='XX'.OR.CDOPER=='INTG') THEN
   IND=1
   ILEVIN = KFLEV
 ELSE
@@ -147,9 +172,10 @@ IEND=ILEVIN-1+IND
 
 !*   3.1 Vertical integral
 !    ---------------------
-IF (CDOPER=='INGW') THEN
+IF (CDOPER(1:4)=='INGW') THEN
+  write(0,*) "oper INWG",present(KLOUT),present(PINS)
   ZOPER => YDVFE%RINTGW(:,:)
-ELSEIF (ANY(CDOPER == (/'ITOP','IBOT'/))) THEN
+ELSEIF (ANY(CDOPER(1:4) == (/'ITOP','IBOT'/))) THEN
   IF (CLBC=='XX') THEN
     ZOPER => YDVFE%RINTE(:,:)
   ELSEIF (CLBC=='00') THEN
@@ -160,14 +186,16 @@ ELSEIF (ANY(CDOPER == (/'ITOP','IBOT'/))) THEN
     WRITE(NULERR,*) 'VERDISINT: ITOP/IBOT NOT IMPLEMENTED FOR CDBC=',CLBC
     CALL ABOR1(' VERDISINT: ABOR1 CALLED')
   ENDIF
+ELSEIF (CDOPER=='INTG') THEN
+  ZOPER => YDVFE%RINTG(:,:)
 ENDIF
 
 !*   3.2 Vertical derivative
 !    -----------------------
 
-IF (CDOPER=='DEGW') THEN
+IF (CDOPER(1:4)=='DEGW') THEN
   ZOPER => YDVFE%RDERGW(:,:)
-ELSEIF (CDOPER=='HDER') THEN
+ELSEIF (CDOPER(1:4)=='HDER') THEN
   IF (CLBC=='00') THEN
     ZOPER => YDVFE%RDERBH00(:,:)
   ELSEIF (CLBC=='01') THEN
@@ -176,7 +204,7 @@ ELSEIF (CDOPER=='HDER') THEN
     WRITE(NULERR,*) 'VERDISINT: HDER NOT IMPLEMENTED FOR CDBC=',CLBC
     CALL ABOR1(' VERDISINT: ABOR1 CALLED')
   ENDIF
-ELSEIF (CDOPER=='FDER') THEN
+ELSEIF (CDOPER(1:4)=='FDER') THEN
   IF (CLBC=='XX') THEN
     ZOPER => YDVFE%RDERI(:,:)
   ELSEIF (CLBC=='BC') THEN
@@ -193,7 +221,7 @@ ELSEIF (CDOPER=='FDER') THEN
     WRITE(NULERR,*) 'VERDISINT: FDER NOT IMPLEMENTED FOR CDBC=',CLBC
     CALL ABOR1(' VERDISINT: ABOR1 CALLED')
   ENDIF
-ELSEIF (CDOPER=='DDER') THEN
+ELSEIF (CDOPER(1:4)=='DDER') THEN
   IF (CLBC=='XX') THEN
     ZOPER => YDVFE%RDDERI(:,:)
   ELSEIF (CLBC=='01') THEN
@@ -207,17 +235,58 @@ ENDIF
 !*   4. Apply the required operation
 !    --------------------------------
 
-IF (ANY(CDOPER == (/'INGW','ITOP','IBOT'/))) THEN
+IF (ANY(CDOPER(1:4) == (/'INGW','ITOP','IBOT'/))) THEN
   IF(PRESENT(KCHUNK)) THEN
     JCHUNK=KCHUNK
   ELSE
-    JCHUNK=1
+    JCHUNK=1+(KEND-KST)/IMAXTHREADS
   ENDIF
-  CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),&
-   & POUT,ITYPE,KCHUNK=JCHUNK)
-ELSEIF (ANY(CDOPER == (/'FDER','HDER','DEGW','DDER'/))) THEN
+
+  ! note: mind all the various cases
+  ! - no POUT: POUTS is present => only integral
+  ! - POUT and POUTS present: 3D (POUT) + integral (POUTS)
+  ! - type 1 (and no POUTS): use ZOUTS, no integral (meaningless)
+  ! - no KLOUT (and no POUTS, type 0): "old" style => 3D integral + full integral in POUT
+  ! - KLOUT present or ILEVOUT=KFLEV: "new" style => 3D integral in POUT, no full integral
+
+  IF (.NOT.PRESENT(POUT)) THEN
+    ! integral only: from top only, kflev+1 levels required in zoper
+    IF (.NOT.PRESENT(POUTS)) CALL ABOR1("ERROR: NEEDS AT LEAST 1 OF POUT/POUTS")
+    IF (ITYPE == 1) CALL ABOR1("ERROR POUTS: ITYPE=1 NOT POSSIBLE")
+    IF (ILEVOUT == KFLEV) CALL ABOR1("ERROR POUTS: DERIVATIVE NOT POSSIBLE")
+
+    CALL VERINTS(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),ZOUTS)
+    POUTS(:) = ZOUTS(:)
+  ELSE IF (PRESENT(POUTS)) THEN
+    IF (ITYPE == 1) CALL ABOR1("ERROR KFLEV+1: ITYPE=1 NOT POSSIBLE")
+    IF (PRESENT(PINS)) CALL ABOR1("ERROR: PINS MEANINGLESS WITH POUTS")
+
+    CALL VERINTS(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),ZOUTS)
+    POUTS(:) = ZOUTS(:)
+
+    CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
+      &JCHUNK,ZOUTS)
+  ELSE IF (ITYPE == 1) THEN
+    ! no copy needed
+    CALL VERINTS(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),ZOUTS)
+
+    CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
+      &JCHUNK,ZOUTS,PINS)
+  ELSE IF (ILEVOUT == KFLEV+1.AND..NOT.PRESENT(KLOUT)) THEN
+    IF (PRESENT(PINS)) CALL ABOR1("ERROR: PINS MEANINGLESS WITH POUTS")
+
+    CALL VERINTS(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),ZOUTS)
+    POUT(:,ILEVOUT) = ZOUTS(:)
+
+    CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
+      &JCHUNK,ZOUTS,PINS)
+  ELSE
+    CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
+      &JCHUNK,PINS=PINS)
+  ENDIF
+ELSEIF (ANY(CDOPER(1:4) == (/'FDER','HDER','DEGW','DDER'/))) THEN
   CALL VERDER(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT)
-ELSE 
+ELSE
   WRITE(NULERR,*) 'VERDISINT: UNKNOWN CDOPER=', CDOPER
   CALL ABOR1(' VERDISINT: ABOR1 CALLED')
 ENDIF

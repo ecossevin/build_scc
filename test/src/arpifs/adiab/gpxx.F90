@@ -1,5 +1,5 @@
 SUBROUTINE GPXX(YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHIFL, PHIFM, &
-& PLNPR, PRT, PUF, PVF, PUH, PVH, PX, PNHPPI, LDVFE  )
+& PLNPR, PRT, PUF, PVF, PUH, PVH, PWF2H, PX, PNHPPI, PTAUX_NL, LDVFE  )
 
 ! GPXX - Diagnose NHX-term
 
@@ -39,12 +39,14 @@ SUBROUTINE GPXX(YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHIFL, PHIFM
 !   PVF          : V-wind at full levels.
 !   PUH          : U-wind at half levels.
 !   PVH          : V-wind at half levels.
+!   PWF2H        : Full-to-Half levels interpolation weights.
 
 !   * OUTPUT:
 !   PX           : NHX-term at full levels.
 
 !   * OPTIONAL INPUT:
 !   PNHPPI       : [pre/prehyd] at full levels (NHEE model).
+!   PTAUX_NL     : control parameter tau for LNHHY.
 !   LDVFE        : T if VFE discretisation is used in this routine.
 
 ! Externals
@@ -71,6 +73,9 @@ SUBROUTINE GPXX(YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHIFL, PHIFM
 !   J. Vivoda and P. Smolikova (Sep 2020): VFE pruning.
 !   R. El Khatib 31-Jan-2022 Optional VFE
 !   C. Wastl and C. Wittmann (Feb 2022): Add updraft helicity 
+!   J. Vivoda and P. Smolikova (Aug-2023): Blended NH/HYD system.
+!   F. Voitus (Sep-2023): compatible vfe discretisation
+!
 ! End Modifications
 !---------------------------------------------------------------------
 
@@ -98,10 +103,12 @@ REAL(KIND=JPRB)    ,INTENT(IN)             :: PRT(KPROMA,KFLEV)
 REAL(KIND=JPRB)    ,INTENT(IN)             :: PUF(KPROMA,KFLEV) 
 REAL(KIND=JPRB)    ,INTENT(IN)             :: PVF(KPROMA,KFLEV) 
 REAL(KIND=JPRB)    ,INTENT(IN)             :: PUH(KPROMA,0:KFLEV) 
-REAL(KIND=JPRB)    ,INTENT(IN)             :: PVH(KPROMA,0:KFLEV) 
+REAL(KIND=JPRB)    ,INTENT(IN)             :: PVH(KPROMA,0:KFLEV)
+REAL(KIND=JPRB)    ,INTENT(IN)             :: PWF2H(KPROMA,0:KFLEV) 
 REAL(KIND=JPRB)    ,INTENT(OUT)            :: PX(KPROMA,KFLEV) 
-REAL(KIND=JPRB)    ,INTENT(IN)  ,OPTIONAL  :: PNHPPI(KPROMA,KFLEV) 
-LOGICAL, OPTIONAL, INTENT(IN)    :: LDVFE
+REAL(KIND=JPRB)    ,INTENT(IN)  ,OPTIONAL  :: PNHPPI(KPROMA,KFLEV)
+REAL(KIND=JPRB)    ,INTENT(IN)  ,OPTIONAL  :: PTAUX_NL 
+LOGICAL            ,INTENT(IN)  ,OPTIONAL  :: LDVFE
 
 ! -----------------------------------------------------------------------------
 
@@ -109,6 +116,8 @@ INTEGER(KIND=JPIM) :: JLEV, JROF
 REAL(KIND=JPRB) :: ZDUF(KPROMA,KFLEV)
 REAL(KIND=JPRB) :: ZDVF(KPROMA,KFLEV)
 REAL(KIND=JPRB) :: ZF(KPROMA,0:KFLEV+1)
+REAL(KIND=JPRB) :: ZUVH(KPROMA,0:KFLEV)
+REAL(KIND=JPRB) :: ZNHPPI(KPROMA,KFLEV)
 LOGICAL :: LLVFE
 
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
@@ -119,14 +128,27 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 ! -----------------------------------------------------------------------------
 
-IF (LHOOK) CALL DR_HOOK('GPXX', 0, ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('GPXX',0, ZHOOK_HANDLE)
 
 ! -----------------------------------------------------------------------------
 
 IF (PRESENT(LDVFE)) THEN
   LLVFE = LDVFE
 ELSE
-  LLVFE = YDGEOMETRY%YRVERT_GEOM%YRCVER%LVERTFE
+  LLVFE = YDGEOMETRY%YRVERT_GEOM%YRCVER%LVERTFE.AND.(.NOT.YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_COMPATIBLE)
+ENDIF
+
+! possibility to use hydrostatic divergence in full model
+IF (PRESENT(PNHPPI)) THEN
+  IF (PRESENT(PTAUX_NL)) THEN
+    DO JLEV=1,KFLEV
+      DO JROF=KST,KEND
+        ZNHPPI(JROF,JLEV) = 1.0_JPRB + PTAUX_NL * (PNHPPI(JROF,JLEV) - 1.0_JPRB)
+      ENDDO
+    ENDDO
+  ELSE
+    ZNHPPI(KST:KEND,1:KFLEV) = PNHPPI(KST:KEND,1:KFLEV)
+  ENDIF
 ENDIF
 
 IF (LLVFE) THEN
@@ -143,7 +165,7 @@ IF (LLVFE) THEN
     DO JLEV=1,KFLEV
       DO JROF=KST,KEND
         PX(JROF,JLEV) =&
-         & REAL(PNHPPI(JROF,JLEV),JPRD)/REAL(PRT(JROF,JLEV)*PLNPR(JROF,JLEV),JPRD)*&
+         & REAL(ZNHPPI(JROF,JLEV),JPRD)/REAL(PRT(JROF,JLEV)*PLNPR(JROF,JLEV),JPRD)*&
          & REAL(PHIFL(JROF,JLEV)*ZDUF(JROF,JLEV)+PHIFM(JROF,JLEV)*ZDVF(JROF,JLEV),JPRD)&
          & /YDGEOMETRY%YRVERT_GEOM%YRVETA%VFE_RDETAH(JLEV)
       ENDDO
@@ -159,6 +181,49 @@ IF (LLVFE) THEN
     ENDDO
   ENDIF
 
+ELSEIF (YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_COMPATIBLE.OR.YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFD_COMPATIBLE) THEN
+    
+  DO JLEV=1,KFLEV-1
+    DO JROF=KST,KEND
+      ZUVH(JROF,JLEV) = ( PUF(JROF,JLEV+1)*PHIFL(JROF,JLEV+1) &
+       & + PVF(JROF,JLEV+1)*PHIFM(JROF,JLEV+1) &
+       & + PWF2H(JROF,JLEV)*(PUF(JROF,JLEV)*PHIFL(JROF,JLEV)  &
+       & - PUF(JROF,JLEV+1)*PHIFL(JROF,JLEV+1) &
+       & + PVF(JROF,JLEV)*PHIFM(JROF,JLEV) &
+       & - PVF(JROF,JLEV+1)*PHIFM(JROF,JLEV+1)) )
+    ENDDO
+  ENDDO
+
+  !* top and bottom boundary treatment
+  DO JROF=KST,KEND
+    ZUVH(JROF,0)= PUF(JROF,1)*PHIHL(JROF,0) &
+     & + PVF(JROF,1)*PHIHM(JROF,0)
+    ZUVH(JROF,KFLEV)=PUF(JROF,KFLEV)*PHIHL(JROF,KFLEV) &
+     & + PVF(JROF,KFLEV)*PHIHM(JROF,KFLEV)
+  ENDDO
+
+  IF (PRESENT(PNHPPI)) THEN
+    DO JLEV=1,KFLEV
+      DO JROF=KST,KEND
+        PX(JROF,JLEV) = YDGEOMETRY%YRVERT_GEOM%YRVETA%VDETA_RATIO(JLEV)*(&
+         & ( REAL((ZUVH(JROF,JLEV)-ZUVH(JROF,JLEV-1)),JPRD)&
+         & - PUF(JROF,JLEV)*REAL(PHIHL(JROF,JLEV)-PHIHL(JROF,JLEV-1),JPRD)&
+         & - PVF(JROF,JLEV)*REAL(PHIHM(JROF,JLEV)-PHIHM(JROF,JLEV-1),JPRD)&
+         & )*REAL(PNHPPI(JROF,JLEV),JPRD)/(REAL(PRT(JROF,JLEV)*PLNPR(JROF,JLEV),JPRD)))
+      ENDDO
+    ENDDO
+  ELSE
+    DO JLEV=1,KFLEV
+      DO JROF=KST,KEND
+        PX(JROF,JLEV) = YDGEOMETRY%YRVERT_GEOM%YRVETA%VDETA_RATIO(JLEV)*(&
+         & ( REAL(ZUVH(JROF,JLEV)-ZUVH(JROF,JLEV-1),JPRD)&
+         & - PUF(JROF,JLEV)*REAL(PHIHL(JROF,JLEV)-PHIHL(JROF,JLEV-1),JPRD)&
+         & - PVF(JROF,JLEV)*REAL(PHIHM(JROF,JLEV)-PHIHM(JROF,JLEV-1),JPRD)&
+         & )/REAL(PRT(JROF,JLEV)*PLNPR(JROF,JLEV),JPRD))
+      ENDDO
+    ENDDO
+  ENDIF
+    
 ELSE
 
   IF (PRESENT(PNHPPI)) THEN
@@ -169,7 +234,7 @@ ELSE
          & REAL(PVH(JROF,JLEV)-PVF(JROF,JLEV),JPRD)*PHIHM(JROF,JLEV) + &
          & REAL(PUF(JROF,JLEV)-PUH(JROF,JLEV-1),JPRD)*PHIHL(JROF,JLEV-1) + &
          & REAL(PVF(JROF,JLEV)-PVH(JROF,JLEV-1),JPRD)*PHIHM(JROF,JLEV-1) &
-         & )*REAL(PNHPPI(JROF,JLEV),JPRD)/REAL(PRT(JROF,JLEV)*PLNPR(JROF,JLEV),JPRD)
+         & )*REAL(ZNHPPI(JROF,JLEV),JPRD)/REAL(PRT(JROF,JLEV)*PLNPR(JROF,JLEV),JPRD)
       ENDDO
     ENDDO
   ELSE
@@ -189,7 +254,6 @@ ENDIF
 
 ! -----------------------------------------------------------------------------
 
-IF (LHOOK) CALL DR_HOOK('GPXX', 1, ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('GPXX',1, ZHOOK_HANDLE)
 
 END SUBROUTINE GPXX
-

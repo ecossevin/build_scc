@@ -5,7 +5,7 @@ SUBROUTINE ACNEBCOND ( YDCST, YDRIP,YDML_PHY_MF,KIDIA,KFDIA,KLON,KTDIA,KLEV,LDRE
  & YDSTA,&
  !-----------------------------------------------------------------------
  ! - INPUT  2D .
- & PAPHI,PAPHIF,PAPRSF,PCP,PR,PDELP,PRH,PBLH,PQ,PQI,PQL,PQW,PT,&
+ & PAPHI,PAPHIF,PAPRSF,PCP,PR,PDELP,PQ,PQI,PQL,PQW,PT,&
  ! - INPUT-OUTPUT  2D .
  & PNCV,&
  ! - INPUT  1D .
@@ -174,13 +174,11 @@ REAL(KIND=JPRB)   ,INTENT(IN)    :: PT(KLON,KLEV)
 REAL(KIND=JPRB)   ,INTENT(INOUT) :: PNCV(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(IN)    :: PGM(KLON) 
 REAL(KIND=JPRB)   ,INTENT(IN)    :: PTS(KLON)
-REAL(KIND=JPRB)   ,INTENT(IN)    :: PRH(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PQCS(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PNEBCOND(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PHCRICS(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PQSATS(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PRMF(KLON,KLEV) 
-REAL(KIND=JPRB)   ,INTENT(IN)    :: PBLH(KLON)
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PRHOUT(KLON,KLEV)
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PQCS0(KLON,KLEV)
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PNEBS0(KLON,KLEV)
@@ -231,7 +229,7 @@ ASSOCIATE(REFLRHC=>YDML_PHY_MF%YRPHY0%REFLRHC, RDPHIC=>YDML_PHY_MF%YRPHY0%RDPHIC
  & TSPHY=>YDML_PHY_MF%YRPHY2%TSPHY, &
  & LSMGCDEV=>YDML_PHY_MF%YRPHY%LSMGCDEV, NSMDNEB=>YDML_PHY_MF%YRPHY%NSMDNEB, L3MT=>YDML_PHY_MF%YRPHY%L3MT, &
  & LSMTPS=>YDML_PHY_MF%YRPHY%LSMTPS, NSMTBOT=>YDML_PHY_MF%YRPHY%NSMTBOT, LXRCDEV=>YDML_PHY_MF%YRPHY%LXRCDEV, &
- & LRKCDEV=>YDML_PHY_MF%YRPHY%LRKCDEV, LSMITH_CDEV=>YDML_PHY_MF%YRPHY%LSMITH_CDEV, &
+ & LSMITH_CDEV=>YDML_PHY_MF%YRPHY%LSMITH_CDEV, &
  & RCPD=>YDCST%RCPD, RD=>YDCST%RD, RG=>YDCST%RG, RLSTT=>YDCST%RLSTT, RLVTT=>YDCST%RLVTT, &
  & RMD=>YDCST%RMD, RMV=>YDCST%RMV, RV=>YDCST%RV, &
  & RSTATI=>YDRIP%RSTATI, YDPHY0=>YDML_PHY_MF%YRPHY0)
@@ -345,72 +343,6 @@ IF(LSMGCDEV) THEN
   ENDDO
 
 ENDIF ! LSMGCDEV
-
-IF(LRKCDEV) THEN
-!     ------------------------------------------------------------------
-!     IIIc - CALCUL DE L'HUMIDITE CRITIQUE (FORMULE RASCH-KRISTJANSSON).
-
-!            CRITICAL HUMIDITY (RASCH-KRISTJANSSON).
-
-  
-  ZSIGMA=4.0E-04_JPRB
-  ZSIGMASTAB=1.6E-02_JPRB
-  ZEPSILO=RMV/RMD
-  ZSIGMAZ=1.6E-2_JPRB
-
-  DO JLEV=1,KLEV
-    DO JLON=KIDIA,KFDIA
-     ZLSTMP(JLON,JLEV)=0._JPRB
-    ENDDO
-  ENDDO
- 
-  DO JLEV=1,KLEV
-!DEC$ IVDEP
-    DO JLON=KIDIA,KFDIA
-
-      ZMESH=REFLRHC/(TEQH*PGM(JLON))
-
-      ZESN=FOEW(PT(JLON,JLEV),1._JPRB)*PRMF(JLON,JLEV)&
-     &+FOEW(PT(JLON,JLEV),0._JPRB)*(1._JPRB-PRMF(JLON,JLEV))
-
-      ZDENOM=PAPRSF(JLON,JLEV)-(1._JPRB-ZEPSILO)*ZESN
-
-      PQSATS(JLON,JLEV)=ZEPSILO*ZESN/ZDENOM
-
-      PRHOUT(JLON,JLEV)=PQ(JLON,JLEV)/PQSATS(JLON,JLEV)
-
-      ZRHIN=MAX(PRHOUT(JLON,JLEV),0.05_JPRB)      
-
-      ZDRHDZ=ZRHIN*RG/(PT(JLON,JLEV)*RD)* &
-     & ( ZEPSILO*(RLVTT+PRMF(JLON,JLEV)*(RLSTT-RLVTT))/ &
-     & (RCPD*PT(JLON,JLEV)) - 1._JPRB)       
-
-      ZTEST=MAX(0.0_JPRB,SIGN(1.0_JPRB,PAPHIF(JLON,JLEV)-PAPHI(JLON,KLEV)&
-     &        -RG*PBLH(JLON)))
- 
-      ZZDIST2 = (PAPHI(JLON,JLEV-1)-PAPHI(JLON,JLEV))/RG
-
-      PHCRICS(JLON,JLEV)=1.0_JPRB - 0.5_JPRB*SQRT(2.0_JPRB*ZMESH*(ZSIGMA)**2&
-           &                   +(1.0_JPRB-ZTEST)*(ZZDIST2*ZDRHDZ)**2 +&
-           &                    ZTEST*ZZDIST2*ZSIGMAZ**2)
-     
-      PHCRICS(JLON,JLEV)=MAX(PHCRICS(JLON,JLEV),0.5_JPRB)
-
-!   Decrease spinup of phcrics in the beginning of a forecast. No 
-!   physical relevance:
-
-      ZONEMRHCRIT=MIN(0.075_JPRB,1._JPRB-PHCRICS(JLON,JLEV))
-      ZSTIMEINC=MAX(0._JPRB,MIN(1._JPRB,1._JPRB-RSTATI/ &
-     & (12._JPRB*3600._JPRB)))
-      ZSTIMEINC=ZSTIMEINC**4
-
-     PHCRICS(JLON,JLEV)= PHCRICS(JLON,JLEV)-ZSTIMEINC*ZONEMRHCRIT
-      
-     
-    ENDDO
-  ENDDO
-
-ENDIF ! LRKCDEV
 
 IF(LXRCDEV) THEN
 !*
@@ -748,79 +680,6 @@ IF(LSMGCDEV) THEN
   ENDIF ! NSMDNEB
 
 ENDIF ! LSMGCDEV
-IF(LRKCDEV) THEN
-!  ------------------------------------------------------------------
-!           IVc - CALCUL DE LA NEBULOSITE (FORMULE RASCH-KRISTJANSSON).
-
-!           CLOUDINESS DIAGNOSED BY MODIFIED RASCH-KRISTJANSSON CAM3.
-! ---------------------------------------------------------------------
-
-!    1. Define some constants for the scheme depending on height
-
-!   ---------------------------------------------------------------------------
-!    2. In HIRLAM this is where shallow and convective cloudiness is computed, 
-!       Need to know what to do with 3MT, and Meteo-France physics for Cu and
-!       shallow convection. Now I use historic PNCV for convective cloudiness.
-!   ---------------------------------------------------------------------------
-
-  DO  JLEV=KTDIA,KLEV
-    DO JLON=KIDIA,KFDIA   
-
-      ZSHALTEMP(JLON,JLEV)=0._JPRB
-      ZHCUTMP(JLON,JLEV)=0._JPRB
-
-    ENDDO
-  ENDDO
-!   ---------------------------------------------------------------------------
-!    3. Compute stratiform cloudiness and merge it which shallow convective 
-!       clouds from (2.) into "total" clouds, excluding deep convective clouds.
-!   ---------------------------------------------------------------------------
-
-  DO  JLEV=2,KLEV
-    DO JLON=KIDIA,KFDIA
-
-!      Following lines currently not needed, but may be later on if shallow              
-!      convection enters from TOUCANS:                                                   
-!      ZCLD = MIN(0.8_JPRB,ZHCUTMP(JLON,JLEV)+ZSHALTEMP(JLON,JLEV))                      
-!      ZRHD = (PRH(JLON,JLEV)-ZCLD)/(1._JPRB-ZCLD)                                       
-
-       ZRHD = MIN(1._JPRB,PRHOUT(JLON,JLEV))
-       ZRHDIF = (1._JPRB-ZRHD)/(1._JPRB-PHCRICS(JLON,JLEV))
-       ZRHDIF = 1._JPRB - SQRT(MAX(0._JPRB,ZRHDIF))
-       ZLSTMP(JLON,JLEV)=MIN(0.999_JPRB,MAX(ZRHDIF,0.0_JPRB))
-
-!      Following lines currently not needed, but may be later on if shallow              
-!      convection enters from TOUCANS:                                                   
-!      ZLSTMP(JLON,JLEV)=ZLSTMP(JLON,JLEV)*(1._JPRB-ZSHALTEMP(JLON,JLEV))&               
-!     & + ZSHALTEMP(JLON,JLEV)                                                           
-
-    ENDDO
-  ENDDO
-
-
-!     ----------------------------------------------------------------------------
-!     4. Merge deep convective and layered cloud fraction for total cloud.
-!     ----------------------------------------------------------------------------
-
- DO JLEV=KTDIA,KLEV
-    DO JLON=KIDIA,KFDIA
-
-!      Following lines currently not needed, but may be later on:                        
-!      IF((ZHCUTMP(JLON,JLEV)+ZLSTMP(JLON,JLEV)) > 1.0_JPRB)THEN                         
-!        ZHCUTMP(JLON,JLEV)=ZHCUTMP(JLON,JLEV)/(ZHCUTMP(JLON,JLEV)&                      
-!       &+ZLSTMP(JLON,JLEV))                                                             
-!        ZLSTMP(JLON,JLEV)=ZLSTMP(JLON,JLEV)/(ZHCUTMP(JLON,JLEV)&                        
-!       &+ZLSTMP(JLON,JLEV))                                                             
-!      ENDIF                                                                             
-
-! Other output variables:                                                                
-
-      PNEBCOND(JLON,JLEV) = MAX(0.0_JPRB,MIN(0.99_JPRB,ZLSTMP(JLON,JLEV)))
-
-    ENDDO
- ENDDO
-
-ENDIF ! LRKCDEV 
 
 IF(LSMITH_CDEV) THEN
 !  ------------------------------------------------------------------

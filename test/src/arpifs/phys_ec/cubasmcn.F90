@@ -76,6 +76,7 @@ SUBROUTINE CUBASMCN &
 !          NONE
 
 !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+!     R. El Khatib 06-Sep-2023 vectorization
 !----------------------------------------------------------------------
 
 USE PARKIND1  ,ONLY : JPIM     ,JPRB
@@ -125,14 +126,14 @@ IF (LHOOK) CALL DR_HOOK('CUBASMCN',0,ZHOOK_HANDLE)
 !*    1.           CALCULATE ENTRAINMENT AND DETRAINMENT RATES
 !                  -------------------------------------------
 
-!DIR$ IVDEP
-!OCL NOVREC
 ASSOCIATE(LMFMID=>YDECUMF%LMFMID, NJKT7=>YDECUMF%NJKT7, &
  & RMFLIA=>YDECUMF%RMFLIA, RMFCMIN=>YDECUMF%RMFCMIN, &
  & RCPD=>YDCST%RCPD, RG=>YDCST%RG)
 
 ZRG=1.0_JPRB/RG
 ZORCPD=1.0_JPRB/RCPD
+!DIR$ IVDEP
+!OCL NOVREC
 DO JL=KIDIA,KFDIA
   IF(.NOT.LDCUM(JL).AND.KLAB(JL,KK+1) == 0 ) THEN
     IF(LMFMID.AND.KK>NJKT7&

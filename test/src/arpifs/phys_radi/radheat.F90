@@ -1,6 +1,6 @@
 !OPTIONS XOPT(HSFUN)
 SUBROUTINE RADHEAT    (YDCST, YDTHF, YDERAD, YDERDI, YDML_PHY_MF, KIDIA, KFDIA, KLON, KLEV, PAPHM1,   &
-&  PEMIS, PEMTED, PMU0, PQM1, PTE, PTRSOL, PTRSOD, PTSM1M, PTSPHY, PTRSODIR, PTRSODIF, PALBD,  PALBP, &
+&  PEMIS, PEMTED, PMU0, PSOLO, PQM1, PTE, PTRSOL, PTRSOD, PTSM1M, PTSPHY, PTRSODIR, PTRSODIF, PALBD,  PALBP, &
 & PFRSO, PFRTH, PFRSODS, PFRTHDS, PCEMTR, PCTRSO, PFRSOC, PFRTHC, PSUDU, PSDUR, PDSRP,  PSFSWDIR,     &
 & PSFSWDIF, PFRSOPS, PFRSOFS, PFRSOPT)
 
@@ -67,6 +67,7 @@ SUBROUTINE RADHEAT    (YDCST, YDTHF, YDERAD, YDERDI, YDML_PHY_MF, KIDIA, KFDIA, 
 !      Y. Bouteloup Nov 2014 : Correction of a bug in the computation of SW downward diagnostic
 !                              in the case LMSE=TRUE
 !      Y. Bouteloup Jun 2015 : Re-activation of LMSE protection
+!      2022-04-13: J.M. Piriou: introduce Sun eclipses: PSOLO.
 !-----------------------------------------------------------------------
 
 USE MODEL_PHYSICS_MF_MOD , ONLY : MODEL_PHYSICS_MF_TYPE
@@ -93,6 +94,7 @@ REAL(KIND=JPRB)             ,INTENT(IN)     :: PAPHM1(KLON,KLEV+1)
 REAL(KIND=JPRB)             ,INTENT(IN)     :: PEMIS(KLON) 
 REAL(KIND=JPRB)             ,INTENT(IN)     :: PEMTED(KLON,KLEV+1) 
 REAL(KIND=JPRB)             ,INTENT(IN)     :: PMU0(KLON) 
+REAL(KIND=JPRB)             ,INTENT(IN)     :: PSOLO(KLON) 
 REAL(KIND=JPRB)             ,INTENT(IN)     :: PQM1(KLON,KLEV) 
 REAL(KIND=JPRB)             ,INTENT(INOUT)  :: PTE(KLON,KLEV) 
 REAL(KIND=JPRB)             ,INTENT(IN)     :: PTRSOL(KLON,KLEV+1) 
@@ -166,7 +168,7 @@ ENDDO
 DO JL=KIDIA,KFDIA
   IF (PMU0(JL) >= 1.E-10_JPRB) THEN
 !!    ZI0(JL)=RRAE/(SQRT(PMU0(JL)**2+ZCONS1)-PMU0(JL)) * ZRII0
-    ZI0(JL)=PMU0(JL)*ZRII0
+    ZI0(JL)=PMU0(JL)*ZRII0*(1._JPRB-PSOLO(JL))
   ELSE
     ZI0(JL)=0.0_JPRB
   ENDIF

@@ -1,4 +1,4 @@
-SUBROUTINE GPHLWI_OPENACC (YDDIMV, KPROMA, KST, KEND, PLNPR, PALPH, PWW, LDVERINT, YDSTACK)
+SUBROUTINE GPHLWI_OPENACC (LDVERTFE, KFLEV, KPROMA, KST, KEND, PLNPR, PALPH, PRDETAH, PDETA_RATIO, PWW, YDSTACK)
   
   !**** *GPHLWI* - to half-levels interpolation weights
   
@@ -14,9 +14,10 @@ SUBROUTINE GPHLWI_OPENACC (YDDIMV, KPROMA, KST, KEND, PLNPR, PALPH, PWW, LDVERIN
   !        Explicit arguments :
   !        --------------------
   !         INPUT:
+  !          KFLEV   - Nb of vertical levels.
   !          KPROMA  - dimensioning.
-  !          KSTART  - start of work.
-  !          KPROF   - depth of work.
+  !          KST     - start of work.
+  !          KEND    - depth of work.
   !          PLNPR   - "delta" (log(prehyd) depth) at full levels.
   !          PALPH   - "alpha" at full levels.
   
@@ -47,14 +48,13 @@ SUBROUTINE GPHLWI_OPENACC (YDDIMV, KPROMA, KST, KEND, PLNPR, PALPH, PWW, LDVERIN
   !     --------------
   !        Original : November 1997
   !        Modified 02-07-02 by C. Fischer : remove pww5 computation + intents
-  !        M.Hamrud      01-Oct-2003 CY28 Cleaning
-  !        K.Yessad      20-Mar-2006 Cleaning + optimisation
-  !        K. Yessad (Dec 2008): remove dummy CDLOCK
+  !        M.Hamrud 01-Oct-2003 CY28 Cleaning
+  !        K.Yessad 20-Mar-2006 Cleaning + optimisation
+  !        K.Yessad (Dec 2008): remove dummy CDLOCK
   !     ----------------------------------------------------------------------
   
 !$acc routine( GPHLWI_OPENACC ) seq
   
-  USE YOMDIMV, ONLY: TDIMV
   USE PARKIND1, ONLY: JPIM, JPRB
   USE YOMHOOK, ONLY: LHOOK, DR_HOOK, JPHOOK
   
@@ -65,20 +65,22 @@ SUBROUTINE GPHLWI_OPENACC (YDDIMV, KPROMA, KST, KEND, PLNPR, PALPH, PWW, LDVERIN
   
   IMPLICIT NONE
   
-  TYPE(TDIMV), INTENT(IN) :: YDDIMV
+  LOGICAL, INTENT(IN) :: LDVERTFE
+  INTEGER(KIND=JPIM), INTENT(IN) :: KFLEV
   INTEGER(KIND=JPIM), INTENT(IN) :: KPROMA
   INTEGER(KIND=JPIM), INTENT(IN) :: KST
   INTEGER(KIND=JPIM), INTENT(IN) :: KEND
-  REAL(KIND=JPRB), INTENT(IN) :: PLNPR(KPROMA, YDDIMV%NFLEVG)
-  REAL(KIND=JPRB), INTENT(IN) :: PALPH(KPROMA, YDDIMV%NFLEVG)
-  REAL(KIND=JPRB), INTENT(OUT) :: PWW(KPROMA, YDDIMV%NFLEVG)
-  LOGICAL, OPTIONAL, INTENT(IN) :: LDVERINT
+  REAL(KIND=JPRB), INTENT(IN) :: PLNPR(KPROMA, KFLEV)
+  REAL(KIND=JPRB), INTENT(IN) :: PALPH(KPROMA, KFLEV)
+  REAL(KIND=JPRB), INTENT(IN) :: PRDETAH(KFLEV)
+  REAL(KIND=JPRB), INTENT(IN) :: PDETA_RATIO(KFLEV)
+  REAL(KIND=JPRB), INTENT(OUT) :: PWW(KPROMA, 0:KFLEV)
+  
   !     ------------------------------------------------------------------
   
   INTEGER(KIND=JPIM) :: JLEV
   INTEGER(KIND=JPIM) :: JROF
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
-  LOGICAL :: LL_VERINT
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
@@ -86,31 +88,23 @@ SUBROUTINE GPHLWI_OPENACC (YDDIMV, KPROMA, KST, KEND, PLNPR, PALPH, PWW, LDVERIN
   JLON = KST
   
   !     ------------------------------------------------------------------
-  
-  
   !     ------------------------------------------------------------------
   
-  IF (PRESENT(LDVERINT)) THEN
-    LL_VERINT = LDVERINT
-  ELSE
-    LL_VERINT = .false.
-  END IF
-  
-  IF (.not.LL_VERINT) THEN
-    DO JLEV=1,YDDIMV%NFLEVG - 1
+  IF (LDVERTFE) THEN
+    DO JLEV=1,KFLEV - 1
       PWW(JLON, JLEV) =  &
-      & (PLNPR(JLON, JLEV + 1) - PALPH(JLON, JLEV + 1)) / (PLNPR(JLON, JLEV + 1) - PALPH(JLON, JLEV + 1) + PALPH(JLON, JLEV))
+      & (PDETA_RATIO(JLEV)*PRDETAH(JLEV)) / ((PDETA_RATIO(JLEV + 1)*PRDETAH(JLEV + 1)) + (PDETA_RATIO(JLEV)*PRDETAH(JLEV)))
     END DO
   ELSE
-    DO JLEV=1,YDDIMV%NFLEVG - 1
-      PWW(JLON, JLEV) = 0.5_JPRB
+    DO JLEV=1,KFLEV - 1
+      PWW(JLON, JLEV) =  &
+      & (PLNPR(JLON, JLEV + 1) - PALPH(JLON, JLEV + 1)) / (PLNPR(JLON, JLEV + 1) - PALPH(JLON, JLEV + 1) + PALPH(JLON, JLEV))
     END DO
   END IF
   !     ------------------------------------------------------------------
   
   !* Bottom half level:
-  PWW(JLON, YDDIMV%NFLEVG) = 0.0_JPRB
+  PWW(JLON, KFLEV) = 1.0_JPRB
   
   !     ------------------------------------------------------------------
-  
 END SUBROUTINE GPHLWI_OPENACC

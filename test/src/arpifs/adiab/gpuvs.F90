@@ -25,7 +25,7 @@ SUBROUTINE GPUVS( &
 !   * INPUT:
 !   KFLEV   - number of levels.
 !   KPROMA  - horizontal dimension.
-!   KSTART  - start of work.
+!   KST  - start of work.
 !   KEND    - end of work.
 !   LDER    - T: treatment of the derivatives.
 !   PUF     - upper air U-wind at full levels.

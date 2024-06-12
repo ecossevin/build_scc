@@ -81,8 +81,8 @@ SUBROUTINE GPCTY_EXPL(YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, YDVAB, YD
 !        --------------------
 !        * INPUT:
 !          KPROMA       : horizontal dimensioning
-!          KD           : start of work
-!          KF           : depth of work
+!          KST           : start of work
+!          KEND           : depth of work
 !          KFLEV        : number of layers
 !          LDRUBC       : upper boundary condition switch
 !          YDVAB        : contains information about hybrid vertical coordinate
@@ -171,7 +171,7 @@ REAL(KIND=JPRB)    ,INTENT(OUT)            :: PPSDVBC(KPROMA,0:KFLEV),PDIVDP(KPR
 !     ------------------------------------------------------------------
 
 REAL(KIND=JPRB) :: ZSDIV(KPROMA,0:KFLEV+1)
-REAL(KIND=JPRB) :: ZPSDIVFE(KPROMA,KFLEV+1)
+REAL(KIND=JPRB) :: ZPSDIVFE(KPROMA)
 REAL(KIND=JPRB) :: ZVP(KPROMA,KFLEV)
 
 INTEGER(KIND=JPIM) :: JROF,JLEV
@@ -230,14 +230,8 @@ IF(YDCVER%LVERTFE) THEN
 
   ZSDIV(KST:KEND,0)=0.0_JPRB
   ZSDIV(KST:KEND,KFLEV+1)=0.0_JPRB
-  CALL VERDISINT(YDVFE, YDCVER, 'ITOP', '11', KPROMA, KST, KEND, KFLEV, ZSDIV, ZPSDIVFE)
-
-  DO JLEV=1,KFLEV
-    DO JROF=KST,KEND
-      PPSDIV(JROF,JLEV)=ZPSDIVFE(JROF,JLEV)
-    ENDDO
-  ENDDO
-
+  CALL VERDISINT(YDVFE,YDCVER,'ITOP','11',KPROMA,KST,KEND,KFLEV,ZSDIV,PPSDIV(:,1:KFLEV),&
+    &POUTS=ZPSDIVFE)
 ELSE
   DO JLEV=1,KFLEV
     !dir$ ivdep
@@ -250,7 +244,7 @@ ENDIF
 IF (LDRUBC) THEN
   IF(YDCVER%LVERTFE) THEN
     DO JROF=KST,KEND
-      PPSDVBC(JROF,KFLEV)=ZPSDIVFE(JROF,KFLEV+1)-PEVT(JROF)
+      PPSDVBC(JROF,KFLEV)=ZPSDIVFE(JROF)-PEVT(JROF)
     ENDDO
   ELSE
     DO JLEV=0,KFLEV
@@ -263,7 +257,7 @@ IF (LDRUBC) THEN
 ELSE
   IF(YDCVER%LVERTFE) THEN
     DO JROF=KST,KEND
-      PPSDVBC(JROF,KFLEV)=ZPSDIVFE(JROF,KFLEV+1)
+      PPSDVBC(JROF,KFLEV)=ZPSDIVFE(JROF)
     ENDDO
   ELSE
     DO JLEV=0,KFLEV
@@ -287,7 +281,7 @@ IF(YDCVER%LVERTFE) THEN
   DO JLEV=1,KFLEV
     !dir$ ivdep
     DO JROF=KST,KEND
-      PEVEL(JROF,JLEV)=YDVAB%VBF(JLEV)*ZPSDIVFE(JROF,KFLEV+1)-PPSDIV(JROF,JLEV)
+      PEVEL(JROF,JLEV)=YDVAB%VBF(JLEV)*ZPSDIVFE(JROF)-PPSDIV(JROF,JLEV)
     ENDDO
   ENDDO
 ELSE

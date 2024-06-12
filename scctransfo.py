@@ -6,7 +6,7 @@ from loki import (
     Intrinsic, Variable, SymbolAttributes,
     DerivedType, VariableDeclaration, flatten,
     BasicType, FindInlineCalls, SubstituteExpressions,
-    Nullify, analyse_dataflow, Comparison
+    Nullify, analyse_dataflow, Comparison, RangeIndex, 
 )
 
 from loki.transformations.sanitise import resolve_associates
@@ -139,11 +139,26 @@ def demote_horizontal(routine, horizontal_size):
     :param routine:.
     :param horizontal_size: size of the horizontal dimension (NPROMA)
     """
+    #demote_arg=True #rm KLON in function arg if True
     demote_arg=False #rm KLON in function arg if True
     routine_arg=[var.name for var in routine.arguments]
-    to_demote=FindVariables(unique=True).visit(routine.spec)
-    to_demote=[var for var in to_demote if isinstance(var, symbols.Array)]
-    to_demote=[var for var in to_demote if var.shape[-1] == horizontal_size]
+    variables=FindVariables(unique=True).visit(routine.spec)
+    variables=[var for var in variables if isinstance(var, symbols.Array)]
+    to_demote=[]
+    for var in variables:
+        not_cste=False
+        if len(var.shape)==1:
+            if var.shape[0] == horizontal_size:
+                to_demote.append(var)
+        else: 
+            for shape in var.shape:
+                if not isinstance(shape, symbols.IntLiteral):
+                    if shape!=horizontal_size:
+                        not_cste=True
+                        break
+            if not not_cste: #if the shape of the var are cste or horizontal
+                to_demote.append(var) 
+    
     if not demote_arg :
         to_demote = [var for var in to_demote if var.name not in routine_arg]
 
@@ -174,41 +189,55 @@ def alloc_temp(routine):
             if isinstance(s, symbols.Array):
                 if not s.type.pointer: #if pt, 
                     if s.name not in routine_arg:
-                        if s.type.kind:
-                            new_s='temp ('+s.type.dtype.name+' (KIND='+s.type.kind.name+'), '+s.name+', ('
-                        else:
-                            new_s='temp ('+s.type.dtype.name+', '+s.name+', ('
+                        not_cste=False
                         for shape in s.shape:
-                            new_s=new_s+str(shape)+', '
-                        new_s=new_s[:-2]
-                        new_s=new_s+'))'
-                        kind = symbols.DeferredTypeSymbol(name=f"KIND ({s.name})")
-                        #kind = symbols.InlineCall(symbols.Variable(name='KIND'), parameters=(new_s,))
-                        
-                        cond8 = Comparison(
-                        		left=kind,
-                        		operator='==',
-                        		right=symbols.IntLiteral(value=8))
-                        cond4 = Comparison(
-                        		left=kind,
-                        		operator='==',
-                        		right=symbols.IntLiteral(value=4))
-                        alloc8='alloc8 ('+s.name+')'
-                        alloc4='alloc4 ('+s.name+')'
-                        stop='STOP 1'
-                        else_cond = ir.Conditional(
-                        		condition=cond4,
-                        		body=(Intrinsic(alloc4),),
-                        		else_body=(Intrinsic(stop),)
-                                    )
-                        alloc_block = ir.Conditional(
-                        	condition=cond8,
-                        	body=(Intrinsic(alloc8),),
-                        	else_body=(else_cond,),
-                        	hase_elseif=True
-                        		)
-                        routine.spec.append(alloc_block)
-                        intrinsic_lst.append(Intrinsic(new_s))
+
+                            if (not isinstance(shape, symbols.IntLiteral)):
+                                if isinstance(shape, symbols.Scalar) :
+                                    if not shape.type.initial:
+                                        not_cste=True
+                                        break
+                        if not_cste: 
+
+                            if s.type.kind:
+                                new_s='temp ('+s.type.dtype.name+' (KIND='+s.type.kind.name+'), '+s.name+', ('
+                            else:
+                                new_s='temp ('+s.type.dtype.name+', '+s.name+', ('
+                            for shape in s.shape:
+                                new_s=new_s+str(shape)+', '
+                            new_s=new_s[:-2]
+                            new_s=new_s+'))'
+                            kind = symbols.DeferredTypeSymbol(name=f"KIND ({s.name})")
+                            #kind = symbols.InlineCall(symbols.Variable(name='KIND'), parameters=(new_s,))
+                            
+                            cond8 = Comparison(
+                            		left=kind,
+                            		operator='==',
+                            		right=symbols.IntLiteral(value=8))
+                            cond4 = Comparison(
+                            		left=kind,
+                            		operator='==',
+                            		right=symbols.IntLiteral(value=4))
+                            alloc8='alloc8 ('+s.name+')'
+                            alloc4='alloc4 ('+s.name+')'
+                            stop='STOP 1'
+                            else_cond = ir.Conditional(
+                            		condition=cond4,
+                            		body=(Intrinsic(alloc4),),
+                            		else_body=(Intrinsic(stop),)
+                                        )
+                            alloc_block = ir.Conditional(
+                            	condition=cond8,
+                            	body=(Intrinsic(alloc8),),
+                            	else_body=(else_cond,),
+                            	hase_elseif=True
+                            		)
+                            routine.spec.append(alloc_block)
+                            intrinsic_lst.append(Intrinsic(new_s))
+                        else: 
+                            var_lst=[s]
+                            VAR=decls.clone(symbols=var_lst)
+                            intrinsic_lst.append(VAR)
                     else: #if array in routine args
 #                        var_lst.append(decls.clone(symbols=s))
                         var_lst=[s]
@@ -344,17 +373,41 @@ def get_horizontal_idx(routine, lst_horizontal_idx):
     return(loop_index)
 
 
-def rm_sum(routine):
+def rm_sum(routine, horizontal_size):
     """
-    Remove calls to SUM fortran function.
+    Remove calls to SUM if the sum is performed on the horizontal dimension.
+
+    TODO : add check to be sure the SUM is of this type : 
+    ZTEST = SUM(A(:))
+    IF (ZTEST > 0.0_JPRB) THEN
+    ...
+
     :param routine:.
     """
-    #TODO : Check if one wants to remove it everywhere? 
+    verbose = False
+    #verbose = True
     call_map={}
     for assign in FindNodes(Assignment).visit(routine.body):
         for call in FindInlineCalls().visit(assign):
             if (call.name=="SUM"):
-                call_map[call]=call.parameters[0]
+                if len(call.parameters)>1:
+                    raise NotImplementedError("SUM should have only one arg")
+                else:
+                    arg = call.parameters[0]
+                    if len(arg.shape)==1:
+                        if arg.shape[0].name == horizontal_size:
+                            if verbose : print(f"Removing an horizontal SUM : {fgen(assign)}")
+                            call_map[call]=call.parameters[0]
+                    else:
+                        shape_idx = 0
+                        for shape in arg.shape:
+                            if arg.shape[0].name == horizontal_size:
+                                break 
+                            shape_idx += 1
+                        if isinstance(arg.dimensions[shape_idx], RangeIndex):
+                            if verbose : print(f"Removing an horizontal SUM : {fgen(assign)}")
+                            call_map[call]=call.parameters[0]
+
     if call_map:
         routine.body=SubstituteExpressions(call_map).visit(routine.body)
 
@@ -578,6 +631,7 @@ def openacc_trans(routine, horizontal, lst_horizontal_idx, lst_horizontal_size, 
     rename(routine)
     acc_seq(routine)
     stack_mod(routine)
+    rm_sum(routine, horizontal_size) #must be before demote_horizontal
     demote_horizontal(routine, horizontal_size)
     #TODO : change resolve_vector : changes dim for all possible idx and bounds..
     ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
@@ -585,7 +639,7 @@ def openacc_trans(routine, horizontal, lst_horizontal_idx, lst_horizontal_size, 
     remove_horizontal_loop(routine, lst_horizontal_idx)
     ###
     ystack1(routine)
-    rm_sum(routine)
+    #rm_sum(routine) #must be before demote_horizontal
     str_interface = generate_interface(routine) #must be before temp allocation and y stack, or temp will be in interface
    
    ##----------------------------------------
@@ -600,7 +654,7 @@ def openacc_trans(routine, horizontal, lst_horizontal_idx, lst_horizontal_size, 
     write_print(routine)
     
     ystack2(routine)
-    alloc_temp(routine)
+    alloc_temp(routine) #must be after demote_horizontal
     jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx) #at the end
     
     return(str_interface)

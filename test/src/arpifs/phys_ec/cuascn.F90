@@ -14,7 +14,7 @@ SUBROUTINE CUASCN &
  & PMFUS,    PMFUQ,    PMFUL,    PLUDE,    PLUDELI,        PDMFUP,&
  & PLCRIT_AER,&
  & PDMFEN,&
- & KCBOT,    KCTOP,    KCTOP0,   KDPL,     PMFUDE_RATE,    PKINEU,  PWMEAN )  
+ & KCBOT,    KCTOP,    KCTOP0,   KDPL,     PMFUDE_RATE,    PKINEU,  PWU, PWMEAN )  
 
 !          THIS ROUTINE DOES THE CALCULATIONS FOR CLOUD ASCENTS
 !          FOR CUMULUS PARAMETERIZATION
@@ -142,9 +142,10 @@ SUBROUTINE CUASCN &
 !      16-01-27 : Introduced SPP scheme (LSPP)   M. Leutbecher & S.-J. Lock 
 !      30-Jan-20: Single precision fix    F. Vana
 !      20-10-12 : SPP abstraction                M. Leutbecher
-!      21-09-13 : Introduced LDTDKMF for Arpege
+!      21-09-13 : Introduced LDTDKMF and ENTR_RH parameter for Arpege
 !    2021-09-24 : Fix bug on PKINEU, this bug is active only in simple precision mode.
 !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+!     R. El Khatib 06-Sep-2023 vectorization
 !----------------------------------------------------------------------
 
 USE PARKIND1 , ONLY : JPIM, JPRB
@@ -214,6 +215,7 @@ INTEGER(KIND=JPIM),INTENT(INOUT) :: KCTOP0(KLON)
 INTEGER(KIND=JPIM),INTENT(IN)    :: KDPL(KLON) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PMFUDE_RATE(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PKINEU(KLON,KLEV) 
+REAL(KIND=JPRB)   ,INTENT(OUT)   :: PWU(KLON,KLEV) 
 REAL(KIND=JPRB)   ,INTENT(OUT)   :: PWMEAN(KLON) 
 
 REAL(KIND=JPRB) ::     ZDMFEN(KLON), ZDMFDE(KLON),&
@@ -233,7 +235,7 @@ REAL(KIND=JPRB) :: Z_CLDMAX, Z_CPRC2, Z_CWDRAG, Z_CWIFRAC, ZALFAW,&
  & ZLEEN, ZLNEW, ZMFMAX, ZMFTEST, ZMFULK, ZMFUN, &
  & ZMFUQK, ZMFUSK, ZOEALFA, ZOEALFAP, ZPRCDGW, &
  & ZPRCON, ZQEEN, ZQUDE, ZRNEW, ZROLD, ZSCDE, &
- & ZSEEN, ZVI, ZVV, ZVW, ZWU, ZZCO, ZOCUDET, ZGLAC
+ & ZSEEN, ZVI, ZVV, ZVW, ZZCO, ZOCUDET, ZGLAC
 REAL(KIND=JPRB) :: ZXENTRORG, ZXENTSHALP, ZXPRCDGW
 
 ! A bunch of SPP variables
@@ -357,6 +359,7 @@ DO JK=1,KLEV
     PMFUS(JL,JK)=0.0_JPRB
     PMFUQ(JL,JK)=0.0_JPRB
     PMFUL(JL,JK)=0.0_JPRB
+    PWU(JL,JK)=0.0_JPRB
   ENDDO
   DO JL=KIDIA,KFDIA
     PLUDE(JL,JK)=0.0_JPRB
@@ -375,6 +378,7 @@ DO JK=1,KLEV
   ENDDO
 ENDDO
 !DIR$ IVDEP
+!NEC$ IVDEP
 !OCL NOVREC
 DO JL=KIDIA,KFDIA
   IF(KTYPE(JL) == 3) LDCUM(JL)=.FALSE.
@@ -570,6 +574,7 @@ DO JK=KLEV-1,3,-1
     IF (LPHYLIN) THEN
 
 !DIR$ IVDEP
+!NEC$ IVDEP
 !OCL NOVREC
       DO JLL=1,JLM  
         JL=JLX(JLL)
@@ -588,6 +593,7 @@ DO JK=KLEV-1,3,-1
     ELSE
 
 !DIR$ IVDEP
+!NEC$ IVDEP
 !OCL NOVREC
       DO JLL=1,JLM  
         JL=JLX(JLL)
@@ -728,7 +734,7 @@ DO JK=KLEV-1,3,-1
     DO JL=KIDIA,KFDIA
       IF(LLO1(JL)) THEN
         IF(PLU(JL,JK) > ZDNOPRC) THEN
-          ZWU=MIN(15._JPRB,SQRT(2.0_JPRB*MAX(0.5_JPRB,PKINEU(JL,JK+1))))
+          PWU(JL,JK)=MIN(15._JPRB,SQRT(2.0_JPRB*MAX(0.5_JPRB,PKINEU(JL,JK+1))))
 !       increase conversion for liquid phase only
           IF (LDTDKMF) THEN
              ZZCO=FOEALFCU(PTU(JL,JK))*1.3_JPRB+(1.0_JPRB-FOEALFCU(PTU(JL,JK)))
@@ -742,7 +748,7 @@ DO JK=KLEV-1,3,-1
           ELSE
             ZXPRCDGW=ZPRCDGW
           ENDIF
-          ZPRCON=ZXPRCDGW/(0.75_JPRB*ZWU)*ZZCO
+          ZPRCON=ZXPRCDGW/(0.75_JPRB*PWU(JL,JK))*ZZCO
 
 !           PARAMETERS FOR BERGERON-FINDEISEN PROCESS (T < -5C)
 
@@ -786,6 +792,7 @@ DO JK=KLEV-1,3,-1
     IF (LPHYLIN) THEN
 
 !DEC$ IVDEP
+!NEC$ IVDEP
       DO JL=KIDIA,KFDIA
         IF(LLO1(JL)) THEN
           IF(PLRAIN(JL,JK) > 0.0_JPRB) THEN
@@ -795,8 +802,8 @@ DO JK=KLEV-1,3,-1
             ZVV=ZALFAW*ZVW+(1.0_JPRB-ZALFAW)*ZVI
             ZROLD=PLRAIN(JL,JK)-ZPRECIP(JL)
             ZC=ZPRECIP(JL)
-            ZWU=MIN(15._JPRB,SQRT(2.0_JPRB*MAX(0.1_JPRB,PKINEU(JL,JK))))
-            ZD=ZVV/ZWU
+            PWU(JL,JK)=MIN(15._JPRB,SQRT(2.0_JPRB*MAX(0.1_JPRB,PKINEU(JL,JK))))
+            ZD=ZVV/PWU(JL,JK)
             ZINT=EXP(-ZD)
             ZRNEW=ZROLD*ZINT+ZC/ZD*(1.0_JPRB-ZINT)
             ZRNEW=MAX(0.0_JPRB,MIN(PLRAIN(JL,JK),ZRNEW))
@@ -817,8 +824,8 @@ DO JK=KLEV-1,3,-1
             ZVV=ZALFAW*ZVW+(1.0_JPRB-ZALFAW)*ZVI
             ZROLD=PLRAIN(JL,JK)-ZPRECIP(JL)
             ZC=ZPRECIP(JL)
-            ZWU=MIN(15._JPRB,SQRT(2.0_JPRB*MAX(0.1_JPRB,PKINEU(JL,JK))))
-            ZD=ZVV/ZWU
+            PWU(JL,JK)=MIN(15._JPRB,SQRT(2.0_JPRB*MAX(0.1_JPRB,PKINEU(JL,JK))))
+            ZD=ZVV/PWU(JL,JK)
             ZINT=EXP(-ZD)
             ZRNEW=ZROLD*ZINT+ZC/ZD*(1.0_JPRB-ZINT)
             ZRNEW=MAX(0.0_JPRB,MIN(PLRAIN(JL,JK),ZRNEW))
