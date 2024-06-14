@@ -35,8 +35,8 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined=
            
   #creation of a dict associating the name of each callee to inline to it's path; according to the path in the openacc.sh file 
   #TODO : create a file containing these path? 
-#        with open('openacc.sh', 'r', encoding='utf-8', errors='ignore') as file_lst_callee:
-        with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r') as file_lst_callee:
+        with open('/home/cossevine/build_scc/openacc.sh', 'r', encoding='utf-8', errors='ignore') as file_lst_callee:
+#        with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r') as file_lst_callee:
             lines=file_lst_callee.readlines()
             for callee_name in inlined:
                 callee_path=None
