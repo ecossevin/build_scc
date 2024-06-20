@@ -9,7 +9,7 @@ from loki import (
     Nullify, analyse_dataflow
 )
 
-from loki.transform import resolve_associates
+from loki.transformations import resolve_associates
 
 import os
 import sys
