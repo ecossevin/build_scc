@@ -58,7 +58,7 @@ do
   mkdir -p loki/$dir
   g=src/
   python3 ../main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki 
-  python3 ../accseq.py $p/loki/$f
+#  python3 ../accseq.py $p/loki/$f
 
 done
 
@@ -72,7 +72,7 @@ do
   mkdir -p loki/$dir
   g=src/
   python3 ../main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki 
-  python3 ../accseq.py $p/loki/$f
+#  python3 ../accseq.py $p/loki/$f
 
 
 done

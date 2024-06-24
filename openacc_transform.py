@@ -233,7 +233,7 @@ def alloc_temp(routine):
                             	else_body=(else_cond,),
                             	hase_elseif=True
                             		)
-                            allocs_list.append(Intrinsic(alloc_block))
+                            allocs_list.append([alloc_block])
                             intrinsic_lst.append(Intrinsic(new_s))
                         else: 
                             var_lst=[s]
@@ -601,8 +601,9 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
            
   #creation of a dict associating the name of each callee to inline to it's path; according to the path in the openacc.sh file 
   #TODO : create a file containing these path? 
-        with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r', encoding='utf-8', errors='ignore') as file_lst_callee:
-        #with open('/home/gmap/mrpm/cossevine/build_scc/openacc.sh', 'r') as file_lst_callee:
+        script_path = os.path.abspath(__file__)
+        script_dir = os.path.dirname(script_path)
+        with open(f"{script_dir}/bin/openacc.sh", 'r', encoding='utf-8', errors='ignore') as file_lst_callee:
             lines=file_lst_callee.readlines()
             for callee_name in inlined:
                 callee_path=None
@@ -615,7 +616,6 @@ def add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
         if verbose: print("dict_callee_path=",dict_callee_path)
 
    #open the current routine "caller", inserts each callee when a CALL CALLEE appears in the caller. 
-        #with open(pathr, 'r') as file_caller:
         with open(pathr, 'r', encoding='utf-8', errors='ignore') as file_caller:
             caller = file_caller.read()
                 
@@ -702,6 +702,7 @@ def scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     
     
     stack_mod(routine)
+    rm_sum(routine, horizontal_size) #must be before demote_horizontal
     demote_horizontal(routine, horizontal_size)
     #TODO : change resolve_vector : changes dim for all possible idx and bounds..
     ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
@@ -709,7 +710,7 @@ def scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     remove_horizontal_loop(routine, lst_horizontal_idx)
     ###
     ystack1(routine)
-    rm_sum(routine)
+#    rm_sum(routine), horizontal_size)
 
     if pathw:
         generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
