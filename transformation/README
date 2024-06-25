@@ -1,0 +1,2 @@
+main.py : call the transformation from the bash scripts
+openacc_transform.py : contains the transformation
