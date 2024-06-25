@@ -321,65 +321,537 @@ SUBROUTINE ACLENDER_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, K
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZTHETAVL)
-  alloc (ZRI)
-  alloc (ZDTH)
-  alloc (ZDTH2)
-  alloc (ZDCIS)
-  alloc (ZFM_CLEAR)
-  alloc (ZFM_CLOUD)
-  alloc (ZFH_CLEAR)
-  alloc (ZFH_CLOUD)
-  alloc (ZLUPM_CLEAR)
-  alloc (ZLUPM_CLOUD)
-  alloc (ZLUPH_CLEAR)
-  alloc (ZLUPH_CLOUD)
-  alloc (ZLDNM_CLEAR)
-  alloc (ZLDNM_CLOUD)
-  alloc (ZLDNH_CLEAR)
-  alloc (ZLDNH_CLOUD)
-  alloc (ZLSM_CLEAR)
-  alloc (ZLSM_CLOUD)
-  alloc (ZLSH_CLEAR)
-  alloc (ZLSH_CLOUD)
-  alloc (ZLINTM_CLEAR)
-  alloc (ZLINTM_CLOUD)
-  alloc (ZLINTH_CLEAR)
-  alloc (ZLINTH_CLOUD)
-  alloc (ZLENDM_CLEAR)
-  alloc (ZLENDH_CLEAR)
-  alloc (ZLENDM_CLOUD)
-  alloc (ZLENDH_CLOUD)
-  alloc (ZLENDM)
-  alloc (ZLENDH)
-  alloc (ZTHETA)
-  alloc (ZLENDMM)
-  alloc (ZNN_CLEAR)
-  alloc (ZNN_CLOUD)
-  alloc (ZRIF)
-  alloc (ZLMIN)
-  alloc (ZGLMINF)
-  alloc (ZQV)
-  alloc (ZQL)
-  alloc (ZRH)
-  alloc (ZCPH)
-  alloc (ZLH)
-  alloc (ZQVS)
-  alloc (ZQSEUIL)
-  alloc (ZTHD)
-  alloc (ZTHU)
-  alloc (ZTHDC)
-  alloc (ZTHUC)
-  alloc (ZRI2)
-  alloc (ZRIF2)
-  alloc (ZIGMAS_CLOUD)
-  alloc (ZIGMAS_CLEAR)
-  alloc (ZAA)
-  alloc (ZDELTQH)
-  alloc (ZNEB)
-  alloc (ZNEBI)
-  alloc (ZQVL)
-  alloc (ZG2LD2)
+  IF (KIND (ZTHETAVL) == 8) THEN
+    alloc8 (ZTHETAVL)
+  ELSE
+    IF (KIND (ZTHETAVL) == 4) THEN
+      alloc4 (ZTHETAVL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRI) == 8) THEN
+    alloc8 (ZRI)
+  ELSE
+    IF (KIND (ZRI) == 4) THEN
+      alloc4 (ZRI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDTH) == 8) THEN
+    alloc8 (ZDTH)
+  ELSE
+    IF (KIND (ZDTH) == 4) THEN
+      alloc4 (ZDTH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDTH2) == 8) THEN
+    alloc8 (ZDTH2)
+  ELSE
+    IF (KIND (ZDTH2) == 4) THEN
+      alloc4 (ZDTH2)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDCIS) == 8) THEN
+    alloc8 (ZDCIS)
+  ELSE
+    IF (KIND (ZDCIS) == 4) THEN
+      alloc4 (ZDCIS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFM_CLEAR) == 8) THEN
+    alloc8 (ZFM_CLEAR)
+  ELSE
+    IF (KIND (ZFM_CLEAR) == 4) THEN
+      alloc4 (ZFM_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFM_CLOUD) == 8) THEN
+    alloc8 (ZFM_CLOUD)
+  ELSE
+    IF (KIND (ZFM_CLOUD) == 4) THEN
+      alloc4 (ZFM_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFH_CLEAR) == 8) THEN
+    alloc8 (ZFH_CLEAR)
+  ELSE
+    IF (KIND (ZFH_CLEAR) == 4) THEN
+      alloc4 (ZFH_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFH_CLOUD) == 8) THEN
+    alloc8 (ZFH_CLOUD)
+  ELSE
+    IF (KIND (ZFH_CLOUD) == 4) THEN
+      alloc4 (ZFH_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLUPM_CLEAR) == 8) THEN
+    alloc8 (ZLUPM_CLEAR)
+  ELSE
+    IF (KIND (ZLUPM_CLEAR) == 4) THEN
+      alloc4 (ZLUPM_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLUPM_CLOUD) == 8) THEN
+    alloc8 (ZLUPM_CLOUD)
+  ELSE
+    IF (KIND (ZLUPM_CLOUD) == 4) THEN
+      alloc4 (ZLUPM_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLUPH_CLEAR) == 8) THEN
+    alloc8 (ZLUPH_CLEAR)
+  ELSE
+    IF (KIND (ZLUPH_CLEAR) == 4) THEN
+      alloc4 (ZLUPH_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLUPH_CLOUD) == 8) THEN
+    alloc8 (ZLUPH_CLOUD)
+  ELSE
+    IF (KIND (ZLUPH_CLOUD) == 4) THEN
+      alloc4 (ZLUPH_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLDNM_CLEAR) == 8) THEN
+    alloc8 (ZLDNM_CLEAR)
+  ELSE
+    IF (KIND (ZLDNM_CLEAR) == 4) THEN
+      alloc4 (ZLDNM_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLDNM_CLOUD) == 8) THEN
+    alloc8 (ZLDNM_CLOUD)
+  ELSE
+    IF (KIND (ZLDNM_CLOUD) == 4) THEN
+      alloc4 (ZLDNM_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLDNH_CLEAR) == 8) THEN
+    alloc8 (ZLDNH_CLEAR)
+  ELSE
+    IF (KIND (ZLDNH_CLEAR) == 4) THEN
+      alloc4 (ZLDNH_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLDNH_CLOUD) == 8) THEN
+    alloc8 (ZLDNH_CLOUD)
+  ELSE
+    IF (KIND (ZLDNH_CLOUD) == 4) THEN
+      alloc4 (ZLDNH_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLSM_CLEAR) == 8) THEN
+    alloc8 (ZLSM_CLEAR)
+  ELSE
+    IF (KIND (ZLSM_CLEAR) == 4) THEN
+      alloc4 (ZLSM_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLSM_CLOUD) == 8) THEN
+    alloc8 (ZLSM_CLOUD)
+  ELSE
+    IF (KIND (ZLSM_CLOUD) == 4) THEN
+      alloc4 (ZLSM_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLSH_CLEAR) == 8) THEN
+    alloc8 (ZLSH_CLEAR)
+  ELSE
+    IF (KIND (ZLSH_CLEAR) == 4) THEN
+      alloc4 (ZLSH_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLSH_CLOUD) == 8) THEN
+    alloc8 (ZLSH_CLOUD)
+  ELSE
+    IF (KIND (ZLSH_CLOUD) == 4) THEN
+      alloc4 (ZLSH_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLINTM_CLEAR) == 8) THEN
+    alloc8 (ZLINTM_CLEAR)
+  ELSE
+    IF (KIND (ZLINTM_CLEAR) == 4) THEN
+      alloc4 (ZLINTM_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLINTM_CLOUD) == 8) THEN
+    alloc8 (ZLINTM_CLOUD)
+  ELSE
+    IF (KIND (ZLINTM_CLOUD) == 4) THEN
+      alloc4 (ZLINTM_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLINTH_CLEAR) == 8) THEN
+    alloc8 (ZLINTH_CLEAR)
+  ELSE
+    IF (KIND (ZLINTH_CLEAR) == 4) THEN
+      alloc4 (ZLINTH_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLINTH_CLOUD) == 8) THEN
+    alloc8 (ZLINTH_CLOUD)
+  ELSE
+    IF (KIND (ZLINTH_CLOUD) == 4) THEN
+      alloc4 (ZLINTH_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLENDM_CLEAR) == 8) THEN
+    alloc8 (ZLENDM_CLEAR)
+  ELSE
+    IF (KIND (ZLENDM_CLEAR) == 4) THEN
+      alloc4 (ZLENDM_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLENDH_CLEAR) == 8) THEN
+    alloc8 (ZLENDH_CLEAR)
+  ELSE
+    IF (KIND (ZLENDH_CLEAR) == 4) THEN
+      alloc4 (ZLENDH_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLENDM_CLOUD) == 8) THEN
+    alloc8 (ZLENDM_CLOUD)
+  ELSE
+    IF (KIND (ZLENDM_CLOUD) == 4) THEN
+      alloc4 (ZLENDM_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLENDH_CLOUD) == 8) THEN
+    alloc8 (ZLENDH_CLOUD)
+  ELSE
+    IF (KIND (ZLENDH_CLOUD) == 4) THEN
+      alloc4 (ZLENDH_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLENDM) == 8) THEN
+    alloc8 (ZLENDM)
+  ELSE
+    IF (KIND (ZLENDM) == 4) THEN
+      alloc4 (ZLENDM)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLENDH) == 8) THEN
+    alloc8 (ZLENDH)
+  ELSE
+    IF (KIND (ZLENDH) == 4) THEN
+      alloc4 (ZLENDH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHETA) == 8) THEN
+    alloc8 (ZTHETA)
+  ELSE
+    IF (KIND (ZTHETA) == 4) THEN
+      alloc4 (ZTHETA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLENDMM) == 8) THEN
+    alloc8 (ZLENDMM)
+  ELSE
+    IF (KIND (ZLENDMM) == 4) THEN
+      alloc4 (ZLENDMM)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNN_CLEAR) == 8) THEN
+    alloc8 (ZNN_CLEAR)
+  ELSE
+    IF (KIND (ZNN_CLEAR) == 4) THEN
+      alloc4 (ZNN_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNN_CLOUD) == 8) THEN
+    alloc8 (ZNN_CLOUD)
+  ELSE
+    IF (KIND (ZNN_CLOUD) == 4) THEN
+      alloc4 (ZNN_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRIF) == 8) THEN
+    alloc8 (ZRIF)
+  ELSE
+    IF (KIND (ZRIF) == 4) THEN
+      alloc4 (ZRIF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLMIN) == 8) THEN
+    alloc8 (ZLMIN)
+  ELSE
+    IF (KIND (ZLMIN) == 4) THEN
+      alloc4 (ZLMIN)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZGLMINF) == 8) THEN
+    alloc8 (ZGLMINF)
+  ELSE
+    IF (KIND (ZGLMINF) == 4) THEN
+      alloc4 (ZGLMINF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQV) == 8) THEN
+    alloc8 (ZQV)
+  ELSE
+    IF (KIND (ZQV) == 4) THEN
+      alloc4 (ZQV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQL) == 8) THEN
+    alloc8 (ZQL)
+  ELSE
+    IF (KIND (ZQL) == 4) THEN
+      alloc4 (ZQL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRH) == 8) THEN
+    alloc8 (ZRH)
+  ELSE
+    IF (KIND (ZRH) == 4) THEN
+      alloc4 (ZRH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZCPH) == 8) THEN
+    alloc8 (ZCPH)
+  ELSE
+    IF (KIND (ZCPH) == 4) THEN
+      alloc4 (ZCPH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLH) == 8) THEN
+    alloc8 (ZLH)
+  ELSE
+    IF (KIND (ZLH) == 4) THEN
+      alloc4 (ZLH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQVS) == 8) THEN
+    alloc8 (ZQVS)
+  ELSE
+    IF (KIND (ZQVS) == 4) THEN
+      alloc4 (ZQVS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQSEUIL) == 8) THEN
+    alloc8 (ZQSEUIL)
+  ELSE
+    IF (KIND (ZQSEUIL) == 4) THEN
+      alloc4 (ZQSEUIL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHD) == 8) THEN
+    alloc8 (ZTHD)
+  ELSE
+    IF (KIND (ZTHD) == 4) THEN
+      alloc4 (ZTHD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHU) == 8) THEN
+    alloc8 (ZTHU)
+  ELSE
+    IF (KIND (ZTHU) == 4) THEN
+      alloc4 (ZTHU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHDC) == 8) THEN
+    alloc8 (ZTHDC)
+  ELSE
+    IF (KIND (ZTHDC) == 4) THEN
+      alloc4 (ZTHDC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHUC) == 8) THEN
+    alloc8 (ZTHUC)
+  ELSE
+    IF (KIND (ZTHUC) == 4) THEN
+      alloc4 (ZTHUC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRI2) == 8) THEN
+    alloc8 (ZRI2)
+  ELSE
+    IF (KIND (ZRI2) == 4) THEN
+      alloc4 (ZRI2)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRIF2) == 8) THEN
+    alloc8 (ZRIF2)
+  ELSE
+    IF (KIND (ZRIF2) == 4) THEN
+      alloc4 (ZRIF2)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZIGMAS_CLOUD) == 8) THEN
+    alloc8 (ZIGMAS_CLOUD)
+  ELSE
+    IF (KIND (ZIGMAS_CLOUD) == 4) THEN
+      alloc4 (ZIGMAS_CLOUD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZIGMAS_CLEAR) == 8) THEN
+    alloc8 (ZIGMAS_CLEAR)
+  ELSE
+    IF (KIND (ZIGMAS_CLEAR) == 4) THEN
+      alloc4 (ZIGMAS_CLEAR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZAA) == 8) THEN
+    alloc8 (ZAA)
+  ELSE
+    IF (KIND (ZAA) == 4) THEN
+      alloc4 (ZAA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDELTQH) == 8) THEN
+    alloc8 (ZDELTQH)
+  ELSE
+    IF (KIND (ZDELTQH) == 4) THEN
+      alloc4 (ZDELTQH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNEB) == 8) THEN
+    alloc8 (ZNEB)
+  ELSE
+    IF (KIND (ZNEB) == 4) THEN
+      alloc4 (ZNEB)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNEBI) == 8) THEN
+    alloc8 (ZNEBI)
+  ELSE
+    IF (KIND (ZNEBI) == 4) THEN
+      alloc4 (ZNEBI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQVL) == 8) THEN
+    alloc8 (ZQVL)
+  ELSE
+    IF (KIND (ZQVL) == 4) THEN
+      alloc4 (ZQVL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZG2LD2) == 8) THEN
+    alloc8 (ZG2LD2)
+  ELSE
+    IF (KIND (ZG2LD2) == 4) THEN
+      alloc4 (ZG2LD2)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !#include "abor1.intfb.h"

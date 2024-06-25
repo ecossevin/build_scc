@@ -118,8 +118,8 @@ SUBROUTINE CUENTR_OPENACC (YDCST, YDECUMF, YDSPP_CONFIG, KIDIA, KFDIA, KLON, KLE
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !----------------------------------------------------------------------
   

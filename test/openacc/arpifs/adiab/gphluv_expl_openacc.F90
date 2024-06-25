@@ -94,8 +94,8 @@ SUBROUTINE GPHLUV_EXPL_OPENACC (YDDIMV, KPROMA, KST, KEND, PU, PV, PWWI, PUH, PV
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   

@@ -398,6 +398,7 @@ SUBROUTINE ACHMT_OPENACC (YDCLI, YDPHY, YDPHY0, YDPHY1, YDPHY2, YDCST, KIDIA, KF
 #include "fzh.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZCDNH) == 8) THEN
     alloc8 (ZCDNH)
@@ -435,7 +436,6 @@ SUBROUTINE ACHMT_OPENACC (YDCLI, YDPHY, YDPHY0, YDPHY1, YDPHY2, YDCST, KIDIA, KF
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   

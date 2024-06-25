@@ -143,8 +143,8 @@ SUBROUTINE ACDNSHF_OPENACC (YDCST, YDPHY, YDPHY1, KIDIA, KFDIA, KLON, KTDIA, KLE
 #include "fcttrm.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   !     ------------------------------------------------------------------

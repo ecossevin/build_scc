@@ -127,7 +127,7 @@ do
   dir=$(dirname $f)
   mkdir -p loki/$dir
   g=src/
-  python3 ../main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki --horizontal_opt "JL"
+  python3 ../transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki --horizontal_opt "JL"
 #  python3 ../accseq.py $p/loki/$f
 done
 
@@ -173,7 +173,7 @@ do
   dir=$(dirname $f)
   mkdir -p loki/$dir
   g=src/
-  python3 ../main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90 --horizontal_opt "JL"
+  python3 ../transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90 --horizontal_opt "JL"
 #  python3 ../accseq.py $p/loki/$f
 
 done

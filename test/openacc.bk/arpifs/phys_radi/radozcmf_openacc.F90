@@ -88,9 +88,33 @@ SUBROUTINE RADOZCMF_OPENACC (YDCST, YDEOZOC, KIDIA, KFDIA, KLON, KLEV, PAPRS, PG
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZOZLT)
-  alloc (ZOZON)
-  alloc (ZRRR)
+  IF (KIND (ZOZLT) == 8) THEN
+    alloc8 (ZOZLT)
+  ELSE
+    IF (KIND (ZOZLT) == 4) THEN
+      alloc4 (ZOZLT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZOZON) == 8) THEN
+    alloc8 (ZOZON)
+  ELSE
+    IF (KIND (ZOZON) == 4) THEN
+      alloc4 (ZOZON)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRRR) == 8) THEN
+    alloc8 (ZRRR)
+  ELSE
+    IF (KIND (ZRRR) == 4) THEN
+      alloc4 (ZRRR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

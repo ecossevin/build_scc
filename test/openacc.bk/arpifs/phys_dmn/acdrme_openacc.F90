@@ -167,10 +167,42 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZTENU)
-  alloc (ZTENV)
-  alloc (ZTENT)
-  alloc (ZTENQ)
+  IF (KIND (ZTENU) == 8) THEN
+    alloc8 (ZTENU)
+  ELSE
+    IF (KIND (ZTENU) == 4) THEN
+      alloc4 (ZTENU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTENV) == 8) THEN
+    alloc8 (ZTENV)
+  ELSE
+    IF (KIND (ZTENV) == 4) THEN
+      alloc4 (ZTENV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTENT) == 8) THEN
+    alloc8 (ZTENT)
+  ELSE
+    IF (KIND (ZTENT) == 4) THEN
+      alloc4 (ZTENT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTENQ) == 8) THEN
+    alloc8 (ZTENQ)
+  ELSE
+    IF (KIND (ZTENQ) == 4) THEN
+      alloc4 (ZTENQ)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

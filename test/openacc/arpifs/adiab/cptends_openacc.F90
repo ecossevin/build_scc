@@ -181,8 +181,8 @@ SUBROUTINE CPTENDS_OPENACC (YDCST, YDML_PHY_MF, KLON, KIDIA, KFDIA, KFLEV, KCSS,
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   !     ------------------------------------------------------------------

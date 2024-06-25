@@ -83,8 +83,8 @@ SUBROUTINE CUBIDIAG_OPENACC (KIDIA, KFDIA, KLON, KLEV, KCTOP, LD_LCUMASK, PA, PB
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !----------------------------------------------------------------------
   

@@ -102,8 +102,8 @@ SUBROUTINE GPUVS_OPENACC (KFLEV, KPROMA, KST, KEND, LDER, PUF, PVF, PUS, PVS, PD
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   ! -----------------------------------------------------------------------------
   

@@ -118,6 +118,7 @@ SUBROUTINE GPGEO_EXPL_OPENACC (KPROMA, KST, KEND, KFLEV, PHI, PHIF, PT, PR, PLNP
 #include "verdisint_openacc.intfb.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KST
   YLSTACK = YDSTACK
   IF (KIND (ZPHI) == 8) THEN
     alloc8 (ZPHI)
@@ -128,7 +129,6 @@ SUBROUTINE GPGEO_EXPL_OPENACC (KPROMA, KST, KEND, KFLEV, PHI, PHIF, PT, PR, PLNP
       STOP 1
     END IF
   END IF
-  JLON = KST
   
   !     ------------------------------------------------------------------
   

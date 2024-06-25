@@ -112,8 +112,8 @@ SUBROUTINE ACNEBXRS_OPENACC (YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIA, KLEV, PQ,
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !*
   !     ------------------------------------------------------------------

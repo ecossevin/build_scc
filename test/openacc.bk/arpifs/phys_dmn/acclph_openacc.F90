@@ -178,11 +178,51 @@ SUBROUTINE ACCLPH_OPENACC (YDCST, YDPHY0, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZTHETAV)
-  alloc (ZPHI)
-  alloc (ZU)
-  alloc (ZV)
-  alloc (ZTHETAVS)
+  IF (KIND (ZTHETAV) == 8) THEN
+    alloc8 (ZTHETAV)
+  ELSE
+    IF (KIND (ZTHETAV) == 4) THEN
+      alloc4 (ZTHETAV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPHI) == 8) THEN
+    alloc8 (ZPHI)
+  ELSE
+    IF (KIND (ZPHI) == 4) THEN
+      alloc4 (ZPHI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZU) == 8) THEN
+    alloc8 (ZU)
+  ELSE
+    IF (KIND (ZU) == 4) THEN
+      alloc4 (ZU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZV) == 8) THEN
+    alloc8 (ZV)
+  ELSE
+    IF (KIND (ZV) == 4) THEN
+      alloc4 (ZV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHETAVS) == 8) THEN
+    alloc8 (ZTHETAVS)
+  ELSE
+    IF (KIND (ZTHETAVS) == 4) THEN
+      alloc4 (ZTHETAVS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

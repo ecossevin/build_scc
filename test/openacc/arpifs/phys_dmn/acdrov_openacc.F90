@@ -238,8 +238,8 @@ SUBROUTINE ACDROV_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KLEV, KCSS, P
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 source ~/loki_env/bin/activate
-which python3
+#which python3
 
 #export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
-export PATH=~/build_scc:$PATH
+#export PATH=~/build_scc:$PATH
 p=$(pwd)
 
 function resolve ()
@@ -142,8 +142,10 @@ do
   dir=$(dirname $f)
   mkdir -p src/local/ifsaux/openacc/$dir
   g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
-  python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
+  pscc=$(dirname $(dirname $0))
+  echo $pscc
+  python3 $pscc/transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
+#  python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
 done
 
 
@@ -193,7 +195,7 @@ do
   mkdir -p src/local/ifsaux/openacc/$dir
 #  --only-if-newer \
   g=$(resolve $f)
-  python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
-  python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
+  pscc=$(dirname $(dirname $0))
+  python3 $pscc/transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL" -in cuadjtq.F90 -in cubasmcn.F90 -in cuentr.F90 -in cuadjtqs.F90
+#  python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
 done
-

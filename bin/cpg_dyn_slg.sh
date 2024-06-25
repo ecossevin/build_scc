@@ -7,7 +7,7 @@ source ~/loki_env/bin/activate
 which python3
 
 #export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
-export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH
+#export PATH=/home/gmap/mrpm/cossevine/build_scc:$PATH
 p=$(pwd)
 echo $p
 
@@ -85,8 +85,9 @@ do
  g=$(resolve $f)
  #python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f 
  #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
- python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc
- python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
+ pscc=$(dirname $(dirname $0))
+ python3 $pscc/transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc
+# python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
  #exit 1
 
  #openacc.pl --cycle 49 --pointers --nocompute ABOR1 --version --cpg_dyn --dir src/local/ifsaux/openacc/$dir $(resolve $f)
@@ -104,10 +105,9 @@ do
  g=$(resolve $f)
  #python3 ~/build_scc/main.py --pathr $p/$g --pathw $p/src/local/ifsaux/openacc/$f 
  #python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc --horizontal_opt "JL"
- python3 ~/build_scc/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc 
- python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
+ pscc=$(dirname $(dirname $0))
+ python3 $pscc/transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /src/local/ifsaux/openacc 
+# python3 ~/build_scc/accseq.py $p/src/local/ifsaux/openacc/$f
  #openacc.pl --cycle 49 --pointers --nocompute ABOR1 --version --dir src/local/ifsaux/openacc/$dir $(resolve $f)
 
 done
-
-

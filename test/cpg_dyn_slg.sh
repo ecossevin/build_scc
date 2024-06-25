@@ -57,7 +57,7 @@ do
   dir=$(dirname $f)
   mkdir -p loki/$dir
   g=src/
-  python3 ../main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki 
+  python3 ../transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki 
 #  python3 ../accseq.py $p/loki/$f
 
 done
@@ -71,7 +71,7 @@ do
   dir=$(dirname $f)
   mkdir -p loki/$dir
   g=src/
-  python3 ../main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki 
+  python3 ../transformation/main.py --pathpack $p --pathview $g --pathfile $f --pathacc /loki 
 #  python3 ../accseq.py $p/loki/$f
 
 

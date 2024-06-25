@@ -166,7 +166,15 @@ SUBROUTINE RADAER_OPENACC (YDEAERD, YDERAD, YDPHY, KIDIA, KFDIA, KLON, KLEV, PAP
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZTH)
+  IF (KIND (ZTH) == 8) THEN
+    alloc8 (ZTH)
+  ELSE
+    IF (KIND (ZTH) == 4) THEN
+      alloc4 (ZTH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

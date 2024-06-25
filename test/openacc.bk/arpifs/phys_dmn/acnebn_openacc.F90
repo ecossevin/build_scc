@@ -244,18 +244,114 @@ SUBROUTINE ACNEBN_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZS)
-  alloc (ZSDELP)
-  alloc (ZQSSTPP)
-  alloc (ZQS)
-  alloc (ZQSC)
-  alloc (ZQSS)
-  alloc (ZQSAT)
-  alloc (ZTGRAD)
-  alloc (ZINQ)
-  alloc (ZSNEBC)
-  alloc (ZSUSXC)
-  alloc (ZFACQSC)
+  IF (KIND (ZS) == 8) THEN
+    alloc8 (ZS)
+  ELSE
+    IF (KIND (ZS) == 4) THEN
+      alloc4 (ZS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZSDELP) == 8) THEN
+    alloc8 (ZSDELP)
+  ELSE
+    IF (KIND (ZSDELP) == 4) THEN
+      alloc4 (ZSDELP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQSSTPP) == 8) THEN
+    alloc8 (ZQSSTPP)
+  ELSE
+    IF (KIND (ZQSSTPP) == 4) THEN
+      alloc4 (ZQSSTPP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQS) == 8) THEN
+    alloc8 (ZQS)
+  ELSE
+    IF (KIND (ZQS) == 4) THEN
+      alloc4 (ZQS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQSC) == 8) THEN
+    alloc8 (ZQSC)
+  ELSE
+    IF (KIND (ZQSC) == 4) THEN
+      alloc4 (ZQSC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQSS) == 8) THEN
+    alloc8 (ZQSS)
+  ELSE
+    IF (KIND (ZQSS) == 4) THEN
+      alloc4 (ZQSS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZQSAT) == 8) THEN
+    alloc8 (ZQSAT)
+  ELSE
+    IF (KIND (ZQSAT) == 4) THEN
+      alloc4 (ZQSAT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTGRAD) == 8) THEN
+    alloc8 (ZTGRAD)
+  ELSE
+    IF (KIND (ZTGRAD) == 4) THEN
+      alloc4 (ZTGRAD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZINQ) == 8) THEN
+    alloc8 (ZINQ)
+  ELSE
+    IF (KIND (ZINQ) == 4) THEN
+      alloc4 (ZINQ)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZSNEBC) == 8) THEN
+    alloc8 (ZSNEBC)
+  ELSE
+    IF (KIND (ZSNEBC) == 4) THEN
+      alloc4 (ZSNEBC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZSUSXC) == 8) THEN
+    alloc8 (ZSUSXC)
+  ELSE
+    IF (KIND (ZSUSXC) == 4) THEN
+      alloc4 (ZSUSXC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZFACQSC) == 8) THEN
+    alloc8 (ZFACQSC)
+  ELSE
+    IF (KIND (ZFACQSC) == 4) THEN
+      alloc4 (ZFACQSC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

@@ -114,8 +114,24 @@ SUBROUTINE ACDAYD_OPENACC (YDCST, YDRIP, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZTEND)
-  alloc (ZDAYDUR)
+  IF (KIND (ZTEND) == 8) THEN
+    alloc8 (ZTEND)
+  ELSE
+    IF (KIND (ZTEND) == 4) THEN
+      alloc4 (ZTEND)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDAYDUR) == 8) THEN
+    alloc8 (ZDAYDUR)
+  ELSE
+    IF (KIND (ZDAYDUR) == 4) THEN
+      alloc4 (ZDAYDUR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-------------------------------------------------

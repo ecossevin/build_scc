@@ -193,6 +193,7 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZA) == 8) THEN
     alloc8 (ZA)
@@ -248,7 +249,6 @@ SUBROUTINE ACEVOLET_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIAT, KTD
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

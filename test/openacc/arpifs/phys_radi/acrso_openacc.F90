@@ -101,6 +101,7 @@ SUBROUTINE ACRSO_OPENACC (YDPHY0, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST, PGEMU,
   INTEGER(KIND=JPIM) :: JLEV
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZRSO) == 8) THEN
     alloc8 (ZRSO)
@@ -120,7 +121,6 @@ SUBROUTINE ACRSO_OPENACC (YDPHY0, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST, PGEMU,
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-------------------------------------------------
   ! Reducing factor for net solar radiation.

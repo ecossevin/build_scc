@@ -167,8 +167,8 @@ SUBROUTINE GPGRXYB_EXPL_OPENACC (YDCVER, KPROMA, KST, KEND, KFLEV, LDCOEF, YDVAB
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   

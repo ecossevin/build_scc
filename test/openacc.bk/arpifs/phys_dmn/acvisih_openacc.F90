@@ -178,7 +178,15 @@ SUBROUTINE ACVISIH_OPENACC (YDCST, YDVISI, KIDIA, KFDIA, KLON, KTDIA, KLEV, PAPH
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZRHOAIR)
+  IF (KIND (ZRHOAIR) == 8) THEN
+    alloc8 (ZRHOAIR)
+  ELSE
+    IF (KIND (ZRHOAIR) == 4) THEN
+      alloc4 (ZRHOAIR)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

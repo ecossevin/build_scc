@@ -130,6 +130,7 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   !      K. Yessad (Jul 2009): remove CDLOCK + some cleanings
   !      R. El Khatib 22-Jul-2014 Vectorizations
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+  !     R. El Khatib 06-Sep-2023 loop fusion
   !-----------------------------------------------------------------------
   
 !$acc routine( ACBL89_OPENACC ) seq
@@ -201,7 +202,6 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   REAL(KIND=JPRB) :: ZDLDN
   REAL(KIND=JPRB) :: ZDLDN1
   REAL(KIND=JPRB) :: ZDLDN2
-  REAL(KIND=JPRB) :: ZQV
   REAL(KIND=JPRB) :: ZDLUP
   REAL(KIND=JPRB) :: ZDLUP1
   REAL(KIND=JPRB) :: ZDLUP2
@@ -215,8 +215,6 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   REAL(KIND=JPRB) :: ZGLMINF
   REAL(KIND=JPRB) :: ZGLMIX
   REAL(KIND=JPRB) :: ZPHI3MAX
-  REAL(KIND=JPRB) :: ZPREF
-  REAL(KIND=JPRB) :: ZQC
   REAL(KIND=JPRB) :: ZTEST
   REAL(KIND=JPRB) :: ZTEST0
   REAL(KIND=JPRB) :: ZTESTM
@@ -238,15 +236,87 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZGDZF)
-  alloc (ZGDZH)
-  alloc (ZTHETAH)
-  alloc (ZTHETA)
-  alloc (ZDTHETA)
-  alloc (ZTHETAP)
-  alloc (ZGLMUP)
-  alloc (ZGLMDN)
-  alloc (ZPHIH)
+  IF (KIND (ZGDZF) == 8) THEN
+    alloc8 (ZGDZF)
+  ELSE
+    IF (KIND (ZGDZF) == 4) THEN
+      alloc4 (ZGDZF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZGDZH) == 8) THEN
+    alloc8 (ZGDZH)
+  ELSE
+    IF (KIND (ZGDZH) == 4) THEN
+      alloc4 (ZGDZH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHETAH) == 8) THEN
+    alloc8 (ZTHETAH)
+  ELSE
+    IF (KIND (ZTHETAH) == 4) THEN
+      alloc4 (ZTHETAH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHETA) == 8) THEN
+    alloc8 (ZTHETA)
+  ELSE
+    IF (KIND (ZTHETA) == 4) THEN
+      alloc4 (ZTHETA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDTHETA) == 8) THEN
+    alloc8 (ZDTHETA)
+  ELSE
+    IF (KIND (ZDTHETA) == 4) THEN
+      alloc4 (ZDTHETA)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTHETAP) == 8) THEN
+    alloc8 (ZTHETAP)
+  ELSE
+    IF (KIND (ZTHETAP) == 4) THEN
+      alloc4 (ZTHETAP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZGLMUP) == 8) THEN
+    alloc8 (ZGLMUP)
+  ELSE
+    IF (KIND (ZGLMUP) == 4) THEN
+      alloc4 (ZGLMUP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZGLMDN) == 8) THEN
+    alloc8 (ZGLMDN)
+  ELSE
+    IF (KIND (ZGLMDN) == 4) THEN
+      alloc4 (ZGLMDN)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPHIH) == 8) THEN
+    alloc8 (ZPHIH)
+  ELSE
+    IF (KIND (ZPHIH) == 4) THEN
+      alloc4 (ZPHIH)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------
@@ -307,17 +377,11 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
   ! CALCULS DE THETA (sec)
   ! - - - - - - - - - - -
   DO JLEV=KTDIAN,KLEV
-    ZPREF = PAPRSF(JLON, JLEV)
-    ZTHETA(JLON, JLEV) = PT(JLON, JLEV)*(YDCST%RATM / ZPREF)**YDCST%RKAPPA
-  END DO
-  
-  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  ! CALCUL DE (THETA)vl = THETA * ( 1 + RETV*Qv - (Ql+Qi) )
-  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  DO JLEV=KTDIAN,KLEV
-    ZQV = PQV(JLON, JLEV)
-    ZQC = PQLI(JLON, JLEV) + PQICE(JLON, JLEV)
-    ZTHETA(JLON, JLEV) = ZTHETA(JLON, JLEV)*(1.0_JPRB + YDCST%RETV*ZQV - ZQC)
+    ZTHETA(JLON, JLEV) = (PT(JLON, JLEV)*(YDCST%RATM / PAPRSF(JLON, JLEV))**YDCST%RKAPPA)*(1.0_JPRB + YDCST%RETV*PQV(JLON, JLEV)  &
+    & - (PQLI(JLON, JLEV) + PQICE(JLON, JLEV)))
+    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ! CALCUL DE (THETA)vl = THETA * ( 1 + RETV*Qv - (Ql+Qi) )
+    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   END DO
   
   ! - - - - - - - - - - - - - - - - -
@@ -547,7 +611,7 @@ SUBROUTINE ACBL89_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAN, KLE
     ! BOUCLE GENERALE Nr 2
     !     --------------------------------------
     
-    !  On veut que a monte et descende au moins  la mme hauteur !!
+    !  On veut que ca monte et descende au moins a la meme hauteur !!
     
     ZGLMUP(JLON, JLEV) = MAX(ZGLMUP(JLON, JLEV), ZGLMUP(JLON, JLEV + 1) + PAPHI(JLON, JLEV + 1) - PAPHI(JLON, JLEV))
     

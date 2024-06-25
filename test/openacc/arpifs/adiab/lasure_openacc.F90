@@ -106,8 +106,8 @@ SUBROUTINE LASURE_OPENACC (YDGEOMETRY, YDEPHY, YDDYN, YDEDYN, YDPHY, KST, KEND, 
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   

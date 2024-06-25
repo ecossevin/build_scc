@@ -233,6 +233,7 @@ SUBROUTINE ACSOL_OPENACC (YDCLI, YDCST, YDPHY, YDPHY1, KIDIA, KFDIA, KLON, PARG,
 #include "acsolw_openacc.intfb.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZWSAT) == 8) THEN
     alloc8 (ZWSAT)
@@ -243,7 +244,6 @@ SUBROUTINE ACSOL_OPENACC (YDCLI, YDCST, YDPHY, YDPHY1, KIDIA, KFDIA, KLON, PARG,
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

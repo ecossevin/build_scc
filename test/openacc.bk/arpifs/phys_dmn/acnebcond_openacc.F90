@@ -1,6 +1,5 @@
 SUBROUTINE ACNEBCOND_OPENACC (YDCST, YDRIP, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, LDREDPR, YDSTA, PAPHI, PAPHIF, PAPRSF,  &
-& PCP, PR, PDELP, PRH, PBLH, PQ, PQI, PQL, PQW, PT, PNCV, PGM, PTS, PQCS, PNEBCOND, PHCRICS, PRHOUT, PQSATS, PRMF, PQCS0,  &
-& PNEBS0, YDSTACK)
+& PCP, PR, PDELP, PQ, PQI, PQL, PQW, PT, PNCV, PGM, PTS, PQCS, PNEBCOND, PHCRICS, PRHOUT, PQSATS, PRMF, PQCS0, PNEBS0, YDSTACK)
   !-----------------------------------------------------------------------
   ! - INPUT  1D VERTICAL.
   !-----------------------------------------------------------------------
@@ -175,13 +174,11 @@ SUBROUTINE ACNEBCOND_OPENACC (YDCST, YDRIP, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTD
   REAL(KIND=JPRB), INTENT(INOUT) :: PNCV(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(IN) :: PGM(KLON)
   REAL(KIND=JPRB), INTENT(IN) :: PTS(KLON)
-  REAL(KIND=JPRB), INTENT(IN) :: PRH(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PQCS(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PNEBCOND(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PHCRICS(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PQSATS(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PRMF(KLON, KLEV)
-  REAL(KIND=JPRB), INTENT(IN) :: PBLH(KLON)
   REAL(KIND=JPRB), INTENT(OUT) :: PRHOUT(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PQCS0(KLON, KLEV)
   REAL(KIND=JPRB), INTENT(OUT) :: PNEBS0(KLON, KLEV)
@@ -311,12 +308,60 @@ SUBROUTINE ACNEBCOND_OPENACC (YDCST, YDRIP, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTD
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZQTOT)
-  alloc (ZRHL)
-  alloc (ZS)
-  alloc (ZSHALTEMP)
-  alloc (ZHCUTMP)
-  alloc (ZLSTMP)
+  IF (KIND (ZQTOT) == 8) THEN
+    alloc8 (ZQTOT)
+  ELSE
+    IF (KIND (ZQTOT) == 4) THEN
+      alloc4 (ZQTOT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRHL) == 8) THEN
+    alloc8 (ZRHL)
+  ELSE
+    IF (KIND (ZRHL) == 4) THEN
+      alloc4 (ZRHL)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZS) == 8) THEN
+    alloc8 (ZS)
+  ELSE
+    IF (KIND (ZS) == 4) THEN
+      alloc4 (ZS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZSHALTEMP) == 8) THEN
+    alloc8 (ZSHALTEMP)
+  ELSE
+    IF (KIND (ZSHALTEMP) == 4) THEN
+      alloc4 (ZSHALTEMP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZHCUTMP) == 8) THEN
+    alloc8 (ZHCUTMP)
+  ELSE
+    IF (KIND (ZHCUTMP) == 4) THEN
+      alloc4 (ZHCUTMP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZLSTMP) == 8) THEN
+    alloc8 (ZLSTMP)
+  ELSE
+    IF (KIND (ZLSTMP) == 4) THEN
+      alloc4 (ZLSTMP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------
@@ -422,64 +467,6 @@ SUBROUTINE ACNEBCOND_OPENACC (YDCST, YDRIP, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTD
     
   END IF
   ! LSMGCDEV
-  
-  IF (YDML_PHY_MF%YRPHY%LRKCDEV) THEN
-    !     ------------------------------------------------------------------
-    !     IIIc - CALCUL DE L'HUMIDITE CRITIQUE (FORMULE RASCH-KRISTJANSSON).
-    
-    !            CRITICAL HUMIDITY (RASCH-KRISTJANSSON).
-    
-    
-    ZSIGMA = 4.0E-04_JPRB
-    ZSIGMASTAB = 1.6E-02_JPRB
-    ZEPSILO = YDCST%RMV / YDCST%RMD
-    ZSIGMAZ = 1.6E-2_JPRB
-    
-    DO JLEV=1,KLEV
-      ZLSTMP(JLON, JLEV) = 0._JPRB
-    END DO
-    
-    DO JLEV=1,KLEV
-      !DEC$ IVDEP
-      
-      ZMESH = YDML_PHY_MF%YRPHY0%REFLRHC / (YDML_PHY_MF%YRPHY0%TEQH*PGM(JLON))
-      
-      ZESN = FOEW(PT(JLON, JLEV), 1._JPRB)*PRMF(JLON, JLEV) + FOEW(PT(JLON, JLEV), 0._JPRB)*(1._JPRB - PRMF(JLON, JLEV))
-      
-      ZDENOM = PAPRSF(JLON, JLEV) - (1._JPRB - ZEPSILO)*ZESN
-      
-      PQSATS(JLON, JLEV) = ZEPSILO*ZESN / ZDENOM
-      
-      PRHOUT(JLON, JLEV) = PQ(JLON, JLEV) / PQSATS(JLON, JLEV)
-      
-      ZRHIN = MAX(PRHOUT(JLON, JLEV), 0.05_JPRB)
-      
-      ZDRHDZ = ZRHIN*YDCST%RG / (PT(JLON, JLEV)*YDCST%RD)*(ZEPSILO*(YDCST%RLVTT + PRMF(JLON, JLEV)*(YDCST%RLSTT - YDCST%RLVTT)) / &
-      &  (YDCST%RCPD*PT(JLON, JLEV)) - 1._JPRB)
-      
-      ZTEST = MAX(0.0_JPRB, SIGN(1.0_JPRB, PAPHIF(JLON, JLEV) - PAPHI(JLON, KLEV) - YDCST%RG*PBLH(JLON)))
-      
-      ZZDIST2 = (PAPHI(JLON, JLEV - 1) - PAPHI(JLON, JLEV)) / YDCST%RG
-      
-      PHCRICS(JLON, JLEV) =  &
-      & 1.0_JPRB - 0.5_JPRB*SQRT(2.0_JPRB*ZMESH*ZSIGMA**2 + (1.0_JPRB - ZTEST)*(ZZDIST2*ZDRHDZ)**2 + ZTEST*ZZDIST2*ZSIGMAZ**2)
-      
-      PHCRICS(JLON, JLEV) = MAX(PHCRICS(JLON, JLEV), 0.5_JPRB)
-      
-      !   Decrease spinup of phcrics in the beginning of a forecast. No
-      !   physical relevance:
-      
-      ZONEMRHCRIT = MIN(0.075_JPRB, 1._JPRB - PHCRICS(JLON, JLEV))
-      ZSTIMEINC = MAX(0._JPRB, MIN(1._JPRB, 1._JPRB - YDRIP%RSTATI / (12._JPRB*3600._JPRB)))
-      ZSTIMEINC = ZSTIMEINC**4
-      
-      PHCRICS(JLON, JLEV) = PHCRICS(JLON, JLEV) - ZSTIMEINC*ZONEMRHCRIT
-      
-      
-    END DO
-    
-  END IF
-  ! LRKCDEV
   
   IF (YDML_PHY_MF%YRPHY%LXRCDEV) THEN
     !*
@@ -768,74 +755,6 @@ SUBROUTINE ACNEBCOND_OPENACC (YDCST, YDRIP, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTD
     
   END IF
   ! LSMGCDEV
-  IF (YDML_PHY_MF%YRPHY%LRKCDEV) THEN
-    !  ------------------------------------------------------------------
-    !           IVc - CALCUL DE LA NEBULOSITE (FORMULE RASCH-KRISTJANSSON).
-    
-    !           CLOUDINESS DIAGNOSED BY MODIFIED RASCH-KRISTJANSSON CAM3.
-    ! ---------------------------------------------------------------------
-    
-    !    1. Define some constants for the scheme depending on height
-    
-    !   ---------------------------------------------------------------------------
-    !    2. In HIRLAM this is where shallow and convective cloudiness is computed,
-    !       Need to know what to do with 3MT, and Meteo-France physics for Cu and
-    !       shallow convection. Now I use historic PNCV for convective cloudiness.
-    !   ---------------------------------------------------------------------------
-    
-    DO JLEV=KTDIA,KLEV
-      
-      ZSHALTEMP(JLON, JLEV) = 0._JPRB
-      ZHCUTMP(JLON, JLEV) = 0._JPRB
-      
-    END DO
-    !   ---------------------------------------------------------------------------
-    !    3. Compute stratiform cloudiness and merge it which shallow convective
-    !       clouds from (2.) into "total" clouds, excluding deep convective clouds.
-    !   ---------------------------------------------------------------------------
-    
-    DO JLEV=2,KLEV
-      
-      !      Following lines currently not needed, but may be later on if shallow
-      !      convection enters from TOUCANS:
-      !      ZCLD = MIN(0.8_JPRB,ZHCUTMP(JLON,JLEV)+ZSHALTEMP(JLON,JLEV))
-      !      ZRHD = (PRH(JLON,JLEV)-ZCLD)/(1._JPRB-ZCLD)
-      
-      ZRHD = MIN(1._JPRB, PRHOUT(JLON, JLEV))
-      ZRHDIF = (1._JPRB - ZRHD) / (1._JPRB - PHCRICS(JLON, JLEV))
-      ZRHDIF = 1._JPRB - SQRT(MAX(0._JPRB, ZRHDIF))
-      ZLSTMP(JLON, JLEV) = MIN(0.999_JPRB, MAX(ZRHDIF, 0.0_JPRB))
-      
-      !      Following lines currently not needed, but may be later on if shallow
-      !      convection enters from TOUCANS:
-      !      ZLSTMP(JLON,JLEV)=ZLSTMP(JLON,JLEV)*(1._JPRB-ZSHALTEMP(JLON,JLEV))&
-      !     & + ZSHALTEMP(JLON,JLEV)
-      
-    END DO
-    
-    
-    !     ----------------------------------------------------------------------------
-    !     4. Merge deep convective and layered cloud fraction for total cloud.
-    !     ----------------------------------------------------------------------------
-    
-    DO JLEV=KTDIA,KLEV
-      
-      !      Following lines currently not needed, but may be later on:
-      !      IF((ZHCUTMP(JLON,JLEV)+ZLSTMP(JLON,JLEV)) > 1.0_JPRB)THEN
-      !        ZHCUTMP(JLON,JLEV)=ZHCUTMP(JLON,JLEV)/(ZHCUTMP(JLON,JLEV)&
-      !       &+ZLSTMP(JLON,JLEV))
-      !        ZLSTMP(JLON,JLEV)=ZLSTMP(JLON,JLEV)/(ZHCUTMP(JLON,JLEV)&
-      !       &+ZLSTMP(JLON,JLEV))
-      !      ENDIF
-      
-      ! Other output variables:
-      
-      PNEBCOND(JLON, JLEV) = MAX(0.0_JPRB, MIN(0.99_JPRB, ZLSTMP(JLON, JLEV)))
-      
-    END DO
-    
-  END IF
-  ! LRKCDEV
   
   IF (YDML_PHY_MF%YRPHY%LSMITH_CDEV) THEN
     !  ------------------------------------------------------------------

@@ -144,8 +144,8 @@ SUBROUTINE ACTQSAT_OPENACC (YDCST, YDPHY, KIDIA, KFDIA, KLON, KTDIA, KLEV, PAPRS
 #include "fcttrm.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

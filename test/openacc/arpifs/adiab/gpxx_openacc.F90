@@ -134,6 +134,7 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KST
   YLSTACK = YDSTACK
   IF (KIND (ZDUF) == 8) THEN
     alloc8 (ZDUF)
@@ -180,7 +181,6 @@ SUBROUTINE GPXX_OPENACC (YDGEOMETRY, KFLEV, KPROMA, KST, KEND, PHIHL, PHIHM, PHI
       STOP 1
     END IF
   END IF
-  JLON = KST
   
   ! -----------------------------------------------------------------------------
   

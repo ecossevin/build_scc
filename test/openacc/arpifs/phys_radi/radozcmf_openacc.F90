@@ -87,6 +87,7 @@ SUBROUTINE RADOZCMF_OPENACC (YDCST, YDEOZOC, KIDIA, KFDIA, KLON, KLEV, PAPRS, PG
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZOZLT) == 8) THEN
     alloc8 (ZOZLT)
@@ -115,7 +116,6 @@ SUBROUTINE RADOZCMF_OPENACC (YDCST, YDEOZOC, KIDIA, KFDIA, KLON, KLEV, PAPRS, PG
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !     ------------------------------------------------------------------
   !     ------------------------------------------------------------------

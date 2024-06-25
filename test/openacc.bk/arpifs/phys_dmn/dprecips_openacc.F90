@@ -76,6 +76,7 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   !     --------------
   !        2019-10, I. Etchevers : optimization and cleaning
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+  !        2023-08, R. Brozkova  : further optimization
   !
   !     ------------------------------------------------------------------
   
@@ -120,6 +121,9 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   INTEGER(KIND=JPIM) :: JL
   INTEGER(KIND=JPIM) :: JLEVH
   INTEGER(KIND=JPIM) :: JLEVB
+  INTEGER(KIND=JPIM) :: INDIH
+  INTEGER(KIND=JPIM) :: INDI1
+  INTEGER(KIND=JPIM) :: INDI2
   INTEGER(KIND=JPIM) :: ITOP
   INTEGER(KIND=JPIM) :: JLEVM1
   INTEGER(KIND=JPIM) :: JJLEVM1
@@ -143,7 +147,15 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZHF)
+  IF (KIND (ZHF) == 8) THEN
+    alloc8 (ZHF)
+  ELSE
+    IF (KIND (ZHF) == 4) THEN
+      alloc4 (ZHF)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   !     ------------------------------------------------------------------
   
@@ -164,41 +176,37 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
   ZTOT = MAX(ZTOT, 1.E-8_JPRB)
   ZRATIO = ZLIQ / ZTOT
   ZHEIGHT = POROG(JLON)*ZINVG
-  ! first level index > 4000m above ground
+  
+  ! Preparations
   ITOP = 1._JPIM
-  DO JLEV=KLEV,1,-1
-    ZHF(JLON, JLEV) = PAPHIFM(JLON, JLEV)*ZINVG
-    ITOP = MAX(ITOP, JLEV*INT(MAX(0._JPRB, SIGN(1._JPRB, ZHF(JLON, JLEV) - YDPRECIPS%RHTOP - ZHEIGHT))))
-  END DO
-  
-  ! first level index above ground where T'w > RTT
   I1 = 1._JPIM
-  DO JLEV=KLEV,ITOP,-1
-    I1 = MAX(I1, JLEV*INT(MAX(0._JPRB, SIGN(1._JPRB, PTPW(JLON, JLEV) - YDCST%RTT))))
-  END DO
-  
-  ! first level index above I1 where T'w < RTT
   I2 = 1._JPIM
-  DO JLEV=I1,ITOP,-1
-    I2 = MAX(I2, JLEV*INT(MAX(0._JPRB, SIGN(1._JPRB, YDCST%RTT - PTPW(JLON, JLEV)))))
-  END DO
-  
-  
-  ! iso-PTPW < RTT between ITOP and KLEV, after areas computation
   ZPROFNEG = 0._JPRB
   ZANEG = 0._JPRB
   ZAPOS = 0._JPRB
   
-  DO JLEV=KLEV,ITOP,-1
-    ZPROFNEG = ZPROFNEG + MAX(0._JPRB, SIGN(1._JPRB, PTPW(JLON, JLEV) - YDCST%RTT))
-  END DO
-  
-  DO JLEV=KLEV,MIN(I1 + 1, KLEV),-1
-    ZANEG = ZANEG + PDZZ(JLON, JLEV)*(YDCST%RTT - PTPW(JLON, JLEV))
-  END DO
-  
-  DO JLEV=I1,MIN(I2 + 1, I1),-1
-    ZAPOS = ZAPOS + PDZZ(JLON, JLEV)*(PTPW(JLON, JLEV) - YDCST%RTT)
+  DO JLEV=KLEV,1,-1
+    ZHF(JLON, JLEV) = PAPHIFM(JLON, JLEV)*ZINVG
+    ! first level index > 4000m above ground
+    INDIH = INT(MAX(0._JPRB, SIGN(1._JPRB, ZHF(JLON, JLEV) - YDPRECIPS%RHTOP - ZHEIGHT)))
+    ITOP = MAX(ITOP, JLEV*INDIH)
+    
+    ! first level index above ground where T'w > RTT in the layer limited by 4000 m
+    I1 = MAX(I1, ITOP, JLEV*INT(MAX(0._JPRB, SIGN(1._JPRB, PTPW(JLON, JLEV) - YDCST%RTT))))
+    
+    ! first level index above I1 where T'w < RTT in the layer from I1 to 4000 m
+    I2 = MIN(I1, MAX(I2, ITOP, JLEV*INT(MAX(0._JPRB, SIGN(1._JPRB, YDCST%RTT - PTPW(JLON, JLEV))))))
+    
+    ! integral from the ground up to the level 4000 m above ground
+    ZPROFNEG = ZPROFNEG + (1 - INDIH)*MAX(0._JPRB, SIGN(1._JPRB, PTPW(JLON, JLEV) - YDCST%RTT))
+    
+    ! integral from ground up to the level I1+1 securized by MIN with KLEV
+    INDI1 = MAX(0, SIGN(1, JLEV - MIN(I1 + 1, KLEV)))
+    ZANEG = ZANEG + INDI1*PDZZ(JLON, JLEV)*(YDCST%RTT - PTPW(JLON, JLEV))
+    
+    ! integral from the level I1 up to the level I2+1, securized by MIN with I1
+    INDI2 = MAX(0, SIGN(1, JLEV - MIN(I2 + 1, I1)))*MAX(0, SIGN(1, I1 - JLEV))
+    ZAPOS = ZAPOS + INDI2*PDZZ(JLON, JLEV)*(PTPW(JLON, JLEV) - YDCST%RTT)
   END DO
   
   ! computation of qc(HDCLWC)
@@ -260,8 +268,14 @@ SUBROUTINE DPRECIPS_OPENACC (YDCST, YDPRECIPS, KIDIA, KFDIA, KLON, KLEV, POROG, 
         ELSE
           PDPRECIPS(JLON) = 8._JPRB            ! Ice pellets
         END IF
+      ELSE IF (ZAPOS >= YDPRECIPS%RAWARM2) THEN
+        IF (ZANEG < YDPRECIPS%RACOLD2) THEN
+          PDPRECIPS(JLON) = 7._JPRB            ! Rain snow mixture
+        ELSE
+          PDPRECIPS(JLON) = 8._JPRB            ! Ice pellets
+        END IF
       ELSE
-        PDPRECIPS(JLON) = 7._JPRB          ! Rain snow mixture
+        PDPRECIPS(JLON) = 6._JPRB          ! Wet snow
       END IF
       
       !     -------------------

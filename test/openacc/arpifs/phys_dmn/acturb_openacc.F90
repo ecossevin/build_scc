@@ -473,6 +473,7 @@ SUBROUTINE ACTURB_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAT, KTD
 #include "wrscmr.intfb.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZRTV) == 8) THEN
     alloc8 (ZRTV)
@@ -618,7 +619,6 @@ SUBROUTINE ACTURB_OPENACC (YDCST, YDPHY, YDPHY0, KIDIA, KFDIA, KLON, KTDIAT, KTD
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   

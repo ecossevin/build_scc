@@ -20,7 +20,7 @@ SUBROUTINE GPUVS_OPENACC (KFLEV, KPROMA, KST, KEND, LDER, PUF, PVF, PUS, PVS, PD
   !   * INPUT:
   !   KFLEV   - number of levels.
   !   KPROMA  - horizontal dimension.
-  !   KSTART  - start of work.
+  !   KST  - start of work.
   !   KEND    - end of work.
   !   LDER    - T: treatment of the derivatives.
   !   PUF     - upper air U-wind at full levels.
@@ -118,7 +118,8 @@ SUBROUTINE GPUVS_OPENACC (KFLEV, KPROMA, KST, KEND, LDER, PUF, PVF, PUS, PVS, PD
   
   IF (LDER) THEN
     IF (.not.(PRESENT(PDIVF) .and. PRESENT(PVORF) .and. PRESENT(PUFL) .and. PRESENT(PVFL) .and. PRESENT(PUS_L) .and.  &
-    & PRESENT(PVS_L) .and. PRESENT(PUS_M) .and. PRESENT(PVS_M))) CALL ABOR1_ACC(' GPUVS: LDER=T => PDIVF to PVS_M should be present!')
+    & PRESENT(PVS_L) .and. PRESENT(PUS_M) .and. PRESENT(PVS_M))) CALL ABOR1_ACC(' GPUVS: LDER=T => PDIVF to PVS_M should be  &
+    & present!')
     PUS_L(JLON) = PUFL(JLON, KFLEV)
     PVS_L(JLON) = PVFL(JLON, KFLEV)
     PUS_M(JLON) = PVFL(JLON, KFLEV) - PVORF(JLON, KFLEV)

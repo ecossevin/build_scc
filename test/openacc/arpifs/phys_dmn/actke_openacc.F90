@@ -250,6 +250,7 @@ SUBROUTINE ACTKE_OPENACC (YDCST, YDLDDH, YDMDDH, YDML_PHY_MF, KIDIA, KFDIA, KLON
 #include "aclender_openacc.intfb.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZUSLE) == 8) THEN
     alloc8 (ZUSLE)
@@ -503,7 +504,6 @@ SUBROUTINE ACTKE_OPENACC (YDCST, YDLDDH, YDMDDH, YDML_PHY_MF, KIDIA, KFDIA, KLON
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

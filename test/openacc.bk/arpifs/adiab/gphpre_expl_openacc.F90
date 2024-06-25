@@ -18,8 +18,8 @@ SUBROUTINE GPHPRE_EXPL_OPENACC (YDCVER, TOPPRES, YDCST, KPROMA, KFLEV, KST, KEND
   
   !          KPROMA    : horizontal dimensioning                                (in)
   !          KFLEV     : vertical dimensioning                                  (in)
-  !          KSTART    : start of work                                          (in)
-  !          KPROF     : depth of work                                          (in)
+  !          KST    : start of work                                          (in)
+  !          KEND     : depth of work                                          (in)
   !          YDVAB     : contains information about hybrid vertical coordinate  (in)
   !          PRESH     : half level pressure                                    (inout)
   !          PRESF     : full level pressure                                    (opt out)

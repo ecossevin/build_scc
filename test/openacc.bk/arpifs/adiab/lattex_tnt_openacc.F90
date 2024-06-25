@@ -106,7 +106,7 @@ SUBROUTINE LATTEX_TNT_OPENACC (YDGEOMETRY, YDLDDH, YDDYN, KST, KEND, KXLAG, PESG
   
   !     ------------------------------------------------------------------
   
-  temp (REAL (KIND=JPRB), ZMOYXNL, (YDGEOMETRY%YRDIM%NPROMA))
+  REAL(KIND=JPRB) :: ZMOYXNL(YDGEOMETRY%YRDIM%NPROMA)
   
   INTEGER(KIND=JPIM) :: JLEV
   INTEGER(KIND=JPIM) :: JROF
@@ -115,7 +115,6 @@ SUBROUTINE LATTEX_TNT_OPENACC (YDGEOMETRY, YDLDDH, YDDYN, KST, KEND, KXLAG, PESG
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZMOYXNL)
   JLON = KST
   
   !     ------------------------------------------------------------------

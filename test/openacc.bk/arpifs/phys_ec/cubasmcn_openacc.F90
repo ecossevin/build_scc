@@ -70,6 +70,7 @@ SUBROUTINE CUBASMCN_OPENACC (YDCST, YDECUMF, KIDIA, KFDIA, KLON, KLEV, KK, PTEN,
   !          NONE
   
   !     R. El Khatib 22-Jun-2022 A contribution to simplify phasing after the refactoring of YOMCLI/YOMCST/YOETHF.
+  !     R. El Khatib 06-Sep-2023 vectorization
   !----------------------------------------------------------------------
   
 !$acc routine( CUBASMCN_OPENACC ) seq
@@ -130,11 +131,11 @@ SUBROUTINE CUBASMCN_OPENACC (YDCST, YDECUMF, KIDIA, KFDIA, KLON, KLEV, KK, PTEN,
   !*    1.           CALCULATE ENTRAINMENT AND DETRAINMENT RATES
   !                  -------------------------------------------
   
-  !DIR$ IVDEP
-  !OCL NOVREC
   
   ZRG = 1.0_JPRB / YDCST%RG
   ZORCPD = 1.0_JPRB / YDCST%RCPD
+  !DIR$ IVDEP
+  !OCL NOVREC
   IF (.not.LDCUM(JLON) .and. KLAB(JLON, KK + 1) == 0) THEN
     IF (YDECUMF%LMFMID .and. KK > YDECUMF%NJKT7 .and. PQEN(JLON, KK) > 0.80_JPRB*PQSEN(JLON, KK)) THEN
       PTU(JLON, KK + 1) = (YDCST%RCPD*PTEN(JLON, KK) + PGEO(JLON, KK) - PGEOH(JLON, KK + 1))*ZORCPD

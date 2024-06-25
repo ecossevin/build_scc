@@ -197,6 +197,7 @@ SUBROUTINE ACPLUIS_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
 #include "fctdoi.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZFONTE) == 8) THEN
     alloc8 (ZFONTE)
@@ -207,7 +208,6 @@ SUBROUTINE ACPLUIS_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

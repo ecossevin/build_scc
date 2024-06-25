@@ -1,5 +1,5 @@
 SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, LDGDWI, POROGL, POROGM, PLNPR, PALPH, PUS, PVS,  &
-& PRT, PDVER, PGWH, PGWF, LDVFE, PRNHPPI, PGDW, YDSTACK)
+& PRT, PDVER, PGWH, PGWF, LDVFE, PRNHPPI, PTAUD_NL, PGDW, YDSTACK)
   
   ! GPGW - Diagnoses "Gw" from the vertical divergence "dver" or from "-G dw".
   
@@ -24,7 +24,7 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   !   YDGEOMETRY   : structure containing all geometry.
   !   KFLEV        : number of levels.
   !   KPROMA       : horizontal dimension.
-  !   KSTART       : start of work.
+  !   KST       : start of work.
   !   KEND         : end of work.
   !   LDGWF        : calculation of "Gw" at full layers asked for
   !                  if finite difference vertical discretization.
@@ -108,14 +108,16 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   REAL(KIND=JPRB), INTENT(OUT) :: PGWF(KPROMA, KFLEV)
   LOGICAL, OPTIONAL, INTENT(IN) :: LDVFE
   REAL(KIND=JPRB), OPTIONAL, INTENT(IN) :: PRNHPPI(KPROMA, KFLEV)
+  REAL(KIND=JPRB), OPTIONAL, INTENT(IN) :: PTAUD_NL
   REAL(KIND=JPRB), OPTIONAL, TARGET, INTENT(OUT) :: PGDW(KPROMA, KFLEV)
   
   INTEGER(KIND=JPIM) :: JLEV
   INTEGER(KIND=JPIM) :: JROF
   temp (REAL (KIND=JPRB), ZGDW0, (KPROMA, KFLEV))
   temp (REAL (KIND=JPRB), ZIN, (KPROMA, 0:KFLEV + 1))
-  temp (REAL (KIND=JPRB), ZGWH, (KPROMA, KFLEV + 1))
   temp (REAL (KIND=JPRB), ZGDW, (KPROMA, KFLEV))
+  REAL(KIND=JPRB) :: ZNHPPI
+  temp (REAL (KIND=JPRB), ZRNHPPI, (KPROMA, KFLEV))
   LOGICAL :: LLVFE
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   
@@ -125,16 +127,41 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZGDW0)
-  alloc (ZIN)
-  alloc (ZGWH)
+  IF (KIND (ZGDW0) == 8) THEN
+    alloc8 (ZGDW0)
+  ELSE
+    IF (KIND (ZGDW0) == 4) THEN
+      alloc4 (ZGDW0)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZIN) == 8) THEN
+    alloc8 (ZIN)
+  ELSE
+    IF (KIND (ZIN) == 4) THEN
+      alloc4 (ZIN)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRNHPPI) == 8) THEN
+    alloc8 (ZRNHPPI)
+  ELSE
+    IF (KIND (ZRNHPPI) == 4) THEN
+      alloc4 (ZRNHPPI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   
   IF (PRESENT(LDVFE)) THEN
     LLVFE = LDVFE
   ELSE
-    LLVFE = YDGEOMETRY%YRVERT_GEOM%YRCVER%LVERTFE .and. (YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_GW .or. .not.LDNHDYN)
+    LLVFE = YDGEOMETRY%YRVERT_GEOM%YRCVER%LVERTFE .and. (YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_GW .or. .not.LDNHDYN) .and.  &
+    & .not.YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_COMPATIBLE
   END IF
   
   ! optim: use of pointer avoids copying, but dependencies may arise (use ivdep/nodep)
@@ -154,6 +181,14 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
       ZGDW(JLON, JLEV) = PDVER(JLON, JLEV)
     END DO
   ELSE IF (PRESENT(PRNHPPI)) THEN
+    IF (PRESENT(PTAUD_NL)) THEN
+      DO JLEV=1,KFLEV
+        ZNHPPI = 1.0_JPRB + PTAUD_NL*(1.0_JPRB / PRNHPPI(JLON, JLEV) - 1.0_JPRB)
+        ZRNHPPI(JLON, JLEV) = 1.0_JPRB / ZNHPPI
+      END DO
+    ELSE
+      ZRNHPPI(JLON, 1:KFLEV) = PRNHPPI(JLON, 1:KFLEV)
+    END IF
     DO JLEV=1,KFLEV
       ZGDW(JLON, JLEV) = PDVER(JLON, JLEV)*PRT(JLON, JLEV)*PLNPR(JLON, JLEV)*PRNHPPI(JLON, JLEV)
     END DO
@@ -176,46 +211,72 @@ SUBROUTINE GPGW_OPENACC (YDGEOMETRY, LDNHDYN, KFLEV, KPROMA, KST, KEND, LDGWF, L
       ZIN(JLON, KFLEV + 1) = ZGDW(JLON, KFLEV)
       ! Apply RINTBF00, constructed from bottom
       CALL VERDISINT_OPENACC(YDGEOMETRY%YRVERT_GEOM%YRVFE, YDGEOMETRY%YRVERT_GEOM%YRCVER, 'ITOP', '00', KPROMA, KST, KEND,  &
-      & KFLEV, ZIN, ZGWH, YDSTACK=YLSTACK)
+      & KFLEV, ZIN, PGWF, PINS=PGWH(:, KFLEV), KLOUT=KFLEV, YDSTACK=YLSTACK)
     ELSE IF (LDNHDYN) THEN
       ZIN(JLON, 0) = ZGDW(JLON, 1)
       ZIN(JLON, KFLEV + 1) = ZGDW(JLON, KFLEV)        ! not applied with INGW
       CALL VERDISINT_OPENACC(YDGEOMETRY%YRVERT_GEOM%YRVFE, YDGEOMETRY%YRVERT_GEOM%YRCVER, 'INGW', '00', KPROMA, KST, KEND,  &
-      & KFLEV, ZIN, ZGWH, YDSTACK=YLSTACK)
+      & KFLEV, ZIN, PGWF, PINS=PGWH(:, KFLEV), KLOUT=KFLEV, YDSTACK=YLSTACK)
     ELSE
       ZIN(JLON, 0) = 0.0_JPRB
       ZIN(JLON, KFLEV + 1) = 0.0_JPRB
       CALL VERDISINT_OPENACC(YDGEOMETRY%YRVERT_GEOM%YRVFE, YDGEOMETRY%YRVERT_GEOM%YRCVER, 'IBOT', '11', KPROMA, KST, KEND,  &
-      & KFLEV, ZIN, ZGWH, YDSTACK=YLSTACK)
+      & KFLEV, ZIN, PGWF, PINS=PGWH(:, KFLEV), YDSTACK=YLSTACK)
     END IF
-    
-    DO JLEV=1,KFLEV
-      PGWF(JLON, JLEV) = ZGWH(JLON, JLEV) + PGWH(JLON, KFLEV)
-    END DO
   ELSE
-    ! transform -G.dw into Gw
-    DO JLEV=KFLEV,1,-1
-      !CDIR NODEP
-      !DIR$ IVDEP
-      PGWH(JLON, JLEV - 1) = PGWH(JLON, JLEV) + ZGDW(JLON, JLEV)
-    END DO
     
-    IF (LDGWF) THEN
-      IF (LDGDWI) CALL abor1_ACC(' GPGW: compute "Gw" at full levels: case not coded')
+    IF (YDGEOMETRY%YRVERT_GEOM%YRCVER%LVFE_COMPATIBLE) THEN
       
-      ! * Also compute "Gw" at full levels
-      ! k.y.: formula pgwf(jlev)=pgwh(jlev)(1-palph(jlev)/plnpr(jlev))
-      ! +pgwh(jlev-1)(palph(jlev)/plnpr(jlev)) must be equivalent.
-      IF (PRESENT(PRNHPPI)) THEN
+      ! transform -G.dw into Gw
+      DO JLEV=KFLEV,1,-1
+        !CDIR NODEP
+        !DIR$ IVDEP
+        PGWH(JLON, JLEV - 1) = PGWH(JLON, JLEV) + (ZGDW(JLON, JLEV) / YDGEOMETRY%YRVERT_GEOM%YRVETA%VDETA_RATIO(JLEV))
+      END DO
+      
+      IF (LDGWF) THEN
+        IF (LDGDWI) CALL abor1_ACC(' GPGW: compute "Gw" at full levels: case not coded')
+        
+        ! compute "G(dw/deta)" at full levels
         DO JLEV=1,KFLEV
-          PGWF(JLON, JLEV) = PGWH(JLON, JLEV) + PDVER(JLON, JLEV)*PRT(JLON, JLEV)*PALPH(JLON, JLEV)*PRNHPPI(JLON, JLEV)
+          ZIN(JLON, JLEV) =  &
+          & -ZGDW(JLON, JLEV)*(YDGEOMETRY%YRVERT_GEOM%YRVETA%VDETA_RATIO(JLEV) / YDGEOMETRY%YRVERT_GEOM%YRVETA%VFE_RDETAH(JLEV))
         END DO
-      ELSE
-        DO JLEV=1,KFLEV
-          PGWF(JLON, JLEV) = PGWH(JLON, JLEV) + PDVER(JLON, JLEV)*PRT(JLON, JLEV)*PALPH(JLON, JLEV)
-        END DO
+        ! Apply RINTBF11, constructed from bottom
+        ZIN(JLON, 0) = 0.0_JPRB
+        ZIN(JLON, KFLEV + 1) = 0.0_JPRB
+        CALL VERDISINT_OPENACC(YDGEOMETRY%YRVERT_GEOM%YRVFE, YDGEOMETRY%YRVERT_GEOM%YRCVER, 'IBOT', '11', KPROMA, KST, KEND,  &
+        & KFLEV, ZIN, PGWF, PINS=PGWH(:, KFLEV), YDSTACK=YLSTACK)
       END IF
+      
+    ELSE
+      
+      ! transform -G.dw into Gw
+      DO JLEV=KFLEV,1,-1
+        !CDIR NODEP
+        !DIR$ IVDEP
+        PGWH(JLON, JLEV - 1) = PGWH(JLON, JLEV) + ZGDW(JLON, JLEV)
+      END DO
+      
+      IF (LDGWF) THEN
+        IF (LDGDWI) CALL abor1_ACC(' GPGW: compute "Gw" at full levels: case not coded')
+        
+        ! * Also compute "Gw" at full levels
+        ! k.y.: formula pgwf(jlev)=pgwh(jlev)(1-palph(jlev)/plnpr(jlev))
+        ! +pgwh(jlev-1)(palph(jlev)/plnpr(jlev)) must be equivalent.
+        IF (PRESENT(PRNHPPI)) THEN
+          DO JLEV=1,KFLEV
+            PGWF(JLON, JLEV) = PGWH(JLON, JLEV) + PDVER(JLON, JLEV)*PRT(JLON, JLEV)*PALPH(JLON, JLEV)*ZRNHPPI(JLON, JLEV)
+          END DO
+        ELSE
+          DO JLEV=1,KFLEV
+            PGWF(JLON, JLEV) = PGWH(JLON, JLEV) + PDVER(JLON, JLEV)*PRT(JLON, JLEV)*PALPH(JLON, JLEV)
+          END DO
+        END IF
+      END IF
+      
     END IF
+    
   END IF
   
 END SUBROUTINE GPGW_OPENACC

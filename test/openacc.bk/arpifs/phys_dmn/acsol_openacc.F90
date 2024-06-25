@@ -234,7 +234,15 @@ SUBROUTINE ACSOL_OPENACC (YDCLI, YDCST, YDPHY, YDPHY1, KIDIA, KFDIA, KLON, PARG,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZWSAT)
+  IF (KIND (ZWSAT) == 8) THEN
+    alloc8 (ZWSAT)
+  ELSE
+    IF (KIND (ZWSAT) == 4) THEN
+      alloc4 (ZWSAT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

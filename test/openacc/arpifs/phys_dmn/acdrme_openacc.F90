@@ -166,6 +166,7 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZTENU) == 8) THEN
     alloc8 (ZTENU)
@@ -203,7 +204,6 @@ SUBROUTINE ACDRME_OPENACC (YDCST, YDSTA, YDPHY2, YDTOPH, KIDIA, KFDIA, KLON, KTD
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

@@ -104,8 +104,8 @@ SUBROUTINE GP_SPV_OPENACC (YDGEOMETRY, YDDYN, YDDYNA, YDSIMPHL, LDTL, KST, KEND,
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   

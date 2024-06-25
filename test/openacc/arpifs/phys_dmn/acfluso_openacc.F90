@@ -269,8 +269,8 @@ SUBROUTINE ACFLUSO_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KLEV, PAPHI,
 #include "fcttrm.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

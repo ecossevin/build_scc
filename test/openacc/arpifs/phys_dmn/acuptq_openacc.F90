@@ -119,6 +119,7 @@ SUBROUTINE ACUPTQ_OPENACC (YDCST, KLON, KIDIA, KFDIA, KFLEV, KNBTRA, LDPTQ, PFRS
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZGSDP) == 8) THEN
     alloc8 (ZGSDP)
@@ -147,7 +148,6 @@ SUBROUTINE ACUPTQ_OPENACC (YDCST, KLON, KIDIA, KFDIA, KFLEV, KNBTRA, LDPTQ, PFRS
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

@@ -130,7 +130,15 @@ SUBROUTINE ACCLDIA_OPENACC (YDCST, LDXCLP, LDXTGST, LDXXGST, YDPHY, YDPHY2, YDTO
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ICM)
+  IF (KIND (ICM) == 8) THEN
+    alloc8 (ICM)
+  ELSE
+    IF (KIND (ICM) == 4) THEN
+      alloc4 (ICM)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !      ----------------------------------------------------------------

@@ -228,13 +228,69 @@ SUBROUTINE ACDRAG_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV, 
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZIPOI)
-  alloc (ZNFNO)
-  alloc (ZPOID)
-  alloc (ZRAPP)
-  alloc (ZU)
-  alloc (ZV)
-  alloc (ZWGHT)
+  IF (KIND (ZIPOI) == 8) THEN
+    alloc8 (ZIPOI)
+  ELSE
+    IF (KIND (ZIPOI) == 4) THEN
+      alloc4 (ZIPOI)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZNFNO) == 8) THEN
+    alloc8 (ZNFNO)
+  ELSE
+    IF (KIND (ZNFNO) == 4) THEN
+      alloc4 (ZNFNO)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPOID) == 8) THEN
+    alloc8 (ZPOID)
+  ELSE
+    IF (KIND (ZPOID) == 4) THEN
+      alloc4 (ZPOID)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZRAPP) == 8) THEN
+    alloc8 (ZRAPP)
+  ELSE
+    IF (KIND (ZRAPP) == 4) THEN
+      alloc4 (ZRAPP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZU) == 8) THEN
+    alloc8 (ZU)
+  ELSE
+    IF (KIND (ZU) == 4) THEN
+      alloc4 (ZU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZV) == 8) THEN
+    alloc8 (ZV)
+  ELSE
+    IF (KIND (ZV) == 4) THEN
+      alloc4 (ZV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZWGHT) == 8) THEN
+    alloc8 (ZWGHT)
+  ELSE
+    IF (KIND (ZWGHT) == 4) THEN
+      alloc4 (ZWGHT)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

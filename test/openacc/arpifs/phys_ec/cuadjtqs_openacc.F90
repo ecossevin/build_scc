@@ -108,8 +108,8 @@ SUBROUTINE CUADJTQS_OPENACC (YDTHF, YDCST, KIDIA, KFDIA, KLON, KLEV, KK, PSP, PT
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   !----------------------------------------------------------------------
   
   !     1.           DEFINE CONSTANTS

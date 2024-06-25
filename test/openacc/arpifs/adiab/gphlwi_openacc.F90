@@ -84,8 +84,8 @@ SUBROUTINE GPHLWI_OPENACC (LDVERTFE, KFLEV, KPROMA, KST, KEND, PLNPR, PALPH, PRD
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   !     ------------------------------------------------------------------

@@ -106,8 +106,8 @@ SUBROUTINE SUOZON_OPENACC (KIDIA, KFDIA, KLON, KLEV, PROFO3, LDQINT, PRESI, PRDE
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !*
   !     ------------------------------------------------------------------

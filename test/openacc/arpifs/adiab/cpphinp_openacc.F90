@@ -107,8 +107,8 @@ SUBROUTINE CPPHINP_OPENACC (YDGEOMETRY, YDMODEL, KIDIA, KFDIA, PGEMU, PGELAM, PU
 #include "smpos_parall_openacc.intfb.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   

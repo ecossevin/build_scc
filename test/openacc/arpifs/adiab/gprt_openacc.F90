@@ -81,8 +81,8 @@ SUBROUTINE GPRT_OPENACC (LDSPRT, KPROMA, KST, KEND, KLEV, PRD, PRV, PR, PT, PTL,
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   !----------------------------------------------------------
   

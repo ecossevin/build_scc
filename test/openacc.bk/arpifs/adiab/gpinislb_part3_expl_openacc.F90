@@ -65,7 +65,8 @@ SUBROUTINE GPINISLB_PART3_EXPL_OPENACC (YDGEOMETRY, YDDYNA, KST, KEND, PVVEL0, P
   & ) THEN
     ! Not yet coded in the TL code.
     ! Makes sence only for LTWOTL=T and LSLAG=T
-    IF (.not.(PRESENT(PGWFT0) .and. PRESENT(PGDW0) .and. PRESENT(PGWS0))) CALL ABOR1_ACC(' GPINISLB 2a: missing optional input arguments!')
+    IF (.not.(PRESENT(PGWFT0) .and. PRESENT(PGDW0) .and. PRESENT(PGWS0))) CALL ABOR1_ACC(' GPINISLB 2a: missing optional input  &
+    & arguments!')
     DO JLEV=1,YDGEOMETRY%YRDIMV%NFLEVG
       PB2GWF(JLON, JLEV) = PGWFT0(JLON, JLEV)
       PB2GDW(JLON, JLEV) = PGDW0(JLON, JLEV)

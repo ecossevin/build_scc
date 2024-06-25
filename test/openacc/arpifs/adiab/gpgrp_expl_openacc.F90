@@ -112,8 +112,8 @@ SUBROUTINE GPGRP_EXPL_OPENACC (YDGEOMETRY, KST, KEND, PRT, PRTL, PRTM, PREL, PRE
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KST
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   

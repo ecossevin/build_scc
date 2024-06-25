@@ -113,6 +113,7 @@ SUBROUTINE ACDAYD_OPENACC (YDCST, YDRIP, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST,
 #include "wrscmr.intfb.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZTEND) == 8) THEN
     alloc8 (ZTEND)
@@ -132,7 +133,6 @@ SUBROUTINE ACDAYD_OPENACC (YDCST, YDRIP, KIDIA, KFDIA, KLON, KLEV, KTDIA, KSGST,
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-------------------------------------------------
   ! Day duration depending on altitude.

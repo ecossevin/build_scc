@@ -96,7 +96,15 @@ SUBROUTINE CPMVVPS_OPENACC (YDCST, YDVAB, KLON, KIDIA, KFDIA, KFLEV, PDT, PFP, P
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZFE)
+  IF (KIND (ZFE) == 8) THEN
+    alloc8 (ZFE)
+  ELSE
+    IF (KIND (ZFE) == 4) THEN
+      alloc4 (ZFE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !     ------------------------------------------------------------------

@@ -79,8 +79,8 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   !        --------------------
   !        * INPUT:
   !          KPROMA       : horizontal dimensioning
-  !          KD           : start of work
-  !          KF           : depth of work
+  !          KST           : start of work
+  !          KEND           : depth of work
   !          KFLEV        : number of layers
   !          LDRUBC       : upper boundary condition switch
   !          YDVAB        : contains information about hybrid vertical coordinate
@@ -181,7 +181,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   !     ------------------------------------------------------------------
   
   temp (REAL (KIND=JPRB), ZSDIV, (KPROMA, 0:KFLEV + 1))
-  temp (REAL (KIND=JPRB), ZPSDIVFE, (KPROMA, KFLEV + 1))
+  temp (REAL (KIND=JPRB), ZPSDIVFE, (KPROMA))
   temp (REAL (KIND=JPRB), ZVP, (KPROMA, KFLEV))
   
   INTEGER(KIND=JPIM) :: JROF
@@ -196,9 +196,33 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZSDIV)
-  alloc (ZPSDIVFE)
-  alloc (ZVP)
+  IF (KIND (ZSDIV) == 8) THEN
+    alloc8 (ZSDIV)
+  ELSE
+    IF (KIND (ZSDIV) == 4) THEN
+      alloc4 (ZSDIV)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZPSDIVFE) == 8) THEN
+    alloc8 (ZPSDIVFE)
+  ELSE
+    IF (KIND (ZPSDIVFE) == 4) THEN
+      alloc4 (ZPSDIVFE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZVP) == 8) THEN
+    alloc8 (ZVP)
+  ELSE
+    IF (KIND (ZVP) == 4) THEN
+      alloc4 (ZVP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KST
   
   !     ------------------------------------------------------------------
@@ -246,12 +270,8 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
     
     ZSDIV(JLON, 0) = 0.0_JPRB
     ZSDIV(JLON, KFLEV + 1) = 0.0_JPRB
-    CALL VERDISINT_OPENACC(YDVFE, YDCVER, 'ITOP', '11', KPROMA, KST, KEND, KFLEV, ZSDIV, ZPSDIVFE, YDSTACK=YLSTACK)
-    
-    DO JLEV=1,KFLEV
-      PPSDIV(JLON, JLEV) = ZPSDIVFE(JLON, JLEV)
-    END DO
-    
+    CALL VERDISINT_OPENACC(YDVFE, YDCVER, 'ITOP', '11', KPROMA, KST, KEND, KFLEV, ZSDIV, PPSDIV(:, 1:KFLEV), POUTS=ZPSDIVFE,  &
+    & YDSTACK=YLSTACK)
   ELSE
     DO JLEV=1,KFLEV
       !dir$ ivdep
@@ -261,7 +281,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   
   IF (LDRUBC) THEN
     IF (YDCVER%LVERTFE) THEN
-      PPSDVBC(JLON, KFLEV) = ZPSDIVFE(JLON, KFLEV + 1) - PEVT(JLON)
+      PPSDVBC(JLON, KFLEV) = ZPSDIVFE(JLON) - PEVT(JLON)
     ELSE
       DO JLEV=0,KFLEV
         !dir$ ivdep
@@ -270,7 +290,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
     END IF
   ELSE
     IF (YDCVER%LVERTFE) THEN
-      PPSDVBC(JLON, KFLEV) = ZPSDIVFE(JLON, KFLEV + 1)
+      PPSDVBC(JLON, KFLEV) = ZPSDIVFE(JLON)
     ELSE
       DO JLEV=0,KFLEV
         !dir$ ivdep
@@ -290,7 +310,7 @@ SUBROUTINE GPCTY_EXPL_OPENACC (YDVFE, YDCVER, KPROMA, KST, KEND, KFLEV, LDRUBC, 
   IF (YDCVER%LVERTFE) THEN
     DO JLEV=1,KFLEV
       !dir$ ivdep
-      PEVEL(JLON, JLEV) = YDVAB%VBF(JLEV)*ZPSDIVFE(JLON, KFLEV + 1) - PPSDIV(JLON, JLEV)
+      PEVEL(JLON, JLEV) = YDVAB%VBF(JLEV)*ZPSDIVFE(JLON) - PPSDIV(JLON, JLEV)
     END DO
   ELSE
     DO JLEV=1,KFLEV - 1

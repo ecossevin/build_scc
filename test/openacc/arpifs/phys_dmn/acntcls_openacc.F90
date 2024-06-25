@@ -198,8 +198,8 @@ SUBROUTINE ACNTCLS_OPENACC (YDPHY, YDPHY0, YDCST, KIDIA, KFDIA, KLON, KLEV, PAPR
 #include "fcttrm.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

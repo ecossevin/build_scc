@@ -138,8 +138,8 @@ SUBROUTINE ACSOLW_OPENACC (YDPHY1, KIDIA, KFDIA, KLON, PARG, PD2, PLSM, PIVEG, P
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

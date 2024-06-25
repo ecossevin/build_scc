@@ -261,6 +261,7 @@ SUBROUTINE ACDIFV2_OPENACC (LDSFORCS, YDCST, YGFL, YDML_PHY_MF, KIDIA, KFDIA, KL
 #include "fctdoi.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZKQRV) == 8) THEN
     alloc8 (ZKQRV)
@@ -370,7 +371,6 @@ SUBROUTINE ACDIFV2_OPENACC (LDSFORCS, YDCST, YGFL, YDML_PHY_MF, KIDIA, KFDIA, KL
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

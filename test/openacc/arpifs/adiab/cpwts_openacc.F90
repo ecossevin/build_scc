@@ -132,8 +132,8 @@ SUBROUTINE CPWTS_OPENACC (YDCST, YDCPG_OPTS, YDMCC, YDPHY, YDPHY1, KLON, KIDIA, 
   INTEGER(KIND=    JPIM) :: JLON
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !     ------------------------------------------------------------------
   

@@ -198,7 +198,15 @@ SUBROUTINE ACPLUIS_OPENACC (YDCST, YDML_PHY_MF, KIDIA, KFDIA, KLON, KTDIA, KLEV,
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZFONTE)
+  IF (KIND (ZFONTE) == 8) THEN
+    alloc8 (ZFONTE)
+  ELSE
+    IF (KIND (ZFONTE) == 4) THEN
+      alloc4 (ZFONTE)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   
   !-----------------------------------------------------------------------

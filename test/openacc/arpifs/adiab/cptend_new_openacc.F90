@@ -387,6 +387,7 @@ SUBROUTINE CPTEND_NEW_OPENACC (YDCST, YDMODEL, KLON, KIDIA, KFDIA, KFLEV, PGNORD
 #include "fcttrm.func.h"
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZGSDP) == 8) THEN
     alloc8 (ZGSDP)
@@ -739,7 +740,6 @@ SUBROUTINE CPTEND_NEW_OPENACC (YDCST, YDMODEL, KLON, KIDIA, KFDIA, KFLEV, PGNORD
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   

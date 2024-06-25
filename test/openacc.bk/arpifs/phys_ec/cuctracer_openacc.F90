@@ -170,16 +170,96 @@ SUBROUTINE CUCTRACER_OPENACC (YDCST, YDCUMFS, YDECUMF2, YDECUMF, KIDIA, KFDIA, K
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
   YLSTACK = YDSTACK
-  alloc (ZCEN)
-  alloc (ZCU)
-  alloc (ZCD)
-  alloc (ZTENC)
-  alloc (ZMFC)
-  alloc (ZDP)
-  alloc (ZB)
-  alloc (ZR1)
-  alloc (LLCUMASK)
-  alloc (LLCUMBAS)
+  IF (KIND (ZCEN) == 8) THEN
+    alloc8 (ZCEN)
+  ELSE
+    IF (KIND (ZCEN) == 4) THEN
+      alloc4 (ZCEN)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZCU) == 8) THEN
+    alloc8 (ZCU)
+  ELSE
+    IF (KIND (ZCU) == 4) THEN
+      alloc4 (ZCU)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZCD) == 8) THEN
+    alloc8 (ZCD)
+  ELSE
+    IF (KIND (ZCD) == 4) THEN
+      alloc4 (ZCD)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZTENC) == 8) THEN
+    alloc8 (ZTENC)
+  ELSE
+    IF (KIND (ZTENC) == 4) THEN
+      alloc4 (ZTENC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZMFC) == 8) THEN
+    alloc8 (ZMFC)
+  ELSE
+    IF (KIND (ZMFC) == 4) THEN
+      alloc4 (ZMFC)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZDP) == 8) THEN
+    alloc8 (ZDP)
+  ELSE
+    IF (KIND (ZDP) == 4) THEN
+      alloc4 (ZDP)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZB) == 8) THEN
+    alloc8 (ZB)
+  ELSE
+    IF (KIND (ZB) == 4) THEN
+      alloc4 (ZB)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (ZR1) == 8) THEN
+    alloc8 (ZR1)
+  ELSE
+    IF (KIND (ZR1) == 4) THEN
+      alloc4 (ZR1)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (LLCUMASK) == 8) THEN
+    alloc8 (LLCUMASK)
+  ELSE
+    IF (KIND (LLCUMASK) == 4) THEN
+      alloc4 (LLCUMASK)
+    ELSE
+      STOP 1
+    END IF
+  END IF
+  IF (KIND (LLCUMBAS) == 8) THEN
+    alloc8 (LLCUMBAS)
+  ELSE
+    IF (KIND (LLCUMBAS) == 4) THEN
+      alloc4 (LLCUMBAS)
+    ELSE
+      STOP 1
+    END IF
+  END IF
   JLON = KIDIA
   !----------------------------------------------------------------------
   

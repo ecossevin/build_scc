@@ -177,8 +177,8 @@ SUBROUTINE ACVEG_OPENACC (YDPHY, YDPHY1, KIDIA, KFDIA, KLON, KLEV, PFRSO, PQ, PQ
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
-  YLSTACK = YDSTACK
   JLON = KIDIA
+  YLSTACK = YDSTACK
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------

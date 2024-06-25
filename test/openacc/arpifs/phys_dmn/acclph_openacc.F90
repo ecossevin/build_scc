@@ -177,6 +177,7 @@ SUBROUTINE ACCLPH_OPENACC (YDCST, YDPHY0, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLE
   REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   TYPE(STACK), INTENT(IN) :: YDSTACK
   TYPE(STACK) :: YLSTACK
+  JLON = KIDIA
   YLSTACK = YDSTACK
   IF (KIND (ZTHETAV) == 8) THEN
     alloc8 (ZTHETAV)
@@ -223,7 +224,6 @@ SUBROUTINE ACCLPH_OPENACC (YDCST, YDPHY0, YDPHY2, KIDIA, KFDIA, KLON, KTDIA, KLE
       STOP 1
     END IF
   END IF
-  JLON = KIDIA
   
   !-----------------------------------------------------------------------
   !-----------------------------------------------------------------------
