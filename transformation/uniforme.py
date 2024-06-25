@@ -1,3 +1,5 @@
+# (C) Copyright 2023- ECMWF.
+# (C) Copyright 2023- Meteo-France.
 class UniformizeLoops(Transformation):
   def __init__(self, horizontal, verbose=False):
     horizontal = horizontal

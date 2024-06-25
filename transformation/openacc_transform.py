@@ -1,3 +1,6 @@
+# (C) Copyright 2023- ECMWF.
+# (C) Copyright 2023- Meteo-France.
+
 from loki import (
     Sourcefile, FindNodes, CallStatement, 
     Transformer, Dimension, ir, 
@@ -435,7 +438,10 @@ def generate_interface(routine, pathw):
         if im.c_import==True:
             removal_map[im]=None
     routine_new.spec = Transformer(removal_map).visit(routine_new.spec)
-    Sourcefile.to_file(fgen(routine_new.interface), Path(pathw+".intfb.h"))
+    if pathw: 
+        Sourcefile.to_file(fgen(routine_new.interface), Path(pathw+".intfb.h"))
+    else:
+        return(fgen(routine_new.interface))
 
 def write_print(routine):
     """
@@ -731,59 +737,7 @@ def scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     ystack2(routine)
     # alloc_temp(routine)
 
-def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
-    """
-    Meteo France SCC transformation
-
-    """
-
-    #----------------------------------------------
-    #setup
-    #----------------------------------------------
-    verbose=True
-    #verbose=False
-    pathr=pathpack+'/'+pathview+pathfile
-    pathw=pathpack+pathacc+'/'+pathfile
-
-    pathw=pathw.replace(".F90", "")+"_openacc"
-    
-    if verbose: print('pathr=', pathr)
-    if verbose: print('pathw=', pathw)
-
-    import logical_lst
-    
-    horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
-    vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
-    
-     #lst_horizontal_idx=['JLON','JROF','JL']
-    lst_horizontal_idx=['JLON','JROF']
-    #the JL idx have to be added only when it's used at an horizontal idx, because it's used as avertical idx in some places.... this should be fixed... The transformation script could check wether JL is a hor or vert idx instead of adding JL to the lst_horizontal_idx conditionally. 
-    if horizontal_opt is not None:
-        lst_horizontal_idx.append(horizontal_opt)
-    if verbose: print("lst_horizontal_idx=",lst_horizontal_idx)
-    
-    lst_horizontal_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA", "YDDIM%NPROMA", "NPROMA"]
-    lst_horizontal_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFDIA","KEND"]]
-    
-    true_symbols, false_symbols=logical_lst.symbols()
-    false_symbols.append('LHOOK')
-    
-    #----------------------------------------------
-    #inlining : 
-    #----------------------------------------------
-    inlined=list(inlined)
-    if inlined:
-        if verbose: print("****************INLINING****************")
-        inline_match=add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
-    else:
-        inline_match=False
-
-    if inline_match:
-        filename=os.path.basename(pathfile)
-        source=Sourcefile.from_file(pathpack+"/tmp/"+filename)
-    else:
-        source=Sourcefile.from_file(pathr)
-    routine=source.subroutines[0]
+def openacc_trans(routine, horizontal, vertical, lst_horizontal_idx, lst_horizontal_size, lst_horizontal_bounds, true_symbols, false_symbols, inline_match):
 
     from loki.transformations import inline_member_procedures
     import transform_inline as tf_in
@@ -837,8 +791,7 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
     ystack1(routine)
 #    rm_sum(routine), horizontal_size)
 
-    if pathw:
-        generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
+    routine_interface = generate_interface(routine, None) #must be before temp allocation and y stack, or temp will be in interface
 
     ##----------------------------------------
     ##pointers
@@ -858,17 +811,147 @@ def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined
 
     ################################
 #    sanitise_imports(routine) 
-
-    
-    Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
-    if inline_match:
-        print("inline_match = ", inline_match)
-        with open(pathw+".F90", 'r', encoding='utf-8', errors='ignore') as file_caller:
-            caller = file_caller.read()
-            new_caller=caller.replace("CONTAINS", "")
-
-        with open(pathw+".F90", 'w', encoding='utf-8', errors='ignore') as file_caller:
-            file_caller.write(new_caller)
-#            file_caller.write(caller)
+    return routine_interface
 
 
+####def openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
+####    """
+####    Meteo France SCC transformation
+####
+####    """
+####
+####    #----------------------------------------------
+####    #setup
+####    #----------------------------------------------
+####    verbose=True
+####    #verbose=False
+####    pathr=pathpack+'/'+pathview+pathfile
+####    pathw=pathpack+pathacc+'/'+pathfile
+####
+####    pathw=pathw.replace(".F90", "")+"_openacc"
+####    
+####    if verbose: print('pathr=', pathr)
+####    if verbose: print('pathw=', pathw)
+####
+####    import logical_lst
+####    
+####    horizontal=Dimension(name='horizontal',size='KLON',index='JLON',bounds=['KIDIA','KFDIA'],aliases=['NPROMA','KDIM%KLON','D%INIT'])
+####    vertical=Dimension(name='vertical',size='KLEV',index='JLEV')
+####    
+####     #lst_horizontal_idx=['JLON','JROF','JL']
+####    lst_horizontal_idx=['JLON','JROF']
+####    #the JL idx have to be added only when it's used at an horizontal idx, because it's used as avertical idx in some places.... this should be fixed... The transformation script could check wether JL is a hor or vert idx instead of adding JL to the lst_horizontal_idx conditionally. 
+####    if horizontal_opt is not None:
+####        lst_horizontal_idx.append(horizontal_opt)
+####    if verbose: print("lst_horizontal_idx=",lst_horizontal_idx)
+####    
+####    lst_horizontal_size=["KLON","YDCPG_OPTS%KLON","YDGEOMETRY%YRDIM%NPROMA","KPROMA", "YDDIM%NPROMA", "NPROMA"]
+####    lst_horizontal_bounds=[["KIDIA", "YDCPG_BNDS%KIDIA","KST"],["KFDIA", "YDCPG_BNDS%KFDIA","KEND"]]
+####    
+####    true_symbols, false_symbols=logical_lst.symbols()
+####    false_symbols.append('LHOOK')
+####    
+####    #----------------------------------------------
+####    #inlining : 
+####    #----------------------------------------------
+####    inlined=list(inlined)
+####    if inlined:
+####        if verbose: print("****************INLINING****************")
+####        inline_match=add_contains(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+####    else:
+####        inline_match=False
+####
+####    if inline_match:
+####        filename=os.path.basename(pathfile)
+####        source=Sourcefile.from_file(pathpack+"/tmp/"+filename)
+####    else:
+####        source=Sourcefile.from_file(pathr)
+####    routine=source.subroutines[0]
+####
+####    from loki.transformations import inline_member_procedures
+####    import transform_inline as tf_in
+####    
+####    #inline_method='daan'
+####    inline_method='ec'
+####    #inline_method='rolf'
+####    if inline_match:
+####        if inline_method=='ec':
+####            mv_include(routine) #ec trans pb with include
+#####            routine.enrich_calls(routine.members)
+####            tf_in.inline_member_procedures(routine)
+####            rename_hor(routine, lst_horizontal_idx)
+####        elif inline_method=='daan':
+#####            routine_orig=source.subroutines[0]
+#####            routine=routine_orig.clone()
+####            analyse_dataflow.attach_dataflow_analysis(routine)
+####            routine_inlined=inline_daan.inline_contained_subroutines(routine)
+####            routine=routine_inlined
+####        elif inline_method=='rolf':
+####            mv_include(routine) #ec trans pb with include
+#####            routine.enrich_calls(routine.members)
+####            inline_rolf.inline_member_procedures(routine)
+####            rename_hor(routine, lst_horizontal_idx)
+####
+####
+####
+########################################
+####    #----------------------------------------------
+####    #transformations:
+####    #----------------------------------------------
+####    horizontal_size=get_horizontal_size(routine, lst_horizontal_size)
+####    resolve_associates(routine)
+####    logical.transform_subroutine(routine, true_symbols, false_symbols)
+####    
+####    end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
+####    horizontal_idx=get_horizontal_idx(routine, lst_horizontal_idx)
+####    bounds=[begin_index, end_index]
+####    add_openacc(routine)        
+####
+####    rename(routine)
+####    acc_seq(routine)
+####    stack_mod(routine)
+####    rm_sum(routine, horizontal_size) #must be before demote_horizontal
+####    demote_horizontal(routine, horizontal_size)
+####    #todo : change resolve_vector : changes dim for all possible idx and bounds..
+####    ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
+####    
+####    remove_horizontal_loop(routine, lst_horizontal_idx)
+####    ###
+####    ystack1(routine)
+#####    rm_sum(routine), horizontal_size)
+####
+####    if pathw:
+####        generate_interface(routine, pathw) #must be before temp allocation and y stack, or temp will be in interface
+####
+####    ##----------------------------------------
+####    ##pointers
+####    ##----------------------------------------
+####    tmp_pt, tmp_target=find_pt(routine)
+####    tmp_pt_klon=get_dim_pt(routine, tmp_pt, tmp_target, horizontal_size)
+####    assoc_alloc_pt(routine, tmp_pt_klon)
+####    nullify(routine, tmp_pt_klon)
+####    ##----------------------------------------
+####    ##----------------------------------------
+####    write_print(routine)
+####    
+####    ystack2(routine)
+####    alloc_temp(routine)
+####    jlon_kidia(routine, end_index, begin_index, new_range, horizontal_idx)
+####    # alloc_temp(routine)
+####
+####    ################################
+#####    sanitise_imports(routine) 
+####
+####    
+####    Sourcefile.to_file(fgen(routine), Path(pathw+".F90"))
+####    if inline_match:
+####        print("inline_match = ", inline_match)
+####        with open(pathw+".F90", 'r', encoding='utf-8', errors='ignore') as file_caller:
+####            caller = file_caller.read()
+####            new_caller=caller.replace("CONTAINS", "")
+####
+####        with open(pathw+".F90", 'w', encoding='utf-8', errors='ignore') as file_caller:
+####            file_caller.write(new_caller)
+#####            file_caller.write(caller)
+####
+####

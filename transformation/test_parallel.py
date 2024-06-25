@@ -1,3 +1,5 @@
+# (C) Copyright 2023- ECMWF.
+# (C) Copyright 2023- Meteo-France.
 from loki import Sourcefile, ProcedureItem, fgen
 from pathlib import Path
 from loki import resolve_associates

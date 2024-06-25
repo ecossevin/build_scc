@@ -1,4 +1,7 @@
-from openacc_transform import openacc_trans
+# (C) Copyright 2023- ECMWF.
+# (C) Copyright 2023- Meteo-France.
+
+from openacc_setup import call_openacc_trans
 
 import click
 
@@ -14,7 +17,7 @@ import click
 @click.option('--inlined', '-in', default=None, multiple=True, help='names of the routine to inline')
 
 def main_function(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined):
-   openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
+   call_openacc_trans(pathpack, pathview, pathfile, pathacc, horizontal_opt, inlined)
 
 main_function()
 

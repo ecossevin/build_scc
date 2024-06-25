@@ -1,3 +1,5 @@
+# (C) Copyright 2023- ECMWF.
+# (C) Copyright 2023- Meteo-France.
 import sys 
 from sys import argv
 

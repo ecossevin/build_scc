@@ -1,3 +1,6 @@
+# (C) Copyright 2023- ECMWF.
+# (C) Copyright 2023- Meteo-France.
+
 my_dict_arpege = {
     "YDMODEL%YRML_DYN%YRDYN%NCURRENT_ITER": '0',
     "YDMODEL%YRML_DYN%YRDYN%RINTOPT" : '1._JPRB',

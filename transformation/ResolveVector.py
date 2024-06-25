@@ -1,3 +1,6 @@
+# (C) Copyright 2023- ECMWF.
+# (C) Copyright 2023- Meteo-France.
+
 from loki.expression import symbols
 from loki import ir
 from loki import (
