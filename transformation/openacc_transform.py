@@ -701,7 +701,7 @@ def scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     resolve_associates(routine)
     logical.transform_subroutine(routine, true_symbols, false_symbols)
     
-    end_index, begin_index, new_range=explicitarraysyntaxes.explicitarraysyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
+    end_index, begin_index, new_range=ExplicitArraySyntaxes.ExplicitArraySyntaxes(routine, lst_horizontal_size, lst_horizontal_bounds)
     horizontal_idx=get_horizontal_idx(routine, lst_horizontal_idx)
     bounds=[begin_index, end_index]
     
@@ -712,7 +712,7 @@ def scc_transform_routine(routine, lst_horizontal_size, lst_horizontal_idx, lst_
     rm_sum(routine, horizontal_size) #must be before demote_horizontal
     demote_horizontal(routine, horizontal_size)
     #todo : change resolve_vector : changes dim for all possible idx and bounds..
-    resolvevector.resolve_vector_dimension(routine, horizontal_idx, bounds)
+    ResolveVector.resolve_vector_dimension(routine, horizontal_idx, bounds)
     
     remove_horizontal_loop(routine, lst_horizontal_idx)
     ###
